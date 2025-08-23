@@ -1,0 +1,1830 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lumina AI - Analytics Dashboard</title>
+    <meta name="description" content="Advanced eye health analytics with AI-powered insights and comprehensive health reporting">
+    
+    <!-- Preload critical resources -->
+    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" as="style">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    
+    <!-- PWA Meta -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#6366f1">
+    
+    <!-- Favicons -->
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='35' fill='%236366f1'/><circle cx='50' cy='50' r='20' fill='white'/><circle cx='50' cy='50' r='8' fill='%236366f1'/></svg>">
+
+    <style>
+        :root {
+            /* Modern Color Palette */
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --primary-light: #8b5cf6;
+            --secondary: #06b6d4;
+            --accent: #f59e0b;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --error: #ef4444;
+            --gradient-primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --gradient-secondary: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            --gradient-accent: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            --gradient-success: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            
+            /* Light Theme */
+            --bg-primary: #ffffff;
+            --bg-secondary: #f8fafc;
+            --bg-tertiary: #f1f5f9;
+            --bg-glass: rgba(255, 255, 255, 0.85);
+            --bg-glass-strong: rgba(255, 255, 255, 0.95);
+            --text-primary: #0f172a;
+            --text-secondary: #64748b;
+            --text-muted: #94a3b8;
+            --text-inverse: #ffffff;
+            --border: #e2e8f0;
+            --border-light: rgba(255, 255, 255, 0.2);
+            --shadow: rgba(15, 23, 42, 0.1);
+            --shadow-strong: rgba(15, 23, 42, 0.2);
+            --backdrop: rgba(0, 0, 0, 0.6);
+            
+            /* Typography */
+            --font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            --transition-base: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            --transition-bounce: 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+
+        [data-theme="dark"] {
+            --bg-primary: #0f172a;
+            --bg-secondary: #1e293b;
+            --bg-tertiary: #334155;
+            --bg-glass: rgba(30, 41, 59, 0.85);
+            --bg-glass-strong: rgba(30, 41, 59, 0.95);
+            --text-primary: #f8fafc;
+            --text-secondary: #cbd5e1;
+            --text-muted: #94a3b8;
+            --text-inverse: #0f172a;
+            --border: #475569;
+            --border-light: rgba(148, 163, 184, 0.2);
+            --shadow: rgba(0, 0, 0, 0.5);
+            --shadow-strong: rgba(0, 0, 0, 0.7);
+            --backdrop: rgba(0, 0, 0, 0.8);
+        }
+
+        /* Global Styles */
+        *, *::before, *::after {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--font-family);
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            transition: all var(--transition-base);
+            -webkit-font-smoothing: antialiased;
+            overflow-x: hidden;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            user-select: none;
+        }
+
+        input, textarea, button {
+            -webkit-user-select: text;
+            -moz-user-select: text;
+            user-select: text;
+        }
+
+        /* Scroll Progress Bar */
+        .scroll-progress {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 0%;
+            height: 3px;
+            background: var(--gradient-primary);
+            z-index: 10001;
+            transition: width 0.1s ease;
+            box-shadow: 0 0 10px var(--primary);
+        }
+
+        /* Background Effects */
+        .bg-effects {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+            overflow: hidden;
+        }
+
+        .gradient-orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(100px);
+            opacity: 0.4;
+            animation: orbFloat 25s ease-in-out infinite;
+        }
+
+        .orb-1 {
+            width: 400px;
+            height: 400px;
+            background: var(--gradient-primary);
+            top: -200px;
+            right: -200px;
+            animation-delay: 0s;
+        }
+
+        .orb-2 {
+            width: 300px;
+            height: 300px;
+            background: var(--gradient-secondary);
+            bottom: -150px;
+            left: -150px;
+            animation-delay: -12s;
+        }
+
+        .orb-3 {
+            width: 250px;
+            height: 250px;
+            background: var(--gradient-accent);
+            top: 40%;
+            left: 60%;
+            animation-delay: -8s;
+        }
+
+        @keyframes orbFloat {
+            0%, 100% { transform: translate(0, 0) scale(1) rotate(0deg); }
+            25% { transform: translate(30px, -30px) scale(1.1) rotate(90deg); }
+            50% { transform: translate(-20px, 20px) scale(0.9) rotate(180deg); }
+            75% { transform: translate(20px, 30px) scale(1.05) rotate(270deg); }
+        }
+
+        .container {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        /* FIXED Revolutionary Header */
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: var(--bg-glass);
+            backdrop-filter: blur(30px);
+            border-bottom: 1px solid var(--border-light);
+            padding: 1rem 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            z-index: 1000;
+            box-shadow: 0 8px 32px rgba(99, 102, 241, 0.3);
+            transition: all var(--transition-base);
+        }
+
+        .header.scrolled {
+            background: var(--bg-glass-strong);
+            box-shadow: 0 12px 40px var(--shadow-strong);
+            border-bottom-color: var(--border);
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+            flex: 1;
+        }
+
+        .logo-section {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            cursor: pointer;
+            transition: all var(--transition-bounce);
+            position: relative;
+            padding: 0.5rem;
+            border-radius: 25px;
+        }
+
+        .logo-section:hover {
+            transform: scale(1.05);
+            background: rgba(99, 102, 241, 0.1);
+        }
+
+        /* Clean Eye Logo WITH FIXED ALIGNMENT */
+        .dashboard-logo {
+            position: relative;
+            width: 50px;
+            height: 35px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .logo-eye {
+            width: 44px;
+            height: 30px;
+            background: var(--gradient-primary);
+            border-radius: 50%;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 6px 25px rgba(99, 102, 241, 0.4);
+            animation: logoFloat 4s ease-in-out infinite;
+            border: 2px solid var(--border-light);
+        }
+
+        .logo-eye::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 22px;
+            height: 22px;
+            background: var(--text-inverse);
+            border-radius: 50%;
+            border: 1px solid rgba(255,255,255,0.3);
+            animation: eyeballFloat 3s ease-in-out infinite;
+        }
+
+        .logo-pupil {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 8px;
+            height: 8px;
+            background: var(--primary-dark);
+            border-radius: 50%;
+            animation: pupilTrack 5s ease-in-out infinite;
+            box-shadow: 0 0 8px rgba(79, 70, 229, 0.8);
+        }
+
+        @keyframes logoFloat {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-2px) rotate(2deg); }
+        }
+
+        @keyframes eyeballFloat {
+            0%, 100% { transform: translate(-50%, -50%) scale(1); }
+            50% { transform: translate(-50%, -50%) scale(1.05); }
+        }
+
+        @keyframes pupilTrack {
+            0%, 100% { transform: translate(-50%, -50%) translateX(0); }
+            25% { transform: translate(-50%, -50%) translateX(3px); }
+            75% { transform: translate(-50%, -50%) translateX(-3px); }
+        }
+
+        .logo-text {
+            font-weight: 900;
+            font-size: 1.5rem;
+            background: var(--gradient-primary);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            position: relative;
+            line-height: 1.2;
+        }
+
+        .nav-menu {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: var(--bg-glass);
+            backdrop-filter: blur(20px);
+            border-radius: 25px;
+            padding: 0.5rem;
+            border: 1px solid var(--border-light);
+        }
+
+        .nav-item {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-weight: 600;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            transition: all var(--transition-base);
+            position: relative;
+            overflow: hidden;
+            font-size: 0.9rem;
+        }
+
+        .nav-item::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: var(--gradient-primary);
+            transition: left 0.3s ease;
+            z-index: -1;
+        }
+
+        .nav-item:hover::before,
+        .nav-item.active::before {
+            left: 0;
+        }
+
+        .nav-item:hover,
+        .nav-item.active {
+            color: var(--text-inverse);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            color: var(--text-secondary);
+            font-weight: 600;
+            background: var(--bg-glass);
+            backdrop-filter: blur(20px);
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            border: 1px solid var(--border-light);
+            font-size: 0.9rem;
+        }
+
+        .user-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: var(--gradient-primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-inverse);
+            font-weight: 700;
+            font-size: 0.9rem;
+            animation: avatarGlow 3s ease-in-out infinite;
+        }
+
+        @keyframes avatarGlow {
+            0%, 100% { box-shadow: 0 0 15px rgba(99, 102, 241, 0.3); }
+            50% { box-shadow: 0 0 25px rgba(99, 102, 241, 0.5); }
+        }
+
+        .theme-toggle {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: 2px solid var(--border-light);
+            background: var(--bg-glass);
+            backdrop-filter: blur(20px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all var(--transition-bounce);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .theme-toggle::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: var(--gradient-primary);
+            transition: left 0.3s ease;
+            opacity: 0.2;
+        }
+
+        .theme-toggle:hover::before {
+            left: 0;
+        }
+
+        .theme-toggle:hover {
+            transform: scale(1.1) rotate(180deg);
+            box-shadow: 0 6px 20px rgba(99, 102, 241, 0.3);
+            border-color: var(--primary);
+        }
+
+        .theme-toggle svg {
+            width: 18px;
+            height: 18px;
+            stroke: var(--text-secondary);
+            transition: all var(--transition-base);
+        }
+
+        /* Mobile Menu Button */
+        .mobile-menu-btn {
+            display: none;
+            flex-direction: column;
+            gap: 3px;
+            background: var(--bg-glass);
+            backdrop-filter: blur(10px);
+            border: 2px solid var(--border-light);
+            border-radius: 8px;
+            padding: 0.5rem;
+            transition: all var(--transition-base);
+            cursor: pointer;
+        }
+
+        .mobile-menu-btn span {
+            width: 20px;
+            height: 2px;
+            background: var(--text-primary);
+            transition: all var(--transition-base);
+            border-radius: 1px;
+        }
+
+        .mobile-menu-btn.active span:nth-child(1) {
+            transform: rotate(45deg) translate(5px, 5px);
+        }
+
+        .mobile-menu-btn.active span:nth-child(2) {
+            opacity: 0;
+        }
+
+        .mobile-menu-btn.active span:nth-child(3) {
+            transform: rotate(-45deg) translate(5px, -5px);
+        }
+
+        /* Mobile Menu */
+        .mobile-menu {
+            position: fixed;
+            top: 70px;
+            left: 1rem;
+            right: 1rem;
+            background: var(--bg-glass-strong);
+            backdrop-filter: blur(30px);
+            border: 1px solid var(--border-light);
+            border-radius: 20px;
+            transform: translateY(-20px);
+            transition: all var(--transition-base);
+            z-index: 999;
+            opacity: 0;
+            visibility: hidden;
+            box-shadow: 0 8px 40px var(--shadow-strong);
+        }
+
+        .mobile-menu.active {
+            transform: translateY(0);
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .mobile-nav-links {
+            display: flex;
+            flex-direction: column;
+            padding: 2rem;
+            gap: 1rem;
+        }
+
+        .mobile-nav-links .nav-item {
+            padding: 1rem;
+            border-radius: 12px;
+            background: var(--bg-primary);
+            border: 1px solid var(--border);
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            padding: 6rem 2rem 3rem;
+            max-width: 1600px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        /* Analytics Header */
+        .analytics-header {
+            margin-bottom: 3rem;
+            text-align: center;
+        }
+
+        .analytics-title {
+            font-size: 3rem;
+            font-weight: 900;
+            background: var(--gradient-primary);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 1rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .analytics-subtitle {
+            font-size: 1.2rem;
+            color: var(--text-secondary);
+            max-width: 600px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+
+        /* Time Filter */
+        .time-filter {
+            background: var(--bg-glass);
+            backdrop-filter: blur(30px);
+            border: 1px solid var(--border-light);
+            border-radius: 20px;
+            padding: 1.5rem 2rem;
+            margin-bottom: 3rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 8px 32px var(--shadow);
+        }
+
+        .filter-buttons {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .filter-btn {
+            padding: 0.75rem 1.5rem;
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            background: transparent;
+            color: var(--text-secondary);
+            font-weight: 600;
+            cursor: pointer;
+            transition: all var(--transition-base);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .filter-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: var(--gradient-primary);
+            transition: left 0.3s ease;
+            z-index: -1;
+        }
+
+        .filter-btn:hover::before,
+        .filter-btn.active::before {
+            left: 0;
+        }
+
+        .filter-btn:hover,
+        .filter-btn.active {
+            color: var(--text-inverse);
+            border-color: var(--primary);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
+        }
+
+        .date-range {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        /* Overview Cards */
+        .overview-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+
+        .overview-card {
+            background: var(--bg-glass);
+            backdrop-filter: blur(30px);
+            border: 1px solid var(--border-light);
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 10px 40px var(--shadow);
+            transition: all var(--transition-base);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .overview-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 100%;
+            height: 100%;
+            background: conic-gradient(from 0deg, var(--primary), var(--secondary), var(--primary));
+            opacity: 0.05;
+            animation: rotateGradient 15s linear infinite;
+            border-radius: 50%;
+        }
+
+        .overview-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 60px var(--shadow-strong);
+        }
+
+        @keyframes rotateGradient {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1.5rem;
+        }
+
+        .card-icon {
+            width: 60px;
+            height: 60px;
+            background: var(--gradient-primary);
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 20px rgba(99, 102, 241, 0.3);
+        }
+
+        .card-icon svg {
+            width: 28px;
+            height: 28px;
+            stroke: var(--text-inverse);
+            fill: none;
+            stroke-width: 2;
+        }
+
+        .card-trend {
+            font-size: 0.85rem;
+            font-weight: 600;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+
+        .trend-up {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--success);
+        }
+
+        .trend-down {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--error);
+        }
+
+        .trend-stable {
+            background: rgba(245, 158, 11, 0.1);
+            color: var(--warning);
+        }
+
+        .card-value {
+            font-size: 2.5rem;
+            font-weight: 900;
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .card-label {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
+        }
+
+        .card-description {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            line-height: 1.4;
+        }
+
+        /* Charts Section */
+        .charts-section {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+
+        .chart-container {
+            background: var(--bg-glass);
+            backdrop-filter: blur(30px);
+            border: 1px solid var(--border-light);
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 10px 40px var(--shadow);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .chart-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: var(--gradient-primary);
+        }
+
+        .chart-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 2rem;
+        }
+
+        .chart-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .chart-options {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .chart-option {
+            padding: 0.5rem 1rem;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            background: transparent;
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all var(--transition-base);
+        }
+
+        .chart-option:hover,
+        .chart-option.active {
+            background: var(--primary);
+            color: var(--text-inverse);
+            border-color: var(--primary);
+        }
+
+        /* Simulated Chart */
+        .chart-placeholder {
+            width: 100%;
+            height: 300px;
+            background: linear-gradient(135deg, var(--bg-tertiary) 0%, var(--bg-secondary) 100%);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px dashed var(--border);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .chart-placeholder::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(90deg, transparent, rgba(99, 102, 241, 0.1), transparent);
+            animation: shimmer 2s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        .chart-placeholder svg {
+            width: 80px;
+            height: 80px;
+            stroke: var(--text-muted);
+            opacity: 0.5;
+        }
+
+        /* Health Reports */
+        .reports-section {
+            margin-bottom: 3rem;
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 2rem;
+        }
+
+        .section-title {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .section-icon {
+            width: 40px;
+            height: 40px;
+            background: var(--gradient-success);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .section-icon svg {
+            width: 20px;
+            height: 20px;
+            stroke: var(--text-inverse);
+            fill: none;
+            stroke-width: 2;
+        }
+
+        .export-btn {
+            padding: 0.75rem 1.5rem;
+            background: var(--gradient-primary);
+            color: var(--text-inverse);
+            border: none;
+            border-radius: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all var(--transition-base);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .export-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(99, 102, 241, 0.4);
+        }
+
+        .reports-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 2rem;
+        }
+
+        .report-card {
+            background: var(--bg-glass);
+            backdrop-filter: blur(30px);
+            border: 1px solid var(--border-light);
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 10px 40px var(--shadow);
+            transition: all var(--transition-base);
+        }
+
+        .report-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 50px var(--shadow-strong);
+        }
+
+        .report-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .report-icon {
+            width: 50px;
+            height: 50px;
+            background: var(--gradient-accent);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .report-icon svg {
+            width: 24px;
+            height: 24px;
+            stroke: var(--text-inverse);
+            fill: none;
+            stroke-width: 2;
+        }
+
+        .report-info h3 {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 0.25rem;
+        }
+
+        .report-info p {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+
+        .report-stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: 1rem;
+            background: var(--bg-primary);
+            border-radius: 12px;
+            border: 1px solid var(--border);
+        }
+
+        .stat-value {
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: var(--text-primary);
+            margin-bottom: 0.25rem;
+        }
+
+        .stat-label {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        .report-footer {
+            display: flex;
+            align-items: center;
+            justify-content: between;
+            gap: 1rem;
+        }
+
+        .progress-bar {
+            flex: 1;
+            height: 8px;
+            background: var(--bg-tertiary);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: var(--gradient-success);
+            border-radius: 4px;
+            transition: width 1s ease;
+        }
+
+        .score-badge {
+            padding: 0.5rem 1rem;
+            background: var(--gradient-success);
+            color: var(--text-inverse);
+            border-radius: 20px;
+            font-weight: 700;
+            font-size: 0.9rem;
+        }
+
+        /* Alert System */
+        .alert-container {
+            position: fixed;
+            top: 6rem;
+            right: 2rem;
+            z-index: 1001;
+            max-width: 400px;
+        }
+
+        .alert {
+            background: var(--bg-glass-strong);
+            backdrop-filter: blur(30px);
+            border: 1px solid var(--border-light);
+            border-radius: 16px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            box-shadow: 0 8px 32px var(--shadow-strong);
+            transform: translateX(100%);
+            transition: all var(--transition-bounce);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .alert.show {
+            transform: translateX(0);
+        }
+
+        .alert::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+        }
+
+        .alert.warning::before {
+            background: var(--warning);
+        }
+
+        .alert.error::before {
+            background: var(--error);
+        }
+
+        .alert.success::before {
+            background: var(--success);
+        }
+
+        .alert-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+        }
+
+        .alert-title {
+            font-weight: 700;
+            font-size: 1rem;
+        }
+
+        .alert-close {
+            background: none;
+            border: none;
+            font-size: 1.2rem;
+            cursor: pointer;
+            color: var(--text-muted);
+            padding: 0;
+        }
+
+        .alert-message {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        /* Utility Classes */
+        .fade-in {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all var(--transition-base);
+        }
+
+        .fade-in.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* RESPONSIVE DESIGN */
+        @media (max-width: 1200px) {
+            .charts-section {
+                grid-template-columns: 1fr;
+            }
+
+            .overview-grid {
+                grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            }
+        }
+
+        @media (max-width: 768px) {
+            .nav-menu {
+                display: none;
+            }
+
+            .mobile-menu-btn {
+                display: flex;
+            }
+
+            .header {
+                padding: 1rem;
+            }
+
+            .main-content {
+                padding: 5rem 1rem 2rem;
+            }
+
+            .analytics-title {
+                font-size: 2.5rem;
+            }
+
+            .analytics-subtitle {
+                font-size: 1rem;
+            }
+
+            .time-filter {
+                flex-direction: column;
+                gap: 1rem;
+                align-items: flex-start;
+            }
+
+            .filter-buttons {
+                flex-wrap: wrap;
+                width: 100%;
+                justify-content: center;
+            }
+
+            .overview-grid {
+                grid-template-columns: 1fr;
+                gap: 1.5rem;
+            }
+
+            .reports-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .section-header {
+                flex-direction: column;
+                gap: 1rem;
+                align-items: flex-start;
+            }
+
+            .alert-container {
+                right: 1rem;
+                left: 1rem;
+                max-width: none;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .header {
+                padding: 0.75rem;
+            }
+
+            .main-content {
+                padding: 4.5rem 0.75rem 1.5rem;
+            }
+
+            .logo-text {
+                font-size: 1.2rem;
+            }
+
+            .user-info span {
+                display: none;
+            }
+
+            .analytics-title {
+                font-size: 2rem;
+            }
+
+            .time-filter {
+                padding: 1rem;
+            }
+
+            .overview-card {
+                padding: 1.5rem;
+            }
+
+            .chart-container {
+                padding: 1.5rem;
+            }
+
+            .report-card {
+                padding: 1.5rem;
+            }
+
+            .card-value {
+                font-size: 2rem;
+            }
+
+            .stat-value {
+                font-size: 1.5rem;
+            }
+        }
+
+        /* Print Styles */
+        @media print {
+            .header, .mobile-menu, .bg-effects, .scroll-progress, .alert-container {
+                display: none !important;
+            }
+            
+            .main-content {
+                padding: 0 !important;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Scroll Progress Bar -->
+    <div class="scroll-progress" id="scrollProgress"></div>
+
+    <!-- Background Effects -->
+    <div class="bg-effects">
+        <div class="gradient-orb orb-1"></div>
+        <div class="gradient-orb orb-2"></div>
+        <div class="gradient-orb orb-3"></div>
+    </div>
+
+    <!-- Alert Container -->
+    <div class="alert-container" id="alertContainer"></div>
+
+    <div class="container">
+        <!-- Header -->
+        <header class="header" id="header">
+            <div class="header-left">
+                <div class="logo-section" onclick="window.location.href='index.html'" title="Return to Landing Page">
+                    <div class="dashboard-logo">
+                        <div class="logo-eye">
+                            <div class="logo-pupil"></div>
+                        </div>
+                    </div>
+                    <div class="logo-text">Lumina AI</div>
+                </div>
+                
+                <nav class="nav-menu">
+                    <a href="dashboard.html" class="nav-item">Dashboard</a>
+                    <a href="monitor.html" class="nav-item">Monitor</a>
+                    <a href="analytics.html" class="nav-item active">Analytics</a>
+                    <a href="profile.html" class="nav-item">Profile</a>
+                    <a href="settings.html" class="nav-item">Settings</a>
+                </nav>
+            </div>
+            
+            <div class="header-right">
+                <div class="user-info">
+                    <div class="user-avatar">U</div>
+                    <span>Dr. User</span>
+                </div>
+                <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                </button>
+                <button class="mobile-menu-btn" id="mobileMenuBtn">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </button>
+            </div>
+        </header>
+
+        <!-- Mobile Menu -->
+        <div class="mobile-menu" id="mobileMenu">
+            <div class="mobile-nav-links">
+                <a href="dashboard.html" class="nav-item">Dashboard</a>
+                <a href="monitor.html" class="nav-item">Monitor</a>
+                <a href="analytics.html" class="nav-item active">Analytics</a>
+                <a href="profile.html" class="nav-item">Profile</a>
+                <a href="settings.html" class="nav-item">Settings</a>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Analytics Header -->
+            <div class="analytics-header fade-in">
+                <h1 class="analytics-title">📊 Advanced Analytics</h1>
+                <p class="analytics-subtitle">
+                    Comprehensive eye health insights powered by AI analysis. Track your progress, 
+                    identify patterns, and optimize your digital wellness journey.
+                </p>
+            </div>
+
+            <!-- Time Filter -->
+            <div class="time-filter fade-in">
+                <div class="filter-buttons">
+                    <button class="filter-btn" data-period="7d">7 Days</button>
+                    <button class="filter-btn active" data-period="30d">30 Days</button>
+                    <button class="filter-btn" data-period="90d">90 Days</button>
+                    <button class="filter-btn" data-period="1y">1 Year</button>
+                </div>
+                <div class="date-range" id="dateRange">
+                    Aug 1 - Aug 23, 2025
+                </div>
+            </div>
+
+            <!-- Overview Cards -->
+            <div class="overview-grid">
+                <div class="overview-card fade-in">
+                    <div class="card-header">
+                        <div class="card-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="12" cy="12" r="3"/>
+                                <path d="M12 1v6M12 17v6M4.22 4.22l4.24 4.24M15.54 15.54l4.24 4.24M1 12h6M17 12h6M4.22 19.78l4.24-4.24M15.54 8.46l4.24-4.24"/>
+                            </svg>
+                        </div>
+                        <div class="card-trend trend-up">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polyline points="23,6 13.5,15.5 8.5,10.5 1,18"/>
+                            </svg>
+                            +12%
+                        </div>
+                    </div>
+                    <div class="card-value" id="avgBlinkRate">18.4</div>
+                    <div class="card-label">Average Blink Rate</div>
+                    <div class="card-description">blinks per minute - within healthy range</div>
+                </div>
+
+                <div class="overview-card fade-in">
+                    <div class="card-header">
+                        <div class="card-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="12" cy="12" r="10"/>
+                                <polyline points="12,6 12,12 16,14"/>
+                            </svg>
+                        </div>
+                        <div class="card-trend trend-up">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polyline points="23,6 13.5,15.5 8.5,10.5 1,18"/>
+                            </svg>
+                            +8.5h
+                        </div>
+                    </div>
+                    <div class="card-value" id="totalScreenTime">156</div>
+                    <div class="card-label">Total Screen Time</div>
+                    <div class="card-description">hours this month</div>
+                </div>
+
+                <div class="overview-card fade-in">
+                    <div class="card-header">
+                        <div class="card-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M9 12l2 2 4-4"/>
+                                <path d="M21 12c-1 0-3-1-3-3s2-3 3-3 3 1 3 3-2 3-3 3"/>
+                                <path d="M3 12c1 0 3-1 3-3s-2-3-3-3-3 1-3 3 2 3 3 3"/>
+                            </svg>
+                        </div>
+                        <div class="card-trend trend-down">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polyline points="23,18 13.5,8.5 8.5,13.5 1,6"/>
+                            </svg>
+                            -15%
+                        </div>
+                    </div>
+                    <div class="card-value" id="strainLevel">24</div>
+                    <div class="card-label">Average Strain Level</div>
+                    <div class="card-description">% - improved from last month</div>
+                </div>
+
+                <div class="overview-card fade-in">
+                    <div class="card-header">
+                        <div class="card-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
+                            </svg>
+                        </div>
+                        <div class="card-trend trend-up">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polyline points="23,6 13.5,15.5 8.5,10.5 1,18"/>
+                            </svg>
+                            +5 pts
+                        </div>
+                    </div>
+                    <div class="card-value" id="healthScore">94</div>
+                    <div class="card-label">Health Score</div>
+                    <div class="card-description">out of 100 - excellent status</div>
+                </div>
+            </div>
+
+            <!-- Charts Section -->
+            <div class="charts-section">
+                <div class="chart-container fade-in">
+                    <div class="chart-header">
+                        <h3 class="chart-title">Eye Health Trends</h3>
+                        <div class="chart-options">
+                            <button class="chart-option active" data-chart="blink">Blink Rate</button>
+                            <button class="chart-option" data-chart="strain">Strain Level</button>
+                            <button class="chart-option" data-chart="break">Break Time</button>
+                        </div>
+                    </div>
+                    <div class="chart-placeholder">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1">
+                            <polyline points="1,6 7,12 15,4 23,10"/>
+                            <circle cx="7" cy="12" r="3" fill="rgba(99, 102, 241, 0.2)"/>
+                            <circle cx="15" cy="4" r="3" fill="rgba(99, 102, 241, 0.2)"/>
+                            <circle cx="23" cy="10" r="3" fill="rgba(99, 102, 241, 0.2)"/>
+                        </svg>
+                    </div>
+                </div>
+
+                <div class="chart-container fade-in">
+                    <div class="chart-header">
+                        <h3 class="chart-title">Weekly Breakdown</h3>
+                    </div>
+                    <div class="chart-placeholder">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1">
+                            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                            <rect x="8" y="8" width="2" height="8" fill="rgba(99, 102, 241, 0.3)"/>
+                            <rect x="12" y="6" width="2" height="10" fill="rgba(99, 102, 241, 0.5)"/>
+                            <rect x="16" y="10" width="2" height="6" fill="rgba(99, 102, 241, 0.7)"/>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Health Reports -->
+            <div class="reports-section">
+                <div class="section-header fade-in">
+                    <h2 class="section-title">
+                        <div class="section-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                                <polyline points="14,2 14,8 20,8"/>
+                                <line x1="16" y1="13" x2="8" y2="13"/>
+                                <line x1="16" y1="17" x2="8" y2="17"/>
+                                <polyline points="10,9 9,9 8,9"/>
+                            </svg>
+                        </div>
+                        Health Reports
+                    </h2>
+                    <button class="export-btn" id="exportBtn">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                            <polyline points="7,10 12,15 17,10"/>
+                            <line x1="12" y1="15" x2="12" y2="3"/>
+                        </svg>
+                        Export All
+                    </button>
+                </div>
+
+                <div class="reports-grid">
+                    <div class="report-card fade-in">
+                        <div class="report-header">
+                            <div class="report-icon">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <circle cx="12" cy="12" r="10"/>
+                                    <polyline points="12,6 12,12 16,14"/>
+                                </svg>
+                            </div>
+                            <div class="report-info">
+                                <h3>Weekly Summary</h3>
+                                <p>Aug 17 - Aug 23, 2025</p>
+                            </div>
+                        </div>
+                        <div class="report-stats">
+                            <div class="stat-item">
+                                <div class="stat-value">42.5</div>
+                                <div class="stat-label">Avg Daily Hours</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-value">18</div>
+                                <div class="stat-label">Breaks Taken</div>
+                            </div>
+                        </div>
+                        <div class="report-footer">
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: 88%"></div>
+                            </div>
+                            <div class="score-badge">88/100</div>
+                        </div>
+                    </div>
+
+                    <div class="report-card fade-in">
+                        <div class="report-header">
+                            <div class="report-icon">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M9 12l2 2 4-4"/>
+                                    <path d="M21 12c-1 0-3-1-3-3s2-3 3-3 3 1 3 3-2 3-3 3"/>
+                                    <path d="M3 12c1 0 3-1 3-3s-2-3-3-3-3 1-3 3 2 3 3 3"/>
+                                </svg>
+                            </div>
+                            <div class="report-info">
+                                <h3>Strain Analysis</h3>
+                                <p>Monthly Assessment</p>
+                            </div>
+                        </div>
+                        <div class="report-stats">
+                            <div class="stat-item">
+                                <div class="stat-value">15</div>
+                                <div class="stat-label">High Strain Days</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-value">72%</div>
+                                <div class="stat-label">Improvement</div>
+                            </div>
+                        </div>
+                        <div class="report-footer">
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: 92%"></div>
+                            </div>
+                            <div class="score-badge">92/100</div>
+                        </div>
+                    </div>
+
+                    <div class="report-card fade-in">
+                        <div class="report-header">
+                            <div class="report-icon">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <circle cx="12" cy="12" r="3"/>
+                                    <path d="M12 1v6M12 17v6M4.22 4.22l4.24 4.24M15.54 15.54l4.24 4.24M1 12h6M17 12h6M4.22 19.78l4.24-4.24M15.54 8.46l4.24-4.24"/>
+                                </svg>
+                            </div>
+                            <div class="report-info">
+                                <h3>Blink Patterns</h3>
+                                <p>AI Analysis Report</p>
+                            </div>
+                        </div>
+                        <div class="report-stats">
+                            <div class="stat-item">
+                                <div class="stat-value">18.4</div>
+                                <div class="stat-label">Avg Rate/Min</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-value">95%</div>
+                                <div class="stat-label">Consistency</div>
+                            </div>
+                        </div>
+                        <div class="report-footer">
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: 96%"></div>
+                            </div>
+                            <div class="score-badge">96/100</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // Global Variables
+        let currentTheme = localStorage.getItem('theme') || 'light';
+        let currentTimeFilter = '30d';
+
+        // Data for different time periods
+        const analyticsData = {
+            '7d': {
+                blinkRate: 19.2,
+                screenTime: 38,
+                strainLevel: 22,
+                healthScore: 96,
+                dateRange: 'Aug 17 - Aug 23, 2025'
+            },
+            '30d': {
+                blinkRate: 18.4,
+                screenTime: 156,
+                strainLevel: 24,
+                healthScore: 94,
+                dateRange: 'Aug 1 - Aug 23, 2025'
+            },
+            '90d': {
+                blinkRate: 17.8,
+                screenTime: 445,
+                strainLevel: 28,
+                healthScore: 91,
+                dateRange: 'May 26 - Aug 23, 2025'
+            },
+            '1y': {
+                blinkRate: 18.1,
+                screenTime: 1820,
+                strainLevel: 26,
+                healthScore: 92,
+                dateRange: 'Aug 24, 2024 - Aug 23, 2025'
+            }
+        };
+
+        // DOM Elements
+        const scrollProgress = document.getElementById('scrollProgress');
+        const dateRange = document.getElementById('dateRange');
+        const filterButtons = document.querySelectorAll('.filter-btn');
+        const chartOptions = document.querySelectorAll('.chart-option');
+        const exportBtn = document.getElementById('exportBtn');
+
+        // Initialize App
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeApp();
+        });
+
+        function initializeApp() {
+            setTheme(currentTheme);
+            setupScrollEffects();
+            setupMobileMenu();
+            setupAnimations();
+            setupEventListeners();
+            updateAnalytics();
+            console.log('📊 Lumina AI Analytics Dashboard initialized successfully!');
+        }
+
+        function setupEventListeners() {
+            // Theme toggle
+            document.getElementById('themeToggle').addEventListener('click', toggleTheme);
+            
+            // Time filter buttons
+            filterButtons.forEach(btn => {
+                btn.addEventListener('click', handleTimeFilterClick);
+            });
+            
+            // Chart option buttons
+            chartOptions.forEach(btn => {
+                btn.addEventListener('click', handleChartOptionClick);
+            });
+            
+            // Export button
+            exportBtn.addEventListener('click', handleExportClick);
+        }
+
+        // Theme Management
+        function setTheme(theme) {
+            currentTheme = theme;
+            document.documentElement.setAttribute('data-theme', theme);
+            localStorage.setItem('theme', theme);
+            
+            const themeToggle = document.getElementById('themeToggle');
+            if (themeToggle) {
+                const icon = themeToggle.querySelector('svg');
+                if (theme === 'dark') {
+                    icon.innerHTML = '<circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>';
+                } else {
+                    icon.innerHTML = '<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>';
+                }
+            }
+        }
+
+        function toggleTheme() {
+            const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+            setTheme(newTheme);
+        }
+
+        // Time Filter Functions
+        function handleTimeFilterClick(event) {
+            const button = event.target;
+            const period = button.dataset.period;
+            
+            // Update active button
+            filterButtons.forEach(btn => btn.classList.remove('active'));
+            button.classList.add('active');
+            
+            // Update current filter
+            currentTimeFilter = period;
+            
+            // Update analytics data
+            updateAnalytics();
+            
+            // Show success message
+            showAlert(`Analytics updated for ${button.textContent.toLowerCase()} period`, 'success');
+        }
+
+        function updateAnalytics() {
+            const data = analyticsData[currentTimeFilter];
+            
+            // Update date range
+            dateRange.textContent = data.dateRange;
+            
+            // Animate metric updates
+            animateMetricUpdate('avgBlinkRate', data.blinkRate, 1);
+            animateMetricUpdate('totalScreenTime', data.screenTime, 0);
+            animateMetricUpdate('strainLevel', data.strainLevel, 0);
+            animateMetricUpdate('healthScore', data.healthScore, 0);
+        }
+
+        function animateMetricUpdate(elementId, targetValue, decimals) {
+            const element = document.getElementById(elementId);
+            if (!element) return;
+            
+            const currentValue = parseFloat(element.textContent) || 0;
+            const difference = targetValue - currentValue;
+            const steps = 30;
+            const stepValue = difference / steps;
+            let currentStep = 0;
+            
+            const updateInterval = setInterval(() => {
+                currentStep++;
+                const newValue = currentValue + (stepValue * currentStep);
+                
+                element.textContent = decimals > 0 ? newValue.toFixed(decimals) : Math.round(newValue);
+                
+                if (currentStep >= steps) {
+                    clearInterval(updateInterval);
+                    element.textContent = decimals > 0 ? targetValue.toFixed(decimals) : Math.round(targetValue);
+                }
+            }, 50);
+        }
+
+        // Chart Option Functions
+        function handleChartOptionClick(event) {
+            const button = event.target;
+            const chartType = button.dataset.chart;
+            
+            // Update active button
+            chartOptions.forEach(btn => btn.classList.remove('active'));
+            button.classList.add('active');
+            
+            // Show success message
+            showAlert(`Viewing ${button.textContent} data`, 'success');
+        }
+
+        // Export Function
+        function handleExportClick() {
+            showAlert('Preparing comprehensive health report...', 'success');
+            
+            // Simulate export process
+            setTimeout(() => {
+                showAlert('Health report exported successfully! 📊', 'success');
+            }, 2000);
+        }
+
+        // Alert System
+        function showAlert(message, type = 'info') {
+            const alertContainer = document.getElementById('alertContainer');
+            
+            const alert = document.createElement('div');
+            alert.className = `alert ${type}`;
+            alert.innerHTML = `
+                <div class="alert-header">
+                    <div class="alert-title">
+                        ${type === 'error' ? '⚠️ Alert' : type === 'warning' ? '🟡 Warning' : type === 'success' ? '✅ Success' : 'ℹ️ Info'}
+                    </div>
+                    <button class="alert-close">&times;</button>
+                </div>
+                <div class="alert-message">${message}</div>
+            `;
+            
+            // Add close functionality
+            alert.querySelector('.alert-close').addEventListener('click', () => {
+                alert.classList.remove('show');
+                setTimeout(() => alert.remove(), 300);
+            });
+            
+            alertContainer.appendChild(alert);
+            setTimeout(() => alert.classList.add('show'), 100);
+            
+            // Auto-remove after 5 seconds
+            setTimeout(() => {
+                if (alert.parentNode) {
+                    alert.classList.remove('show');
+                    setTimeout(() => alert.remove(), 300);
+                }
+            }, 5000);
+        }
+
+        // Scroll Effects
+        function setupScrollEffects() {
+            const header = document.getElementById('header');
+            
+            let ticking = false;
+
+            function updateScrollEffects() {
+                const scrollTop = window.pageYOffset;
+                const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+                const scrollPercent = Math.min((scrollTop / docHeight) * 100, 100);
+
+                if (scrollProgress) {
+                    scrollProgress.style.width = scrollPercent + '%';
+                }
+
+                if (header) {
+                    if (scrollTop > 100) {
+                        header.classList.add('scrolled');
+                    } else {
+                        header.classList.remove('scrolled');
+                    }
+                }
+
+                ticking = false;
+            }
+
+            function requestScrollUpdate() {
+                if (!ticking) {
+                    requestAnimationFrame(updateScrollEffects);
+                    ticking = true;
+                }
+            }
+
+            window.addEventListener('scroll', requestScrollUpdate, { passive: true });
+            updateScrollEffects();
+        }
+
+        // Mobile Menu
+        function setupMobileMenu() {
+            const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+            const mobileMenu = document.getElementById('mobileMenu');
+
+            if (mobileMenuBtn && mobileMenu) {
+                mobileMenuBtn.addEventListener('click', function() {
+                    mobileMenuBtn.classList.toggle('active');
+                    mobileMenu.classList.toggle('active');
+                    document.body.style.overflow = mobileMenu.classList.contains('active') ? 'hidden' : '';
+                });
+
+                mobileMenu.addEventListener('click', function(e) {
+                    if (e.target.classList.contains('nav-item')) {
+                        mobileMenuBtn.classList.remove('active');
+                        mobileMenu.classList.remove('active');
+                        document.body.style.overflow = '';
+                    }
+                });
+            }
+        }
+
+        // Animations
+        function setupAnimations() {
+            const observerOptions = {
+                threshold: 0.1,
+                rootMargin: '0px 0px -50px 0px'
+            };
+
+            const observer = new IntersectionObserver(function(entries) {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('visible');
+                    }
+                });
+            }, observerOptions);
+
+            document.querySelectorAll('.fade-in').forEach(el => {
+                observer.observe(el);
+            });
+        }
+
+        console.log('📊 Lumina AI Analytics ready with WORKING buttons and interactions!');
+    </script>
+</body>
+</html>
