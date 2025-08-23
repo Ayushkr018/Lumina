@@ -2,7 +2,7 @@
 
 <div align="center">
 
-![Lumina AI Logo](shared/images/logo.png)
+![Lumina AI Logo](images/logo.png)
 
 **🚀 Real-time AI-powered eye strain detection and wellness monitoring system**
 
