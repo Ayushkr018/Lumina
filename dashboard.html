@@ -12,13 +12,103 @@
     <link rel="preload" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" as="style">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     
-    <!-- PWA & Mobile Meta -->
-    <link rel="manifest" href="manifest.json">
+    <!-- PWA MANIFEST AND META TAGS -->
+    <link rel="manifest" href="/manifest.json">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="theme-color" content="#6366f1">
     <meta name="msapplication-TileColor" content="#6366f1">
+    <link rel="apple-touch-icon" href="/icons/icon-192x192.png">
+    <meta name="msapplication-config" content="/browserconfig.xml">
+
+    <!-- PWA SERVICE WORKER REGISTRATION -->
+    <script>
+        // Register Service Worker for PWA functionality
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', function() {
+                navigator.serviceWorker.register('/service-worker.js')
+                    .then(function(registration) {
+                        console.log('✅ PWA ServiceWorker registered:', registration.scope);
+                        
+                        // Check for updates
+                        registration.addEventListener('updatefound', () => {
+                            const newWorker = registration.installing;
+                            newWorker.addEventListener('statechange', () => {
+                                if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                                    // Show update notification using existing alert system
+                                    setTimeout(() => {
+                                        if (typeof announceToScreenReader === 'function') {
+                                            announceToScreenReader('📱 New dashboard version available! Refresh to update.');
+                                        }
+                                    }, 2000);
+                                }
+                            });
+                        });
+                    })
+                    .catch(function(error) {
+                        console.warn('❌ PWA ServiceWorker registration failed:', error);
+                    });
+            });
+        }
+
+        // PWA Install Prompt Handler
+        let deferredPrompt;
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            
+            // Show PWA install notification after dashboard loads
+            setTimeout(() => {
+                if (typeof announceToScreenReader === 'function') {
+                    announceToScreenReader('📱 Install Lumina AI Dashboard for offline monitoring!');
+                }
+            }, 4000);
+        });
+        
+        // PWA Installation Success
+        window.addEventListener('appinstalled', () => {
+            console.log('🎉 PWA installed successfully!');
+            if (typeof announceToScreenReader === 'function') {
+                announceToScreenReader('🎉 Dashboard installed! Eye monitoring available offline.');
+            }
+            deferredPrompt = null;
+        });
+
+        // Handle PWA display mode
+        function checkPWAMode() {
+            const isPWA = window.matchMedia('(display-mode: standalone)').matches || 
+                          window.navigator.standalone === true;
+            
+            if (isPWA) {
+                console.log('📱 Running as PWA!');
+                document.body.classList.add('pwa-mode');
+                // Add PWA-specific styles
+                document.documentElement.style.setProperty('--header-padding-top', 'env(safe-area-inset-top)');
+            }
+        }
+        
+        // Check PWA mode when DOM is ready
+        document.addEventListener('DOMContentLoaded', function() {
+            checkPWAMode();
+            // Show PWA status after other initialization
+            setTimeout(() => {
+                const isPWA = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+                if (isPWA && typeof announceToScreenReader === 'function') {
+                    announceToScreenReader('📱 PWA Dashboard - Full offline monitoring active!');
+                }
+            }, 2000);
+        });
+
+        // PWA offline/online detection
+        window.addEventListener('online', () => {
+            console.log('🌐 Back online - Dashboard sync enabled');
+        });
+
+        window.addEventListener('offline', () => {
+            console.log('📱 Offline mode - Dashboard cached locally');
+        });
+    </script>
     
     <!-- Favicon -->
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='35' fill='%236366f1'/><circle cx='50' cy='50' r='20' fill='white'/><circle cx='50' cy='50' r='8' fill='%236366f1'/></svg>">
@@ -101,6 +191,15 @@
             --shadow: rgba(0, 0, 0, 0.5);
             --shadow-strong: rgba(0, 0, 0, 0.7);
             --shadow-colored: rgba(99, 102, 241, 0.5);
+        }
+
+        /* PWA-specific styles */
+        .pwa-mode .header {
+            padding-top: calc(var(--safe-top) + 1rem);
+        }
+        
+        .pwa-mode .main-content {
+            padding-bottom: calc(2rem + var(--safe-bottom));
         }
 
         /* ==================== GLOBAL STYLES ==================== */

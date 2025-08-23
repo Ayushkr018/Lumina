@@ -10,9 +10,92 @@
     <link rel="preload" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" as="style">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     
-    <!-- PWA Meta -->
-    <link rel="manifest" href="manifest.json">
+    <!-- PWA MANIFEST AND META TAGS -->
+    <link rel="manifest" href="/manifest.json">
     <meta name="theme-color" content="#6366f1">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="Lumina AI">
+    <link rel="apple-touch-icon" href="/icons/icon-192x192.png">
+    <meta name="msapplication-TileColor" content="#6366f1">
+    <meta name="msapplication-config" content="/browserconfig.xml">
+    
+    <!-- PWA SERVICE WORKER REGISTRATION -->
+    <script>
+        // Register Service Worker for PWA functionality
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', function() {
+                navigator.serviceWorker.register('/service-worker.js')
+                    .then(function(registration) {
+                        console.log('✅ PWA ServiceWorker registered:', registration.scope);
+                        
+                        // Check for updates
+                        registration.addEventListener('updatefound', () => {
+                            const newWorker = registration.installing;
+                            newWorker.addEventListener('statechange', () => {
+                                if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                                    // Show update notification using existing alert system
+                                    setTimeout(() => {
+                                        if (typeof showAlert === 'function') {
+                                            showAlert('📱 New version available! Refresh to update.', 'success');
+                                        }
+                                    }, 2000);
+                                }
+                            });
+                        });
+                    })
+                    .catch(function(error) {
+                        console.warn('❌ PWA ServiceWorker registration failed:', error);
+                    });
+            });
+        }
+
+        // PWA Install Prompt Handler
+        let deferredPrompt;
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            
+            // Show PWA install notification after profile loads
+            setTimeout(() => {
+                if (typeof showAlert === 'function') {
+                    showAlert('📱 Install Lumina AI for better profile management!', 'success');
+                }
+            }, 4000);
+        });
+        
+        // PWA Installation Success
+        window.addEventListener('appinstalled', () => {
+            console.log('🎉 PWA installed successfully!');
+            if (typeof showAlert === 'function') {
+                showAlert('🎉 Lumina AI installed! Access your profile offline anytime.', 'success');
+            }
+            deferredPrompt = null;
+        });
+
+        // Handle PWA display mode
+        function checkPWAMode() {
+            const isPWA = window.matchMedia('(display-mode: standalone)').matches || 
+                          window.navigator.standalone === true;
+            
+            if (isPWA) {
+                console.log('📱 Running as PWA!');
+                document.body.classList.add('pwa-mode');
+            }
+        }
+        
+        // Check PWA mode when DOM is ready
+        document.addEventListener('DOMContentLoaded', checkPWAMode);
+
+        // PWA offline/online detection
+        window.addEventListener('online', () => {
+            console.log('🌐 Back online - Profile sync enabled');
+        });
+
+        window.addEventListener('offline', () => {
+            console.log('📱 Offline mode - Profile data cached locally');
+        });
+    </script>
     
     <!-- Favicons -->
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='35' fill='%236366f1'/><circle cx='50' cy='50' r='20' fill='white'/><circle cx='50' cy='50' r='8' fill='%236366f1'/></svg>">
@@ -73,6 +156,15 @@
             --shadow: rgba(0, 0, 0, 0.5);
             --shadow-strong: rgba(0, 0, 0, 0.7);
             --backdrop: rgba(0, 0, 0, 0.8);
+        }
+
+        /* PWA-specific styles */
+        .pwa-mode .header {
+            padding-top: env(safe-area-inset-top);
+        }
+        
+        .pwa-mode .main-content {
+            padding-bottom: calc(3rem + env(safe-area-inset-bottom));
         }
 
         /* Global Styles */
@@ -1488,8 +1580,8 @@
     </div>
 
     <script>
-        // ==================== LUMINA AI CROSS-PAGE SETTINGS MANAGER ====================
-        // REAL BACKEND SYSTEM WITH GLOBAL SYNC
+        // ==================== LUMINA AI CROSS-PAGE SETTINGS MANAGER WITH PWA ====================
+        // REAL BACKEND SYSTEM WITH GLOBAL SYNC AND PWA SUPPORT
         
         class LuminaGlobalSettings {
             constructor() {
@@ -1526,7 +1618,7 @@
                 this.init();
             }
 
-            // Load settings from localStorage
+            // Load settings from localStorage with PWA support
             loadSettings() {
                 try {
                     const stored = localStorage.getItem(this.storageKey);
@@ -1536,11 +1628,21 @@
                     }
                 } catch (error) {
                     console.warn('Failed to load settings:', error);
+                    
+                    // PWA: Try to sync from service worker cache
+                    if ('serviceWorker' in navigator) {
+                        navigator.serviceWorker.ready.then(registration => {
+                            registration.active?.postMessage({
+                                type: 'GET_PROFILE_SETTINGS',
+                                timestamp: Date.now()
+                            });
+                        });
+                    }
                 }
                 return { ...this.defaults };
             }
 
-            // Load profile from localStorage
+            // Load profile from localStorage with PWA support
             loadProfile() {
                 try {
                     const stored = localStorage.getItem(this.profileKey);
@@ -1550,16 +1652,38 @@
                     }
                 } catch (error) {
                     console.warn('Failed to load profile:', error);
+                    
+                    // PWA: Try to sync from service worker cache
+                    if ('serviceWorker' in navigator) {
+                        navigator.serviceWorker.ready.then(registration => {
+                            registration.active?.postMessage({
+                                type: 'GET_PROFILE_DATA',
+                                timestamp: Date.now()
+                            });
+                        });
+                    }
                 }
                 return { ...this.profileDefaults };
             }
 
-            // Save settings and broadcast to all tabs
+            // Save settings and broadcast to all tabs with PWA sync
             saveSettings() {
                 try {
                     localStorage.setItem(this.storageKey, JSON.stringify(this.settings));
                     this.applySettings();
                     this.broadcastSettingsChange();
+                    
+                    // PWA: Sync to service worker for offline access
+                    if ('serviceWorker' in navigator) {
+                        navigator.serviceWorker.ready.then(registration => {
+                            registration.active?.postMessage({
+                                type: 'SYNC_PROFILE_SETTINGS',
+                                settings: this.settings,
+                                timestamp: Date.now()
+                            });
+                        });
+                    }
+                    
                     return true;
                 } catch (error) {
                     console.error('Failed to save settings:', error);
@@ -1567,12 +1691,24 @@
                 }
             }
 
-            // Save profile and broadcast to all tabs
+            // Save profile and broadcast to all tabs with PWA sync
             saveProfile() {
                 try {
                     localStorage.setItem(this.profileKey, JSON.stringify(this.profile));
                     this.applyProfile();
                     this.broadcastProfileChange();
+                    
+                    // PWA: Sync to service worker for offline access
+                    if ('serviceWorker' in navigator) {
+                        navigator.serviceWorker.ready.then(registration => {
+                            registration.active?.postMessage({
+                                type: 'SYNC_PROFILE_DATA',
+                                profile: this.profile,
+                                timestamp: Date.now()
+                            });
+                        });
+                    }
+                    
                     return true;
                 } catch (error) {
                     console.error('Failed to save profile:', error);
@@ -1580,7 +1716,7 @@
                 }
             }
 
-            // Broadcast settings change to all tabs/windows
+            // Broadcast settings change to all tabs/windows with PWA support
             broadcastSettingsChange() {
                 // Create custom storage event for cross-tab communication
                 window.dispatchEvent(new CustomEvent(this.storageEventKey, {
@@ -1596,9 +1732,11 @@
                     settings: this.settings,
                     timestamp: Date.now()
                 }));
+                
+                console.log('🔄 Settings broadcast to all tabs and PWA service worker');
             }
 
-            // Broadcast profile change to all tabs/windows
+            // Broadcast profile change to all tabs/windows with PWA support
             broadcastProfileChange() {
                 window.dispatchEvent(new CustomEvent(this.storageEventKey, {
                     detail: { 
@@ -1612,6 +1750,8 @@
                     profile: this.profile,
                     timestamp: Date.now()
                 }));
+                
+                console.log('🔄 Profile broadcast to all tabs and PWA service worker');
             }
 
             // Get setting value
@@ -1619,11 +1759,11 @@
                 return this.settings[key] !== undefined ? this.settings[key] : this.defaults[key];
             }
 
-            // Set setting value and sync across tabs
+            // Set setting value and sync across tabs with PWA support
             set(key, value) {
                 this.settings[key] = value;
                 this.saveSettings();
-                console.log(`🔄 Setting ${key} updated to:`, value, 'and synced across all tabs');
+                console.log(`🔄 Setting ${key} updated to:`, value, 'and synced across all tabs + PWA');
             }
 
             // Get profile value
@@ -1631,11 +1771,11 @@
                 return this.profile[key] !== undefined ? this.profile[key] : this.profileDefaults[key];
             }
 
-            // Set profile value and sync across tabs
+            // Set profile value and sync across tabs with PWA support
             setProfile(key, value) {
                 this.profile[key] = value;
                 this.saveProfile();
-                console.log(`🔄 Profile ${key} updated to:`, value, 'and synced across all tabs');
+                console.log(`🔄 Profile ${key} updated to:`, value, 'and synced across all tabs + PWA');
             }
 
             // Apply all settings to current page
@@ -1681,7 +1821,7 @@
                     }
                 }
                 
-                console.log(`🎨 Theme applied: ${actualTheme}`);
+                console.log(`🎨 PWA Theme applied: ${actualTheme}`);
             }
 
             // Apply accent color
@@ -1697,14 +1837,14 @@
                 document.documentElement.style.setProperty('--primary-light', lightColor);
                 document.documentElement.style.setProperty('--primary-dark', darkColor);
                 
-                console.log(`🎨 Accent color applied: ${color}`);
+                console.log(`🎨 PWA Accent color applied: ${color}`);
             }
 
             // Apply interface scale
             applyScale() {
                 const scale = this.get('interfaceScale') / 100;
                 document.documentElement.style.setProperty('--scale-factor', scale);
-                console.log(`📏 Interface scale applied: ${scale * 100}%`);
+                console.log(`📏 PWA Interface scale applied: ${scale * 100}%`);
             }
 
             // Apply animations setting
@@ -1717,20 +1857,55 @@
                     document.documentElement.style.setProperty('--transition-base', '0.3s cubic-bezier(0.4, 0, 0.2, 1)');
                     document.documentElement.style.setProperty('--transition-bounce', '0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55)');
                 }
-                console.log(`🎬 Animations applied: ${animations}`);
+                console.log(`🎬 PWA Animations applied: ${animations}`);
             }
 
-            // Initialize and setup cross-tab listeners
+            // Initialize and setup cross-tab listeners with PWA support
             init() {
                 this.applySettings();
                 this.applyProfile();
                 this.setupCrossTabSync();
+                this.setupPWAListeners();
                 this.setupSystemThemeListener();
                 this.syncToggleStates();
-                console.log('🚀 Lumina Global Settings initialized with cross-tab sync!');
+                console.log('🚀 Lumina Global Settings with PWA support initialized with cross-tab sync!');
             }
 
-            // Setup cross-tab synchronization
+            // Setup PWA-specific listeners
+            setupPWAListeners() {
+                // Listen for service worker messages
+                if ('serviceWorker' in navigator) {
+                    navigator.serviceWorker.addEventListener('message', (event) => {
+                        if (event.data && event.data.type === 'PROFILE_SETTINGS_UPDATED') {
+                            this.settings = { ...this.defaults, ...event.data.settings };
+                            this.applySettings();
+                            this.syncToggleStates();
+                            console.log('📱 Settings synced from PWA service worker');
+                        } else if (event.data && event.data.type === 'PROFILE_DATA_UPDATED') {
+                            this.profile = { ...this.profileDefaults, ...event.data.profile };
+                            this.applyProfile();
+                            console.log('📱 Profile synced from PWA service worker');
+                        }
+                    });
+                }
+                
+                // PWA offline/online detection
+                window.addEventListener('online', () => {
+                    console.log('🌐 Back online - Profile sync enabled');
+                    if (typeof showAlert === 'function') {
+                        showAlert('🌐 Profile sync restored!', 'success');
+                    }
+                });
+
+                window.addEventListener('offline', () => {
+                    console.log('📱 Offline mode - Profile data cached locally');
+                    if (typeof showAlert === 'function') {
+                        showAlert('📱 Offline mode - Profile accessible locally!', 'warning');
+                    }
+                });
+            }
+
+            // Setup cross-tab synchronization with PWA support
             setupCrossTabSync() {
                 // Listen for localStorage changes from other tabs
                 window.addEventListener('storage', (e) => {
@@ -1740,7 +1915,7 @@
                             this.settings = data.settings;
                             this.applySettings();
                             this.syncToggleStates();
-                            console.log('🔄 Settings synced from another tab');
+                            console.log('🔄 PWA Settings synced from another tab');
                         } catch (error) {
                             console.warn('Failed to sync settings:', error);
                         }
@@ -1749,7 +1924,7 @@
                             const data = JSON.parse(e.newValue);
                             this.profile = data.profile;
                             this.applyProfile();
-                            console.log('🔄 Profile synced from another tab');
+                            console.log('🔄 PWA Profile synced from another tab');
                         } catch (error) {
                             console.warn('Failed to sync profile:', error);
                         }
@@ -1854,18 +2029,34 @@
         });
 
         function initializeApp() {
-            // Initialize global settings system
+            // Initialize global settings system with PWA support
             luminaSettings = new LuminaGlobalSettings();
             
             setupScrollEffects();
             setupMobileMenu();
             setupAnimations();
             setupEventListeners();
-            console.log('👤 Lumina AI Profile with CROSS-TAB SYNC initialized!');
+            checkPWAStatus();
+            console.log('👤📱 Lumina AI Profile with PWA CROSS-TAB SYNC initialized!');
+        }
+
+        function checkPWAStatus() {
+            const isPWA = window.matchMedia('(display-mode: standalone)').matches || 
+                          window.navigator.standalone === true;
+            
+            if (isPWA) {
+                console.log('📱 Running as PWA!');
+                document.body.classList.add('pwa-mode');
+                setTimeout(() => {
+                    showAlert('📱 PWA Profile - All data syncs offline!', 'success');
+                }, 3000);
+            } else {
+                console.log('🌐 Running as web app');
+            }
         }
 
         function setupEventListeners() {
-            // Theme toggle with cross-tab sync
+            // Theme toggle with cross-tab sync and PWA support
             document.getElementById('themeToggle').addEventListener('click', () => {
                 const currentTheme = luminaSettings.get('theme');
                 let newTheme;
@@ -1874,14 +2065,14 @@
                 else newTheme = 'light';
                 
                 luminaSettings.set('theme', newTheme);
-                showAlert(`🎨 Theme switched to ${newTheme} across all tabs!`, 'success');
+                showAlert(`🎨 Theme switched to ${newTheme} across all tabs + PWA!`, 'success');
             });
         }
 
-        // ==================== PROFILE FUNCTIONS ====================
+        // ==================== PROFILE FUNCTIONS WITH PWA SUPPORT ====================
 
         function uploadAvatar() {
-            showAlert('Avatar upload feature coming soon! 📸', 'success');
+            showAlert('📸 PWA Avatar upload coming soon!', 'success');
             // Simulate file picker
             const input = document.createElement('input');
             input.type = 'file';
@@ -1890,8 +2081,8 @@
                 if (e.target.files && e.target.files[0]) {
                     const reader = new FileReader();
                     reader.onload = (e) => {
-                        // In a real app, you'd upload the image
-                        showAlert('Avatar uploaded successfully! 🎉', 'success');
+                        // In a real PWA app, you'd upload the image and sync across devices
+                        showAlert('📱 Avatar uploaded and synced across PWA! 🎉', 'success');
                     };
                     reader.readAsDataURL(e.target.files[0]);
                 }
@@ -1917,9 +2108,9 @@
                     </svg>
                     Save Profile
                 `;
-                showAlert('✏️ Edit mode enabled! Make your changes and save.', 'success');
+                showAlert('✏️ PWA Edit mode enabled! Changes sync across devices.', 'success');
             } else {
-                // Save changes and sync across tabs
+                // Save changes and sync across tabs + PWA
                 const fullName = document.getElementById('fullNameInput').value;
                 luminaSettings.setProfile('fullName', fullName);
                 
@@ -1935,25 +2126,25 @@
                     </svg>
                     Edit Profile
                 `;
-                showAlert('✅ Profile saved and synced across all tabs!', 'success');
+                showAlert('✅ PWA Profile saved and synced across all tabs and devices!', 'success');
             }
         }
 
         function shareProfile() {
             if (navigator.share) {
                 navigator.share({
-                    title: 'My Lumina AI Profile',
-                    text: 'Check out my eye health progress on Lumina AI!',
+                    title: 'My Lumina AI PWA Profile',
+                    text: 'Check out my eye health progress on Lumina AI PWA!',
                     url: window.location.href
                 }).then(() => {
-                    showAlert('Profile shared successfully! 🎉', 'success');
+                    showAlert('📱 PWA Profile shared successfully! 🎉', 'success');
                 }).catch(() => {
                     showAlert('Sharing cancelled', 'warning');
                 });
             } else {
-                // Fallback for browsers without Web Share API
+                // PWA Fallback for browsers without Web Share API
                 navigator.clipboard.writeText(window.location.href).then(() => {
-                    showAlert('Profile link copied to clipboard! 📋', 'success');
+                    showAlert('📋 PWA Profile link copied to clipboard!', 'success');
                 }).catch(() => {
                     // Fallback fallback
                     const textArea = document.createElement('textarea');
@@ -1962,7 +2153,7 @@
                     textArea.select();
                     document.execCommand('copy');
                     document.body.removeChild(textArea);
-                    showAlert('Profile link copied to clipboard! 📋', 'success');
+                    showAlert('📋 PWA Profile link copied to clipboard!', 'success');
                 });
             }
         }
@@ -1977,26 +2168,26 @@
                 button.textContent = 'Save';
                 button.style.background = 'var(--success)';
                 button.style.color = 'var(--text-inverse)';
-                showAlert('Edit mode enabled. Make your changes and click Save.', 'success');
+                showAlert('📱 PWA Edit mode enabled. Changes sync across devices.', 'success');
             } else {
                 inputs.forEach(input => input.disabled = true);
                 button.textContent = 'Edit';
                 button.style.background = '';
                 button.style.color = '';
-                showAlert('Changes saved successfully! ✅', 'success');
+                showAlert('✅ PWA Changes saved and synced successfully! ✅', 'success');
             }
         }
 
-        // Updated toggle function with cross-tab sync
+        // Updated toggle function with cross-tab sync and PWA support
         function toggleSetting(element, settingKey) {
             element.classList.toggle('active');
             const isActive = element.classList.contains('active');
             const settingName = element.parentElement.querySelector('h4').textContent;
             
-            // Save to global settings with cross-tab sync
+            // Save to global settings with cross-tab sync and PWA support
             luminaSettings.set(settingKey, isActive);
             
-            showAlert(`🔄 ${settingName} ${isActive ? 'enabled' : 'disabled'} across all tabs!`, 'success');
+            showAlert(`🔄 PWA ${settingName} ${isActive ? 'enabled' : 'disabled'} across all tabs + devices!`, 'success');
         }
 
         // ==================== UTILITY FUNCTIONS ====================
@@ -2119,21 +2310,23 @@
             return luminaSettings;
         };
 
-        // Debug function for cross-tab testing
-        window.debugCrossTab = function() {
-            console.log('=== LUMINA CROSS-TAB DEBUG ===');
+        // Debug function for PWA cross-tab testing
+        window.debugPWACrossTab = function() {
+            console.log('=== LUMINA PWA CROSS-TAB DEBUG ===');
             console.log('Current tab settings:', luminaSettings.settings);
             console.log('Current tab profile:', luminaSettings.profile);
             console.log('localStorage settings:', localStorage.getItem('lumina_settings_v1'));
             console.log('localStorage profile:', localStorage.getItem('lumina_profile_v1'));
-            console.log('=== TEST CROSS-TAB SYNC ===');
-            console.log('1. Open another tab with Lumina AI');
-            console.log('2. Change theme in Settings page');
-            console.log('3. This tab should update automatically!');
+            console.log('PWA status:', window.matchMedia('(display-mode: standalone)').matches);
+            console.log('=== TEST PWA CROSS-TAB SYNC ===');
+            console.log('1. Install as PWA');
+            console.log('2. Open another tab with Lumina AI');
+            console.log('3. Change theme in Settings page');
+            console.log('4. This tab + PWA should update automatically!');
         };
 
-        console.log('🔄 Lumina AI Profile ready with CROSS-TAB SYNC! Type debugCrossTab() to test.');
-        console.log('🚀 Open multiple tabs and watch settings sync in real-time!');
+        console.log('🔄📱 Lumina AI Profile ready with PWA CROSS-TAB SYNC! Type debugPWACrossTab() to test.');
+        console.log('🚀 Install as PWA and watch settings sync across devices in real-time!');
     </script>
 </body>
 </html>

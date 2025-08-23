@@ -10,9 +10,92 @@
     <link rel="preload" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" as="style">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     
-    <!-- PWA Meta -->
-    <link rel="manifest" href="manifest.json">
+    <!-- PWA MANIFEST AND META TAGS -->
+    <link rel="manifest" href="/manifest.json">
     <meta name="theme-color" content="#6366f1">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="Lumina AI">
+    <link rel="apple-touch-icon" href="/icons/icon-192x192.png">
+    <meta name="msapplication-TileColor" content="#6366f1">
+    <meta name="msapplication-config" content="/browserconfig.xml">
+    
+    <!-- PWA SERVICE WORKER REGISTRATION -->
+    <script>
+        // Register Service Worker for PWA functionality
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', function() {
+                navigator.serviceWorker.register('/service-worker.js')
+                    .then(function(registration) {
+                        console.log('✅ PWA ServiceWorker registered:', registration.scope);
+                        
+                        // Check for updates
+                        registration.addEventListener('updatefound', () => {
+                            const newWorker = registration.installing;
+                            newWorker.addEventListener('statechange', () => {
+                                if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                                    // Show update notification using existing alert system
+                                    setTimeout(() => {
+                                        if (typeof showAlert === 'function') {
+                                            showAlert('📱 New analytics version available! Refresh to update.', 'success');
+                                        }
+                                    }, 2000);
+                                }
+                            });
+                        });
+                    })
+                    .catch(function(error) {
+                        console.warn('❌ PWA ServiceWorker registration failed:', error);
+                    });
+            });
+        }
+
+        // PWA Install Prompt Handler
+        let deferredPrompt;
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            
+            // Show PWA install notification after analytics loads
+            setTimeout(() => {
+                if (typeof showAlert === 'function') {
+                    showAlert('📱 Install Lumina AI Analytics for offline insights!', 'success');
+                }
+            }, 4000);
+        });
+        
+        // PWA Installation Success
+        window.addEventListener('appinstalled', () => {
+            console.log('🎉 PWA installed successfully!');
+            if (typeof showAlert === 'function') {
+                showAlert('🎉 Analytics dashboard installed! Access insights offline anytime.', 'success');
+            }
+            deferredPrompt = null;
+        });
+
+        // Handle PWA display mode
+        function checkPWAMode() {
+            const isPWA = window.matchMedia('(display-mode: standalone)').matches || 
+                          window.navigator.standalone === true;
+            
+            if (isPWA) {
+                console.log('📱 Running as PWA!');
+                document.body.classList.add('pwa-mode');
+            }
+        }
+        
+        // Check PWA mode when DOM is ready
+        document.addEventListener('DOMContentLoaded', checkPWAMode);
+
+        // PWA offline/online detection
+        window.addEventListener('online', () => {
+            console.log('🌐 Back online - Analytics data sync enabled');
+        });
+
+        window.addEventListener('offline', () => {
+            console.log('📱 Offline mode - Analytics still accessible');
+        });
+    </script>
     
     <!-- Favicons -->
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='35' fill='%236366f1'/><circle cx='50' cy='50' r='20' fill='white'/><circle cx='50' cy='50' r='8' fill='%236366f1'/></svg>">
@@ -70,6 +153,15 @@
             --shadow: rgba(0, 0, 0, 0.5);
             --shadow-strong: rgba(0, 0, 0, 0.7);
             --backdrop: rgba(0, 0, 0, 0.8);
+        }
+
+        /* PWA-specific styles */
+        .pwa-mode .header {
+            padding-top: env(safe-area-inset-top);
+        }
+        
+        .pwa-mode .main-content {
+            padding-bottom: calc(3rem + env(safe-area-inset-bottom));
         }
 
         /* Global Styles */
@@ -1590,7 +1682,23 @@
             setupAnimations();
             setupEventListeners();
             updateAnalytics();
-            console.log('📊 Lumina AI Analytics Dashboard initialized successfully!');
+            checkPWAStatus();
+            console.log('📊 Lumina AI Analytics Dashboard with PWA support initialized!');
+        }
+
+        function checkPWAStatus() {
+            const isPWA = window.matchMedia('(display-mode: standalone)').matches || 
+                          window.navigator.standalone === true;
+            
+            if (isPWA) {
+                console.log('📱 Running as PWA!');
+                document.body.classList.add('pwa-mode');
+                setTimeout(() => {
+                    showAlert('📱 PWA Analytics - All insights available offline!', 'success');
+                }, 3000);
+            } else {
+                console.log('🌐 Running as web app');
+            }
         }
 
         function setupEventListeners() {
@@ -1631,6 +1739,7 @@
         function toggleTheme() {
             const newTheme = currentTheme === 'light' ? 'dark' : 'light';
             setTheme(newTheme);
+            showAlert(`🎨 Theme switched to ${newTheme} in PWA!`, 'success');
         }
 
         // Time Filter Functions
@@ -1649,7 +1758,7 @@
             updateAnalytics();
             
             // Show success message
-            showAlert(`Analytics updated for ${button.textContent.toLowerCase()} period`, 'success');
+            showAlert(`📱 PWA Analytics updated for ${button.textContent.toLowerCase()} period`, 'success');
         }
 
         function updateAnalytics() {
@@ -1698,16 +1807,16 @@
             button.classList.add('active');
             
             // Show success message
-            showAlert(`Viewing ${button.textContent} data`, 'success');
+            showAlert(`📱 PWA viewing ${button.textContent} data`, 'success');
         }
 
         // Export Function
         function handleExportClick() {
-            showAlert('Preparing comprehensive health report...', 'success');
+            showAlert('📱 PWA preparing comprehensive health report...', 'success');
             
             // Simulate export process
             setTimeout(() => {
-                showAlert('Health report exported successfully! 📊', 'success');
+                showAlert('📊 PWA health report exported successfully!', 'success');
             }, 2000);
         }
 
@@ -1824,7 +1933,7 @@
             });
         }
 
-        console.log('📊 Lumina AI Analytics ready with WORKING buttons and interactions!');
+        console.log('📊📱 Lumina AI Analytics ready with COMPLETE PWA support and working interactions!');
     </script>
 </body>
 </html>

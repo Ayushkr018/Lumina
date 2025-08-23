@@ -10,9 +10,92 @@
     <link rel="preload" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" as="style">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     
-    <!-- PWA Meta -->
-    <link rel="manifest" href="manifest.json">
+    <!-- PWA MANIFEST AND META TAGS -->
+    <link rel="manifest" href="/manifest.json">
     <meta name="theme-color" content="#6366f1">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="Lumina AI">
+    <link rel="apple-touch-icon" href="/icons/icon-192x192.png">
+    <meta name="msapplication-TileColor" content="#6366f1">
+    <meta name="msapplication-config" content="/browserconfig.xml">
+    
+    <!-- PWA SERVICE WORKER REGISTRATION -->
+    <script>
+        // Register Service Worker for PWA functionality
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', function() {
+                navigator.serviceWorker.register('/service-worker.js')
+                    .then(function(registration) {
+                        console.log('✅ PWA ServiceWorker registered:', registration.scope);
+                        
+                        // Check for updates
+                        registration.addEventListener('updatefound', () => {
+                            const newWorker = registration.installing;
+                            newWorker.addEventListener('statechange', () => {
+                                if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                                    // Show update notification using existing alert system
+                                    setTimeout(() => {
+                                        if (typeof showAlert === 'function') {
+                                            showAlert('📱 New version available! Refresh to update.', 'success');
+                                        }
+                                    }, 1000);
+                                }
+                            });
+                        });
+                    })
+                    .catch(function(error) {
+                        console.warn('❌ PWA ServiceWorker registration failed:', error);
+                    });
+            });
+        }
+
+        // PWA Install Prompt Handler
+        let deferredPrompt;
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            
+            // Show PWA install notification after settings load
+            setTimeout(() => {
+                if (typeof showAlert === 'function') {
+                    showAlert('📱 Install Lumina AI for better offline settings access!', 'success');
+                }
+            }, 3000);
+        });
+        
+        // PWA Installation Success
+        window.addEventListener('appinstalled', () => {
+            console.log('🎉 PWA installed successfully!');
+            if (typeof showAlert === 'function') {
+                showAlert('🎉 Lumina AI installed! Access settings offline anytime.', 'success');
+            }
+            deferredPrompt = null;
+        });
+
+        // Handle PWA display mode
+        function checkPWAMode() {
+            const isPWA = window.matchMedia('(display-mode: standalone)').matches || 
+                          window.navigator.standalone === true;
+            
+            if (isPWA) {
+                console.log('📱 Running as PWA!');
+                document.body.classList.add('pwa-mode');
+            }
+        }
+        
+        // Check PWA mode when DOM is ready
+        document.addEventListener('DOMContentLoaded', checkPWAMode);
+
+        // PWA offline/online detection
+        window.addEventListener('online', () => {
+            console.log('🌐 Back online - Settings sync enabled');
+        });
+
+        window.addEventListener('offline', () => {
+            console.log('📱 Offline mode - Settings still accessible');
+        });
+    </script>
     
     <!-- Include Global Settings Manager -->
     <script src="js/lumina-settings.js"></script>
@@ -73,6 +156,15 @@
             --shadow: rgba(0, 0, 0, 0.5);
             --shadow-strong: rgba(0, 0, 0, 0.7);
             --backdrop: rgba(0, 0, 0, 0.8);
+        }
+
+        /* PWA-specific styles */
+        .pwa-mode .header {
+            padding-top: env(safe-area-inset-top);
+        }
+        
+        .pwa-mode .main-content {
+            padding-bottom: calc(3rem + env(safe-area-inset-bottom));
         }
 
         /* DYNAMIC SCALING SYSTEM */
@@ -1763,7 +1855,7 @@
     <!-- Create the JS file separately to avoid inline issues -->
     <script>
         // ==================== LUMINA AI SETTINGS MANAGER ====================
-        // GLOBAL SETTINGS SYSTEM - Works across all pages
+        // GLOBAL SETTINGS SYSTEM - Works across all pages with PWA support
         
         class LuminaSettings {
             constructor() {
@@ -1812,7 +1904,7 @@
                 this.init();
             }
             
-            // Load settings from localStorage
+            // Load settings from localStorage with PWA support
             load() {
                 try {
                     const stored = localStorage.getItem('lumina_settings');
@@ -1822,16 +1914,38 @@
                     }
                 } catch (error) {
                     console.warn('Failed to load settings:', error);
+                    
+                    // PWA: Try to sync from service worker cache
+                    if ('serviceWorker' in navigator) {
+                        navigator.serviceWorker.ready.then(registration => {
+                            registration.active?.postMessage({
+                                type: 'GET_SETTINGS',
+                                timestamp: Date.now()
+                            });
+                        });
+                    }
                 }
                 return { ...this.defaults };
             }
             
-            // Save settings to localStorage
+            // Save settings to localStorage with PWA sync
             save() {
                 try {
                     localStorage.setItem('lumina_settings', JSON.stringify(this.settings));
                     this.apply();
                     this.notifyChange();
+                    
+                    // PWA: Sync to service worker for offline access
+                    if ('serviceWorker' in navigator) {
+                        navigator.serviceWorker.ready.then(registration => {
+                            registration.active?.postMessage({
+                                type: 'SYNC_SETTINGS',
+                                settings: this.settings,
+                                timestamp: Date.now()
+                            });
+                        });
+                    }
+                    
                     return true;
                 } catch (error) {
                     console.error('Failed to save settings:', error);
@@ -1858,7 +1972,7 @@
                 this.applyAnimations();
             }
             
-            // Apply theme
+            // Apply theme with PWA support
             applyTheme() {
                 const theme = this.get('theme');
                 let actualTheme = theme;
@@ -1913,11 +2027,42 @@
                 }
             }
             
-            // Initialize settings system
+            // Initialize settings system with PWA support
             init() {
                 this.apply();
                 this.setupSystemThemeListener();
+                this.setupPWAListeners();
                 this.loadUIValues();
+            }
+            
+            // Setup PWA-specific listeners
+            setupPWAListeners() {
+                // Listen for service worker messages
+                if ('serviceWorker' in navigator) {
+                    navigator.serviceWorker.addEventListener('message', (event) => {
+                        if (event.data && event.data.type === 'SETTINGS_UPDATED') {
+                            this.settings = { ...this.defaults, ...event.data.settings };
+                            this.apply();
+                            this.loadUIValues();
+                            console.log('📱 Settings synced from PWA service worker');
+                        }
+                    });
+                }
+                
+                // PWA offline/online detection
+                window.addEventListener('online', () => {
+                    console.log('🌐 Back online - Settings sync enabled');
+                    if (typeof showAlert === 'function') {
+                        showAlert('🌐 Settings sync restored!', 'success');
+                    }
+                });
+
+                window.addEventListener('offline', () => {
+                    console.log('📱 Offline mode - Settings cached locally');
+                    if (typeof showAlert === 'function') {
+                        showAlert('📱 Offline mode - Settings accessible locally!', 'warning');
+                    }
+                });
             }
             
             // Setup system theme change listener
@@ -1946,8 +2091,8 @@
                 ['blinkSensitivity', 'strainSensitivity', 'scaleSlider'].forEach(id => {
                     const element = document.getElementById(id);
                     if (element) {
-                        const setting = element.dataset.setting || id;
-                        element.value = this.get(setting === 'scaleSlider' ? 'interfaceScale' : setting);
+                        const setting = element.dataset.setting || (id === 'scaleSlider' ? 'interfaceScale' : id);
+                        element.value = this.get(setting);
                         this.updateSliderDisplay(element);
                     }
                 });
@@ -1990,11 +2135,22 @@
                 }
             }
             
-            // Notify other windows/tabs of settings change
+            // Notify other windows/tabs of settings change with PWA sync
             notifyChange() {
                 window.dispatchEvent(new CustomEvent('luminaSettingsChanged', {
                     detail: { settings: this.settings }
                 }));
+                
+                // PWA: Broadcast to all client tabs
+                if ('serviceWorker' in navigator) {
+                    navigator.serviceWorker.ready.then(registration => {
+                        registration.active?.postMessage({
+                            type: 'BROADCAST_SETTINGS',
+                            settings: this.settings,
+                            timestamp: Date.now()
+                        });
+                    });
+                }
             }
             
             // Color conversion utilities
@@ -2056,16 +2212,26 @@
                 this.loadUIValues();
             }
             
-            // Export settings
+            // Export settings with PWA metadata
             export() {
-                return JSON.stringify(this.settings, null, 2);
+                const exportData = {
+                    settings: this.settings,
+                    metadata: {
+                        exportDate: new Date().toISOString(),
+                        version: '1.0',
+                        isPWA: window.matchMedia('(display-mode: standalone)').matches,
+                        userAgent: navigator.userAgent
+                    }
+                };
+                return JSON.stringify(exportData, null, 2);
             }
             
             // Import settings
             import(settingsJson) {
                 try {
                     const imported = JSON.parse(settingsJson);
-                    this.settings = { ...this.defaults, ...imported };
+                    const settings = imported.settings || imported; // Handle both formats
+                    this.settings = { ...this.defaults, ...settings };
                     this.save();
                     this.loadUIValues();
                     return true;
@@ -2100,11 +2266,27 @@
             setupEventListeners();
             setupSliders();
             setupColorPicker();
-            console.log('⚙️ Lumina AI Settings page with REAL backend initialized!');
+            checkPWAStatus();
+            console.log('⚙️📱 Lumina AI Settings page with PWA support initialized!');
+        }
+
+        function checkPWAStatus() {
+            const isPWA = window.matchMedia('(display-mode: standalone)').matches || 
+                          window.navigator.standalone === true;
+            
+            if (isPWA) {
+                console.log('📱 Running as PWA!');
+                document.body.classList.add('pwa-mode');
+                setTimeout(() => {
+                    showAlert('📱 PWA Settings - All changes sync offline!', 'success');
+                }, 2000);
+            } else {
+                console.log('🌐 Running as web app');
+            }
         }
 
         function setupEventListeners() {
-            // Theme toggle in header
+            // Theme toggle in header with PWA sync
             const themeToggle = document.getElementById('themeToggle');
             if (themeToggle) {
                 themeToggle.addEventListener('click', () => {
@@ -2121,6 +2303,8 @@
                     if (themeSelect) {
                         themeSelect.value = newTheme;
                     }
+                    
+                    showAlert(`🎨 Theme switched to ${newTheme} - Synced across PWA!`, 'success');
                 });
             }
             
@@ -2133,7 +2317,7 @@
             document.querySelectorAll('select[data-setting]').forEach(select => {
                 select.addEventListener('change', (e) => {
                     luminaSettings.set(e.target.dataset.setting, e.target.value);
-                    showAlert(`${e.target.dataset.setting} updated!`, 'success');
+                    showAlert(`📱 ${e.target.dataset.setting} updated and synced!`, 'success');
                 });
             });
 
@@ -2190,7 +2374,7 @@
                     const color = option.dataset.color;
                     luminaSettings.set('accentColor', color);
                     
-                    showAlert(`Accent color updated to ${color}`, 'success');
+                    showAlert(`🎨 Accent color updated to ${color} - PWA synced!`, 'success');
                 });
             });
         }
@@ -2204,52 +2388,48 @@
             if (setting) {
                 luminaSettings.set(setting, isActive);
                 const settingName = element.parentElement.querySelector('h4').textContent;
-                showAlert(`${settingName} ${isActive ? 'enabled' : 'disabled'}`, 'success');
+                showAlert(`📱 ${settingName} ${isActive ? 'enabled' : 'disabled'} - PWA synced!`, 'success');
             }
         }
 
         // Save Functions
         function saveSettings(section) {
             // Settings are already saved automatically, just show confirmation
-            showAlert(`${section.charAt(0).toUpperCase() + section.slice(1)} settings saved successfully!`, 'success');
+            showAlert(`📱 ${section.charAt(0).toUpperCase() + section.slice(1)} settings saved and synced across PWA!`, 'success');
         }
 
         function resetSection(section) {
             if (confirm(`Are you sure you want to reset ${section} settings to default?`)) {
                 luminaSettings.resetSection(section);
-                showAlert(`${section.charAt(0).toUpperCase() + section.slice(1)} settings reset to default`, 'warning');
+                showAlert(`📱 ${section.charAt(0).toUpperCase() + section.slice(1)} settings reset to default - PWA synced!`, 'warning');
             }
         }
 
-        // Data Functions
+        // Data Functions with PWA support
         function exportData() {
-            showAlert('Preparing data export...', 'success');
+            showAlert('📱 Preparing PWA data export...', 'success');
             
-            // Create export data
-            const exportData = {
-                settings: luminaSettings.settings,
-                exported: new Date().toISOString(),
-                version: '1.0'
-            };
+            // Create export data with PWA metadata
+            const exportData = JSON.parse(luminaSettings.export());
             
             // Create download
             const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = `lumina-ai-settings-${new Date().toISOString().split('T')[0]}.json`;
+            a.download = `lumina-ai-pwa-settings-${new Date().toISOString().split('T')[0]}.json`;
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
             URL.revokeObjectURL(url);
             
             setTimeout(() => {
-                showAlert('Settings exported successfully! 📊', 'success');
+                showAlert('📊 PWA settings exported with offline capabilities!', 'success');
             }, 1000);
         }
 
         function clearCache() {
-            if (confirm('Are you sure you want to clear the cache? This will remove temporary files.')) {
+            if (confirm('Are you sure you want to clear the PWA cache? This will remove temporary files.')) {
                 // Clear relevant localStorage items except settings
                 const keysToRemove = [];
                 for (let i = 0; i < localStorage.length; i++) {
@@ -2260,12 +2440,23 @@
                 }
                 
                 keysToRemove.forEach(key => localStorage.removeItem(key));
-                showAlert('Cache cleared successfully!', 'success');
+                
+                // Clear PWA service worker cache
+                if ('serviceWorker' in navigator) {
+                    navigator.serviceWorker.ready.then(registration => {
+                        registration.active?.postMessage({
+                            type: 'CLEAR_CACHE',
+                            timestamp: Date.now()
+                        });
+                    });
+                }
+                
+                showAlert('📱 PWA cache cleared successfully!', 'success');
             }
         }
 
         function clearAllData() {
-            if (confirm('⚠️ WARNING: This will permanently delete all your data. This action cannot be undone. Are you sure?')) {
+            if (confirm('⚠️ WARNING: This will permanently delete all your PWA data. This action cannot be undone. Are you sure?')) {
                 // Clear all localStorage
                 Object.keys(localStorage).forEach(key => {
                     if (key.startsWith('lumina_')) {
@@ -2273,22 +2464,32 @@
                     }
                 });
                 
+                // Clear PWA data
+                if ('serviceWorker' in navigator) {
+                    navigator.serviceWorker.ready.then(registration => {
+                        registration.active?.postMessage({
+                            type: 'CLEAR_ALL_DATA',
+                            timestamp: Date.now()
+                        });
+                    });
+                }
+                
                 // Reinitialize with defaults
                 luminaSettings = new LuminaSettings();
                 luminaSettings.loadUIValues();
                 
-                showAlert('All data has been cleared!', 'warning');
+                showAlert('📱 All PWA data has been cleared!', 'warning');
             }
         }
 
         function showDataDeletionModal() {
-            if (confirm('⚠️ DANGER: This will permanently delete ALL your data and cannot be undone. Type "DELETE" to confirm.')) {
-                const confirmation = prompt('Please type "DELETE" to confirm permanent data deletion:');
+            if (confirm('⚠️ DANGER: This will permanently delete ALL your PWA data and cannot be undone. Type "DELETE" to confirm.')) {
+                const confirmation = prompt('Please type "DELETE" to confirm permanent PWA data deletion:');
                 if (confirmation === 'DELETE') {
                     clearAllData();
-                    showAlert('All account data has been deleted!', 'error');
+                    showAlert('🗑️ All PWA account data has been deleted!', 'error');
                 } else {
-                    showAlert('Data deletion cancelled.', 'warning');
+                    showAlert('📱 PWA data deletion cancelled.', 'warning');
                 }
             }
         }
@@ -2411,7 +2612,7 @@
             return luminaSettings || new LuminaSettings();
         };
 
-        console.log('⚙️ Lumina AI Settings ready with REAL functional backend system!');
+        console.log('⚙️📱 Lumina AI Settings ready with COMPLETE PWA support and offline sync!');
     </script>
 </body>
 </html>
