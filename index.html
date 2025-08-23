@@ -181,7 +181,7 @@
             border: 4px solid var(--border);
         }
 
-        /* Enhanced Loading Eye with Lashes */
+        /* Clean Loading Eye without lashes */
         .loading-eye::before {
             content: '';
             position: absolute;
@@ -207,38 +207,6 @@
             background: var(--primary);
             border-radius: 50%;
             animation: loadingTrack 4s ease-in-out infinite;
-        }
-
-        /* Loading Eye Lashes */
-        .loading-lashes {
-            position: absolute;
-            top: -10px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 100%;
-            height: 20px;
-            z-index: 5;
-        }
-
-        .loading-lashes::before,
-        .loading-lashes::after {
-            content: '';
-            position: absolute;
-            width: 3px;
-            height: 15px;
-            background: var(--text-primary);
-            border-radius: 2px;
-            animation: lashBlink 2s ease-in-out infinite;
-        }
-
-        .loading-lashes::before {
-            left: 20%;
-            transform: rotate(-20deg);
-        }
-
-        .loading-lashes::after {
-            right: 20%;
-            transform: rotate(20deg);
         }
 
         .loading-text {
@@ -267,11 +235,6 @@
         @keyframes loadingFade {
             0%, 100% { opacity: 0.5; }
             50% { opacity: 1; }
-        }
-
-        @keyframes lashBlink {
-            0%, 90%, 100% { opacity: 1; }
-            95% { opacity: 0.3; }
         }
 
         /* Background Effects */
@@ -381,7 +344,7 @@
             height: 45px;
         }
 
-        /* Enhanced Eye-Style Logo with Lashes */
+        /* Clean Eye-Style Logo WITHOUT LASHES */
         .logo-icon {
             width: 45px;
             height: 30px;
@@ -404,7 +367,7 @@
             filter: brightness(0) invert(1);
         }
 
-        /* Enhanced Eye design with lashes if PNG not loaded */
+        /* Clean eye design without lashes */
         .logo-eye {
             position: absolute;
             top: 50%;
@@ -431,46 +394,9 @@
             box-shadow: 0 0 5px rgba(79, 70, 229, 0.8);
         }
 
-        /* Logo Eye Lashes */
-        .logo-lashes {
-            position: absolute;
-            top: -5px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 100%;
-            height: 10px;
-            z-index: 6;
-        }
-
-        .logo-lashes::before,
-        .logo-lashes::after {
-            content: '';
-            position: absolute;
-            width: 2px;
-            height: 8px;
-            background: var(--text-inverse);
-            border-radius: 1px;
-            animation: logoLashFloat 3s ease-in-out infinite;
-        }
-
-        .logo-lashes::before {
-            left: 30%;
-            transform: rotate(-15deg);
-        }
-
-        .logo-lashes::after {
-            right: 30%;
-            transform: rotate(15deg);
-        }
-
         @keyframes logoFloat {
             0%, 100% { transform: translateY(0) rotate(0deg); }
             50% { transform: translateY(-3px) rotate(2deg); }
-        }
-
-        @keyframes logoLashFloat {
-            0%, 100% { opacity: 1; transform: rotate(-15deg); }
-            50% { opacity: 0.8; transform: rotate(-10deg); }
         }
 
         @keyframes pupilTrack {
@@ -524,7 +450,7 @@
             gap: 1rem;
         }
 
-        /* Eye-Style Theme Toggle */
+        /* Clean Theme Toggle */
         .theme-toggle {
             width: 44px;
             height: 44px;
@@ -539,6 +465,7 @@
             transition: all var(--transition-base);
             position: relative;
             overflow: hidden;
+            cursor: pointer;
         }
 
         .theme-toggle:hover {
@@ -574,7 +501,7 @@
             stroke-linejoin: round;
         }
 
-        /* Eye-Style Buttons */
+        /* Button Styles */
         .btn {
             padding: 0.75rem 1.5rem;
             border-radius: 25px;
@@ -589,6 +516,7 @@
             position: relative;
             overflow: hidden;
             white-space: nowrap;
+            cursor: pointer;
         }
 
         .btn::before {
@@ -642,6 +570,7 @@
             border-radius: 8px;
             padding: 0.5rem;
             transition: all var(--transition-base);
+            cursor: pointer;
         }
 
         .mobile-menu-btn span {
@@ -793,7 +722,7 @@
             animation: heroFloat 6s ease-in-out infinite;
         }
 
-        /* Enhanced Hero Eye Design with Lashes */
+        /* Clean Hero Eye WITHOUT LASHES */
         .hero-eye {
             width: 100%;
             height: 70%;
@@ -819,40 +748,6 @@
             background: conic-gradient(from 0deg, var(--primary), var(--secondary), var(--primary));
             animation: rotate 20s linear infinite;
             opacity: 0.3;
-        }
-
-        /* Hero Eye Lashes */
-        .hero-lashes {
-            position: absolute;
-            top: 5%;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 120%;
-            height: 30px;
-            z-index: 10;
-        }
-
-        .hero-lashes::before,
-        .hero-lashes::after {
-            content: '';
-            position: absolute;
-            width: 4px;
-            height: 25px;
-            background: var(--text-primary);
-            border-radius: 2px;
-            animation: heroLashFloat 6s ease-in-out infinite;
-        }
-
-        .hero-lashes::before {
-            left: 25%;
-            transform: rotate(-25deg);
-            animation-delay: 0s;
-        }
-
-        .hero-lashes::after {
-            right: 25%;
-            transform: rotate(25deg);
-            animation-delay: 2s;
         }
 
         .hero-iris {
@@ -892,11 +787,6 @@
             object-fit: contain;
             animation: logoSpin 12s linear infinite;
             z-index: 2;
-        }
-
-        @keyframes heroLashFloat {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.7; }
         }
 
         /* Floating Elements */
@@ -1211,34 +1101,30 @@
             line-height: 1.6;
         }
 
-        /* Fixed Timeline Design - No Eye Overlap */
+        /* FIXED Timeline Design - Left-aligned Timeline */
         .timeline {
             position: relative;
             max-width: 1000px;
             margin: 5rem auto 0;
         }
 
+        /* Timeline line on the left */
         .timeline::before {
             content: '';
             position: absolute;
-            left: 50%;
+            left: 40px;
             top: 0;
             bottom: 0;
             width: 4px;
             background: var(--gradient-primary);
-            transform: translateX(-50%);
         }
 
         .timeline-item {
             position: relative;
-            margin-bottom: 8rem;
+            margin-bottom: 4rem;
             display: flex;
-            align-items: center;
-            min-height: 160px;
-        }
-
-        .timeline-item:nth-child(even) {
-            flex-direction: row-reverse;
+            align-items: flex-start;
+            min-height: 120px;
         }
 
         .timeline-content {
@@ -1248,11 +1134,10 @@
             backdrop-filter: blur(30px);
             border-radius: 20px;
             border: 1px solid var(--border-light);
-            margin: 0 4rem;
+            margin-left: 6rem; /* Space for number */
             position: relative;
             box-shadow: 0 10px 40px var(--shadow);
             transition: all var(--transition-base);
-            max-width: calc(50% - 5rem);
         }
 
         .timeline-content:hover {
@@ -1260,91 +1145,53 @@
             box-shadow: 0 20px 60px var(--shadow-strong);
         }
 
-        /* Fixed Eye-Style Timeline Numbers - No Text Overlap */
+        /* Timeline numbers positioned on the left */
         .timeline-number {
             position: absolute;
-            left: 50%;
-            top: 50%;
-            transform: translate(-50%, -50%);
-            width: 120px;
+            left: 40px; /* Aligned with timeline line */
+            top: 2rem;
+            transform: translateX(-50%);
+            width: 80px;
             height: 80px;
             background: var(--gradient-primary);
-            border-radius: 50%;
+            border-radius: 16px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: var(--font-3xl);
-            font-weight: 800;
+            font-size: var(--font-2xl);
+            font-weight: 900;
             color: var(--text-inverse);
             box-shadow: 0 8px 30px rgba(99, 102, 241, 0.4);
             animation: pulse 3s ease-in-out infinite;
             z-index: 10;
-            border: 6px solid var(--bg-primary);
-            overflow: visible;
-            position: relative;
+            border: 4px solid var(--bg-primary);
         }
 
+        /* Geometric decoration */
         .timeline-number::before {
             content: '';
             position: absolute;
-            top: 50%;
-            left: 30%;
-            transform: translateY(-50%);
-            width: 24px;
-            height: 24px;
-            background: var(--bg-primary);
-            border-radius: 50%;
-            box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+            top: -12px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 0;
+            border-left: 8px solid transparent;
+            border-right: 8px solid transparent;
+            border-bottom: 12px solid var(--primary);
         }
 
         .timeline-number::after {
             content: '';
             position: absolute;
-            top: 50%;
-            left: 30%;
-            transform: translateY(-50%);
-            width: 12px;
-            height: 12px;
-            background: var(--primary-dark);
-            border-radius: 50%;
-            animation: pupilMove 6s ease-in-out infinite;
-        }
-
-        /* Fixed Timeline Eye Lashes - No Overlap */
-        .timeline-lashes {
-            position: absolute;
-            top: -12px;
+            bottom: -12px;
             left: 50%;
             transform: translateX(-50%);
-            width: 100px;
-            height: 20px;
-            z-index: 11;
-        }
-
-        .timeline-lashes::before,
-        .timeline-lashes::after {
-            content: '';
-            position: absolute;
-            width: 4px;
-            height: 16px;
-            background: var(--text-primary);
-            border-radius: 2px;
-            animation: timelineLashFloat 3s ease-in-out infinite;
-        }
-
-        .timeline-lashes::before {
-            left: 25%;
-            transform: rotate(-20deg);
-        }
-
-        .timeline-lashes::after {
-            right: 25%;
-            transform: rotate(20deg);
-        }
-
-        @keyframes timelineLashFloat {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.8; }
+            width: 0;
+            height: 0;
+            border-left: 8px solid transparent;
+            border-right: 8px solid transparent;
+            border-top: 12px solid var(--primary);
         }
 
         .timeline-item:nth-child(2) .timeline-number {
@@ -1356,189 +1203,13 @@
         }
 
         @keyframes pulse {
-            0%, 100% { transform: translate(-50%, -50%) scale(1); }
-            50% { transform: translate(-50%, -50%) scale(1.05); }
+            0%, 100% { transform: translateX(-50%) scale(1); }
+            50% { transform: translateX(-50%) scale(1.05); }
         }
 
         @keyframes shimmer {
             0%, 100% { opacity: 0.1; }
             50% { opacity: 0.3; }
-        }
-
-        /* Pricing Section */
-        .pricing-toggle {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 1.5rem;
-            margin: 3rem 0 5rem;
-            background: var(--bg-glass);
-            backdrop-filter: blur(20px);
-            border-radius: 50px;
-            padding: 1rem 2rem;
-            border: 1px solid var(--border-light);
-            width: fit-content;
-            margin-left: auto;
-            margin-right: auto;
-        }
-
-        .toggle-label {
-            font-weight: 600;
-            color: var(--text-secondary);
-            transition: all var(--transition-base);
-            font-size: var(--font-sm);
-        }
-
-        .toggle-label.active {
-            color: var(--primary);
-            transform: scale(1.05);
-        }
-
-        .toggle-switch {
-            position: relative;
-            width: 70px;
-            height: 36px;
-            background: var(--border);
-            border-radius: 18px;
-            transition: all var(--transition-base);
-            box-shadow: inset 0 2px 4px var(--shadow);
-        }
-
-        .toggle-switch.active {
-            background: var(--gradient-primary);
-        }
-
-        .toggle-knob {
-            position: absolute;
-            top: 3px;
-            left: 3px;
-            width: 30px;
-            height: 30px;
-            background: var(--bg-primary);
-            border-radius: 50%;
-            transition: all var(--transition-base);
-            box-shadow: 0 2px 8px var(--shadow);
-        }
-
-        .toggle-switch.active .toggle-knob {
-            transform: translateX(34px);
-        }
-
-        .pricing-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-            gap: 2rem;
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-
-        .pricing-card {
-            background: var(--bg-glass);
-            backdrop-filter: blur(30px);
-            border: 2px solid var(--border-light);
-            border-radius: 24px;
-            padding: 3rem 2.5rem;
-            text-align: center;
-            position: relative;
-            transition: all var(--transition-base);
-            overflow: hidden;
-        }
-
-        .pricing-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(99, 102, 241, 0.1), transparent);
-            transition: left 0.8s ease;
-        }
-
-        .pricing-card:hover::before {
-            left: 100%;
-        }
-
-        .pricing-card.featured {
-            border-color: var(--primary);
-            transform: scale(1.05);
-            box-shadow: 0 20px 60px rgba(99, 102, 241, 0.3);
-        }
-
-        .pricing-card.featured::after {
-            content: 'Most Popular';
-            position: absolute;
-            top: -15px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: var(--gradient-primary);
-            color: var(--text-inverse);
-            padding: 0.5rem 2rem;
-            border-radius: 20px;
-            font-size: var(--font-xs);
-            font-weight: 700;
-            letter-spacing: 0.5px;
-            text-transform: uppercase;
-        }
-
-        .pricing-card:hover {
-            transform: translateY(-8px);
-            box-shadow: 0 25px 80px var(--shadow-strong);
-        }
-
-        .pricing-card.featured:hover {
-            transform: translateY(-8px) scale(1.05);
-        }
-
-        .pricing-plan {
-            font-size: var(--font-lg);
-            font-weight: 700;
-            color: var(--primary);
-            margin-bottom: 1.5rem;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        .pricing-price {
-            font-size: clamp(2.5rem, 4vw, 3.5rem);
-            font-weight: 900;
-            color: var(--text-primary);
-            margin-bottom: 0.5rem;
-        }
-
-        .pricing-period {
-            color: var(--text-secondary);
-            margin-bottom: 2.5rem;
-            font-weight: 500;
-        }
-
-        .pricing-features {
-            list-style: none;
-            margin-bottom: 3rem;
-        }
-
-        .pricing-features li {
-            padding: 0.75rem 0;
-            color: var(--text-secondary);
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-            font-weight: 500;
-        }
-
-        .pricing-features li::before {
-            content: '✓';
-            width: 20px;
-            height: 20px;
-            background: var(--gradient-primary);
-            border-radius: 50%;
-            flex-shrink: 0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: var(--text-inverse);
-            font-weight: 700;
-            font-size: 12px;
         }
 
         /* Footer */
@@ -1718,6 +1389,7 @@
             font-size: 1.2rem;
             color: var(--text-secondary);
             transition: all var(--transition-base);
+            cursor: pointer;
         }
 
         .modal-close:hover {
@@ -1786,6 +1458,7 @@
             justify-content: center;
             gap: 0.75rem;
             width: 100%;
+            cursor: pointer;
         }
 
         .social-btn:hover {
@@ -1857,36 +1530,93 @@
 
         /* ULTRA RESPONSIVE DESIGN - ALL SCREEN SIZES */
         
-        /* Extra Large Desktop (1400px+) */
-        @media (min-width: 1400px) {
-            .hero-container {
-                max-width: 1600px;
+        /* Extra Large Desktop (2000px+) */
+        @media (min-width: 2000px) {
+            .hero-container,
+            .section-container {
+                max-width: 1800px;
             }
             
-            .section-container {
-                max-width: 1600px;
-            }
-        }
-
-        /* Large Desktop (1200px - 1399px) */
-        @media (min-width: 1200px) and (max-width: 1399px) {
             .hero-eye-container {
-                width: 320px;
-                height: 320px;
+                width: 400px;
+                height: 400px;
             }
             
             .timeline-number {
-                width: 110px;
-                height: 75px;
+                width: 100px;
+                height: 100px;
+                font-size: var(--font-3xl);
             }
         }
 
-        /* Medium Desktop/Laptop (1024px - 1199px) */
-        @media (max-width: 1199px) {
+        /* Extra Large Desktop (1600px - 1999px) */
+        @media (min-width: 1600px) and (max-width: 1999px) {
+            .hero-container,
+            .section-container {
+                max-width: 1700px;
+            }
+            
+            .hero-eye-container {
+                width: 380px;
+                height: 380px;
+            }
+        }
+
+        /* Large Desktop (1400px - 1599px) */
+        @media (min-width: 1400px) and (max-width: 1599px) {
+            .hero-eye-container {
+                width: 360px;
+                height: 360px;
+            }
+            
+            .timeline-number {
+                width: 85px;
+                height: 85px;
+            }
+        }
+
+        /* Standard Desktop (1200px - 1399px) */
+        @media (min-width: 1200px) and (max-width: 1399px) {
+            .hero-eye-container {
+                width: 340px;
+                height: 340px;
+            }
+            
+            .timeline-number {
+                width: 80px;
+                height: 80px;
+            }
+
+            .features-wrapper {
+                gap: 5rem;
+            }
+        }
+
+        /* Desktop/Laptop (992px - 1199px) */
+        @media (min-width: 992px) and (max-width: 1199px) {
+            .nav-links {
+                gap: 1.5rem;
+            }
+            
             .hero-container {
                 grid-template-columns: 1fr;
                 text-align: center;
                 gap: 3rem;
+            }
+
+            .hero-eye-container {
+                width: 320px;
+                height: 320px;
+            }
+
+            .hero-iris {
+                width: 140px;
+                height: 140px;
+            }
+
+            .hero-pupil {
+                width: 50px;
+                height: 50px;
             }
 
             .features-wrapper {
@@ -1898,26 +1628,20 @@
                 left: 30px;
             }
 
-            .timeline-item,
-            .timeline-item:nth-child(even) {
-                flex-direction: row;
+            .timeline-number {
+                left: 30px;
+                width: 70px;
+                height: 70px;
+                font-size: var(--font-lg);
             }
 
             .timeline-content {
                 margin-left: 5rem;
-                margin-right: 0;
-                max-width: calc(100% - 7rem);
-            }
-
-            .timeline-number {
-                left: 30px;
-                width: 100px;
-                height: 70px;
             }
         }
 
-        /* Tablet (768px - 1023px) */
-        @media (max-width: 1023px) {
+        /* Tablet Landscape (768px - 991px) */
+        @media (min-width: 768px) and (max-width: 991px) {
             .navbar {
                 width: calc(100% - 2rem);
                 padding: 0.75rem 1.5rem;
@@ -1935,19 +1659,25 @@
                 padding: 6rem 0 3rem;
             }
 
+            .hero-container {
+                grid-template-columns: 1fr;
+                gap: 3rem;
+                text-align: center;
+            }
+
             .hero-eye-container {
                 width: 300px;
                 height: 300px;
             }
 
             .hero-iris {
-                width: 140px;
-                height: 140px;
+                width: 130px;
+                height: 130px;
             }
 
             .hero-pupil {
-                width: 50px;
-                height: 50px;
+                width: 45px;
+                height: 45px;
             }
 
             .hero-logo-png {
@@ -1964,16 +1694,14 @@
                 padding: 2rem;
             }
 
-            .pricing-grid {
-                grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            .tech-icon {
+                width: 70px;
+                height: 70px;
             }
 
-            .pricing-card.featured {
-                transform: none;
-            }
-
-            .pricing-card.featured:hover {
-                transform: translateY(-8px);
+            .tech-icon svg {
+                width: 35px;
+                height: 35px;
             }
 
             .footer-content {
@@ -1981,23 +1709,28 @@
                 gap: 3rem;
             }
 
+            .timeline::before {
+                left: 25px;
+            }
+
+            .timeline-number {
+                left: 25px;
+                width: 60px;
+                height: 60px;
+                font-size: var(--font-base);
+            }
+
             .timeline-content {
                 margin-left: 4rem;
                 padding: 2rem;
             }
-
-            .timeline-number {
-                width: 90px;
-                height: 60px;
-                font-size: var(--font-xl);
-            }
         }
 
-        /* Mobile Large (481px - 767px) */
-        @media (max-width: 767px) {
+        /* Tablet Portrait (576px - 767px) */
+        @media (min-width: 576px) and (max-width: 767px) {
             .navbar {
                 width: calc(100% - 1.5rem);
-                padding: 0.5rem 1rem;
+                padding: 0.6rem 1.2rem;
                 top: 1rem;
             }
 
@@ -2022,8 +1755,8 @@
             }
 
             .hero-eye-container {
-                width: 260px;
-                height: 260px;
+                width: 280px;
+                height: 280px;
             }
 
             .hero-iris {
@@ -2032,8 +1765,8 @@
             }
 
             .hero-pupil {
-                width: 45px;
-                height: 45px;
+                width: 42px;
+                height: 42px;
             }
 
             .hero-logo-png {
@@ -2060,30 +1793,29 @@
                 height: 30px;
             }
 
-            .pricing-grid {
-                grid-template-columns: 1fr;
-                gap: 1.5rem;
-            }
-
             .footer-content {
                 grid-template-columns: 1fr;
-                gap: 2rem;
+                gap: 2.5rem;
             }
 
             .timeline {
                 margin: 3rem auto 0;
             }
 
-            .timeline-content {
-                margin-left: 3rem;
-                padding: 1.5rem;
-                max-width: calc(100% - 4rem);
+            .timeline::before {
+                left: 20px;
             }
 
             .timeline-number {
-                width: 80px;
-                height: 55px;
-                font-size: var(--font-lg);
+                left: 20px;
+                width: 50px;
+                height: 50px;
+                font-size: var(--font-sm);
+            }
+
+            .timeline-content {
+                margin-left: 3.5rem;
+                padding: 1.8rem;
             }
 
             .modal-content {
@@ -2092,38 +1824,34 @@
             }
         }
 
-        /* Mobile Medium (376px - 480px) */
-        @media (max-width: 480px) {
+        /* Mobile Large (480px - 575px) */
+        @media (min-width: 480px) and (max-width: 575px) {
             .navbar {
                 width: calc(100% - 1rem);
-                padding: 0.5rem 0.75rem;
-                top: 0.5rem;
-            }
-
-            .nav-container {
-                padding: 0;
+                padding: 0.5rem 1rem;
+                top: 0.8rem;
             }
 
             .section-container {
-                padding: 0 1rem;
+                padding: 0 1.2rem;
             }
 
             .hero {
-                padding: 4rem 0 2rem;
+                padding: 4.5rem 0 2rem;
             }
 
             .hero-title {
-                font-size: clamp(2rem, 8vw, 2.5rem);
+                font-size: clamp(2rem, 8vw, 2.8rem);
             }
 
             .hero-eye-container {
-                width: 220px;
-                height: 220px;
+                width: 260px;
+                height: 260px;
             }
 
             .hero-iris {
-                width: 100px;
-                height: 100px;
+                width: 110px;
+                height: 110px;
             }
 
             .hero-pupil {
@@ -2137,6 +1865,93 @@
             }
 
             .features-visual {
+                height: 320px;
+                padding: 1.2rem;
+            }
+
+            .tech-icon {
+                width: 55px;
+                height: 55px;
+            }
+
+            .tech-icon svg {
+                width: 28px;
+                height: 28px;
+            }
+
+            .modal-content {
+                padding: 1.8rem;
+                margin: 0.8rem;
+            }
+
+            .logo-container {
+                width: 42px;
+                height: 42px;
+            }
+
+            .logo-icon {
+                width: 42px;
+                height: 28px;
+            }
+
+            .timeline-number {
+                left: 18px;
+                width: 45px;
+                height: 45px;
+                font-size: var(--font-xs);
+            }
+
+            .timeline-content {
+                margin-left: 3rem;
+                padding: 1.5rem;
+            }
+
+            .section-title {
+                font-size: clamp(1.8rem, 7vw, 2.5rem);
+            }
+        }
+
+        /* Mobile Medium (375px - 479px) */
+        @media (min-width: 375px) and (max-width: 479px) {
+            .navbar {
+                width: calc(100% - 0.8rem);
+                padding: 0.5rem 0.8rem;
+                top: 0.6rem;
+            }
+
+            .section-container {
+                padding: 0 1rem;
+            }
+
+            .hero {
+                padding: 4rem 0 1.5rem;
+            }
+
+            .hero-title {
+                font-size: clamp(1.8rem, 8vw, 2.4rem);
+            }
+
+            .hero-eye-container {
+                width: 240px;
+                height: 240px;
+            }
+
+            .hero-iris {
+                width: 100px;
+                height: 100px;
+            }
+
+            .hero-pupil {
+                width: 38px;
+                height: 38px;
+            }
+
+            .hero-logo-png {
+                width: 18px;
+                height: 18px;
+            }
+
+            .features-visual {
                 height: 300px;
                 padding: 1rem;
             }
@@ -2147,8 +1962,24 @@
             }
 
             .tech-icon svg {
-                width: 24px;
-                height: 24px;
+                width: 25px;
+                height: 25px;
+            }
+
+            .timeline::before {
+                left: 15px;
+            }
+
+            .timeline-number {
+                left: 15px;
+                width: 40px;
+                height: 40px;
+                font-size: 0.8rem;
+            }
+
+            .timeline-content {
+                margin-left: 2.5rem;
+                padding: 1.3rem;
             }
 
             .modal-content {
@@ -2157,36 +1988,43 @@
             }
 
             .logo-container {
-                width: 40px;
-                height: 40px;
+                width: 38px;
+                height: 38px;
             }
 
             .logo-icon {
-                width: 40px;
-                height: 26px;
-            }
-
-            .logo-png {
-                width: 22px;
-                height: 22px;
-            }
-
-            .timeline-number {
-                width: 70px;
-                height: 50px;
-                font-size: var(--font-base);
+                width: 38px;
+                height: 25px;
             }
 
             .section-title {
-                font-size: clamp(1.5rem, 6vw, 2.5rem);
+                font-size: clamp(1.6rem, 8vw, 2.2rem);
             }
         }
 
-        /* Mobile Small (320px - 375px) */
-        @media (max-width: 375px) {
+        /* Mobile Small (320px - 374px) */
+        @media (min-width: 320px) and (max-width: 374px) {
+            .navbar {
+                width: calc(100% - 0.6rem);
+                padding: 0.4rem 0.6rem;
+                top: 0.5rem;
+            }
+
+            .section-container {
+                padding: 0 0.8rem;
+            }
+
+            .hero {
+                padding: 3.5rem 0 1.5rem;
+            }
+
+            .hero-title {
+                font-size: clamp(1.6rem, 9vw, 2rem);
+            }
+
             .hero-eye-container {
-                width: 200px;
-                height: 200px;
+                width: 220px;
+                height: 220px;
             }
 
             .hero-iris {
@@ -2199,38 +2037,187 @@
                 height: 35px;
             }
 
-            .timeline-number {
-                width: 60px;
-                height: 45px;
-                font-size: var(--font-sm);
+            .hero-logo-png {
+                width: 16px;
+                height: 16px;
             }
 
             .features-visual {
                 height: 280px;
+                padding: 0.8rem;
             }
 
             .tech-icon {
                 width: 45px;
                 height: 45px;
             }
-        }
 
-        /* Extra Small Mobile (below 320px) */
-        @media (max-width: 319px) {
-            .hero-eye-container {
-                width: 180px;
-                height: 180px;
+            .tech-icon svg {
+                width: 22px;
+                height: 22px;
+            }
+
+            .timeline::before {
+                left: 12px;
             }
 
             .timeline-number {
-                width: 55px;
-                height: 40px;
-                font-size: var(--font-xs);
+                left: 12px;
+                width: 35px;
+                height: 35px;
+                font-size: 0.7rem;
+            }
+
+            .timeline-content {
+                margin-left: 2.2rem;
+                padding: 1.2rem;
+            }
+
+            .logo-container {
+                width: 35px;
+                height: 35px;
+            }
+
+            .logo-icon {
+                width: 35px;
+                height: 23px;
+            }
+
+            .section-title {
+                font-size: clamp(1.4rem, 9vw, 1.8rem);
+            }
+        }
+
+        /* Mobile Extra Small (280px - 319px) */
+        @media (max-width: 319px) {
+            .navbar {
+                width: calc(100% - 0.4rem);
+                padding: 0.3rem 0.5rem;
+                top: 0.3rem;
+            }
+
+            .section-container {
+                padding: 0 0.6rem;
+            }
+
+            .hero {
+                padding: 3rem 0 1.2rem;
+            }
+
+            .hero-title {
+                font-size: clamp(1.4rem, 10vw, 1.8rem);
+            }
+
+            .hero-eye-container {
+                width: 200px;
+                height: 200px;
+            }
+
+            .hero-iris {
+                width: 80px;
+                height: 80px;
+            }
+
+            .hero-pupil {
+                width: 32px;
+                height: 32px;
             }
 
             .features-visual {
-                height: 250px;
-                padding: 0.75rem;
+                height: 260px;
+                padding: 0.6rem;
+            }
+
+            .tech-icon {
+                width: 40px;
+                height: 40px;
+            }
+
+            .timeline::before {
+                left: 10px;
+            }
+
+            .timeline-number {
+                left: 10px;
+                width: 32px;
+                height: 32px;
+                font-size: 0.6rem;
+            }
+
+            .timeline-content {
+                margin-left: 2rem;
+                padding: 1rem;
+            }
+
+            .logo-container {
+                width: 32px;
+                height: 32px;
+            }
+
+            .logo-icon {
+                width: 32px;
+                height: 20px;
+            }
+
+            .section-title {
+                font-size: clamp(1.2rem, 10vw, 1.6rem);
+            }
+        }
+
+        /* High DPI / Retina Displays */
+        @media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi), (min-resolution: 2dppx) {
+            .tech-icon,
+            .feature-icon {
+                image-rendering: -webkit-optimize-contrast;
+                image-rendering: crisp-edges;
+            }
+        }
+
+        /* Dark mode adjustments for mobile */
+        @media (max-width: 768px) {
+            [data-theme="dark"] .orb-1,
+            [data-theme="dark"] .orb-2,
+            [data-theme="dark"] .orb-3 {
+                opacity: 0.2;
+                filter: blur(60px);
+            }
+        }
+
+        /* Print styles */
+        @media print {
+            .navbar,
+            .mobile-menu,
+            .bg-effects,
+            .scroll-progress,
+            .theme-toggle,
+            .loading-screen {
+                display: none !important;
+            }
+            
+            .main-content {
+                padding: 0 !important;
+            }
+            
+            * {
+                color: black !important;
+                background: white !important;
+            }
+        }
+
+        /* Landscape orientation adjustments for mobile */
+        @media (max-width: 767px) and (orientation: landscape) {
+            .hero {
+                min-height: 80vh;
+                padding: 4rem 0 2rem;
+            }
+            
+            .hero-eye-container {
+                width: 240px;
+                height: 240px;
+            }
+            
+            .timeline-content {
+                padding: 1.5rem;
             }
         }
 
@@ -2270,14 +2257,24 @@
         ::-webkit-scrollbar-thumb:hover {
             background: var(--primary-dark);
         }
+
+        /* Reduced motion preferences */
+        @media (prefers-reduced-motion: reduce) {
+            *,
+            *::before,
+            *::after {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+                scroll-behavior: auto !important;
+            }
+        }
     </style>
 </head>
 <body>
-    <!-- Loading Screen with Enhanced Eye -->
+    <!-- Loading Screen with Clean Eye -->
     <div class="loading-screen" id="loadingScreen">
-        <div class="loading-eye">
-            <div class="loading-lashes"></div>
-        </div>
+        <div class="loading-eye"></div>
         <div class="loading-text">Initializing Lumina AI...</div>
     </div>
 
@@ -2299,11 +2296,10 @@
                     <div class="logo-icon">
                         <!-- Replace this img src with your PNG logo -->
                         <img src="lumina-logo.png" alt="Lumina AI" class="logo-png" onerror="this.style.display='none';">
-                        <!-- Enhanced eye design fallback with lashes -->
+                        <!-- Clean eye design fallback without lashes -->
                         <div class="logo-eye">
                             <div class="logo-pupil"></div>
                         </div>
-                        <div class="logo-lashes"></div>
                     </div>
                 </div>
                 <span class="text-gradient">Lumina AI</span>
@@ -2314,7 +2310,6 @@
                 <li><a href="#about" class="nav-link">About</a></li>
                 <li><a href="#features" class="nav-link">Features</a></li>
                 <li><a href="#how-it-works" class="nav-link">How It Works</a></li>
-                <li><a href="#pricing" class="nav-link">Pricing</a></li>
             </ul>
 
             <div class="nav-actions">
@@ -2345,7 +2340,6 @@
                 <a href="#about" class="nav-link">About</a>
                 <a href="#features" class="nav-link">Features</a>
                 <a href="#how-it-works" class="nav-link">How It Works</a>
-                <a href="#pricing" class="nav-link">Pricing</a>
                 <button class="btn btn-outline" onclick="openModal('loginModal')">Sign In</button>
                 <button class="btn btn-primary" onclick="openModal('signupModal')">Get Started</button>
             </div>
@@ -2394,7 +2388,6 @@
             <div class="hero-visual">
                 <div class="hero-eye-container">
                     <div class="hero-eye">
-                        <div class="hero-lashes"></div>
                         <div class="hero-iris">
                             <div class="hero-pupil">
                                 <!-- Replace this img src with your main Lumina PNG logo -->
@@ -2527,8 +2520,10 @@
                 </p>
             </div>
 
+            <!-- FIXED Timeline - Left-aligned with proper spacing -->
             <div class="timeline">
                 <div class="timeline-item">
+                    <div class="timeline-number">1</div>
                     <div class="timeline-content fade-in">
                         <h3 class="feature-title">Camera Access</h3>
                         <p class="feature-description">
@@ -2536,13 +2531,10 @@
                             your eyes using advanced facial landmark detection technology with real-time processing capabilities.
                         </p>
                     </div>
-                    <div class="timeline-number">
-                        <div class="timeline-lashes"></div>
-                        1
-                    </div>
                 </div>
 
                 <div class="timeline-item">
+                    <div class="timeline-number">2</div>
                     <div class="timeline-content fade-in">
                         <h3 class="feature-title">AI Analysis</h3>
                         <p class="feature-description">
@@ -2550,23 +2542,16 @@
                             using advanced computer vision and machine learning algorithms for precise health insights.
                         </p>
                     </div>
-                    <div class="timeline-number">
-                        <div class="timeline-lashes"></div>
-                        2
-                    </div>
                 </div>
 
                 <div class="timeline-item">
+                    <div class="timeline-number">3</div>
                     <div class="timeline-content fade-in">
                         <h3 class="feature-title">Smart Insights</h3>
                         <p class="feature-description">
                             Receive personalized break recommendations, eye exercises, and comprehensive health 
                             insights based on your unique usage patterns and behavioral data analysis.
                         </p>
-                    </div>
-                    <div class="timeline-number">
-                        <div class="timeline-lashes"></div>
-                        3
                     </div>
                 </div>
             </div>
@@ -2750,93 +2735,6 @@
         </div>
     </section>
 
-    <!-- Pricing Section -->
-    <section class="section" id="pricing">
-        <div class="section-container">
-            <div class="section-header fade-in">
-                <div class="section-badge">
-                    <svg class="professional-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
-                    </svg>
-                    Transparent Pricing
-                </div>
-                <h2 class="section-title">
-                    Choose Your <span class="text-gradient">Perfect Plan</span>
-                </h2>
-                <p class="section-subtitle">
-                    Start free, upgrade when you're ready. All plans include privacy-first processing 
-                    and local data storage for maximum security and performance.
-                </p>
-            </div>
-
-            <div class="pricing-toggle fade-in">
-                <span class="toggle-label active" id="monthlyLabel">Monthly</span>
-                <div class="toggle-switch" id="pricingToggle">
-                    <div class="toggle-knob"></div>
-                </div>
-                <span class="toggle-label" id="yearlyLabel">Yearly <span style="color: var(--success); font-weight: 700;">Save 20%</span></span>
-            </div>
-
-            <div class="pricing-grid">
-                <div class="pricing-card fade-in hover-lift">
-                    <div class="pricing-plan">Free</div>
-                    <div class="pricing-price">₹0</div>
-                    <div class="pricing-period">Forever free</div>
-                    <ul class="pricing-features">
-                        <li>Basic blink detection</li>
-                        <li>Simple break reminders</li>
-                        <li>7-day health history</li>
-                        <li>Basic eye exercises</li>
-                        <li>Local data storage</li>
-                        <li>Community support</li>
-                    </ul>
-                    <button class="btn btn-outline" onclick="openModal('signupModal')" style="width: 100%;">
-                        Get Started Free
-                    </button>
-                </div>
-
-                <div class="pricing-card featured fade-in hover-lift">
-                    <div class="pricing-plan">Pro</div>
-                    <div class="pricing-price" id="proPrice">₹299</div>
-                    <div class="pricing-period" id="proPeriod">per month</div>
-                    <ul class="pricing-features">
-                        <li>Advanced AI fatigue detection</li>
-                        <li>Smart break optimization</li>
-                        <li>Unlimited health history</li>
-                        <li>Premium eye exercises</li>
-                        <li>Cloud sync across devices</li>
-                        <li>Advanced analytics & insights</li>
-                        <li>Custom notification sounds</li>
-                        <li>Priority email support</li>
-                        <li>Export health reports</li>
-                    </ul>
-                    <button class="btn btn-primary" onclick="openModal('signupModal')" style="width: 100%;">
-                        Start Pro Trial
-                    </button>
-                </div>
-
-                <div class="pricing-card fade-in hover-lift">
-                    <div class="pricing-plan">Teams</div>
-                    <div class="pricing-price" id="teamPrice">₹999</div>
-                    <div class="pricing-period" id="teamPeriod">per month</div>
-                    <ul class="pricing-features">
-                        <li>Everything in Pro</li>
-                        <li>Team dashboard & analytics</li>
-                        <li>Employee wellness reports</li>
-                        <li>Admin controls & policies</li>
-                        <li>API access & integrations</li>
-                        <li>Custom branding options</li>
-                        <li>24/7 dedicated support</li>
-                        <li>On-site training available</li>
-                    </ul>
-                    <button class="btn btn-outline" onclick="openModal('signupModal')" style="width: 100%;">
-                        Contact Sales
-                    </button>
-                </div>
-            </div>
-        </div>
-    </section>
-
     <!-- Footer -->
     <footer class="footer">
         <div class="footer-container">
@@ -2849,7 +2747,6 @@
                                 <div class="logo-eye">
                                     <div class="logo-pupil"></div>
                                 </div>
-                                <div class="logo-lashes"></div>
                             </div>
                         </div>
                         <span class="text-gradient">Lumina AI</span>
@@ -2874,7 +2771,7 @@
                                 <polyline points="22,6 12,13 2,6"/>
                             </svg>
                         </a>
-                                                <a href="https://twitter.com/luminaai" class="social-link" aria-label="X Twitter" target="_blank" rel="noopener noreferrer">
+                        <a href="https://twitter.com/luminaai" class="social-link" aria-label="X Twitter" target="_blank" rel="noopener noreferrer">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                 <path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z"/>
                             </svg>
@@ -2893,7 +2790,6 @@
                     <h4>Product</h4>
                     <ul class="footer-links">
                         <li><a href="#features">Features</a></li>
-                        <li><a href="#pricing">Pricing</a></li>
                         <li><a href="#how-it-works">How It Works</a></li>
                         <li><a href="#">API Documentation</a></li>
                         <li><a href="#">System Status</a></li>
@@ -2975,7 +2871,7 @@
             <button class="modal-close" onclick="closeModal('signupModal')">&times;</button>
             <h2 class="modal-title">Start Your Free Trial</h2>
             
-            <div class="social-auth">
+                      <div class="social-auth">
                 <button class="social-btn" onclick="handleSocialLogin('google')">
                     <svg width="18" height="18" viewBox="0 0 24 24">
                         <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
@@ -3015,15 +2911,8 @@
 
     <script>
         // Global Variables
-        let isYearlyPricing = false;
         let currentTheme = localStorage.getItem('theme') || 
             (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
-        
-        // Pricing Data
-        const pricingData = {
-            monthly: { pro: 299, team: 999 },
-            yearly: { pro: 239, team: 799 } // 20% discount
-        };
 
         // Initialize App
         document.addEventListener('DOMContentLoaded', function() {
@@ -3042,9 +2931,6 @@
             // Initialize scroll effects
             setupScrollEffects();
 
-            // Initialize pricing toggle
-            setupPricingToggle();
-
             // Initialize mobile menu
             setupMobileMenu();
 
@@ -3056,6 +2942,12 @@
 
             // Initialize active nav links
             setupActiveNavLinks();
+
+            // Performance monitoring
+            initPerformanceMonitoring();
+
+            // Setup accessibility
+            setupAccessibility();
         }
 
         // Theme Management - FIXED
@@ -3111,7 +3003,7 @@
             updateActiveLink(); // Initial call
         }
 
-        // Mouse Tracking for Interactive Elements
+        // Enhanced Mouse Tracking for Interactive Elements
         function setupMouseTracking() {
             const logos = document.querySelectorAll('.logo-pupil');
             
@@ -3120,6 +3012,8 @@
                 const mouseY = e.clientY;
                 
                 logos.forEach(logo => {
+                    if (!logo) return;
+                    
                     const rect = logo.getBoundingClientRect();
                     const logoX = rect.left + rect.width / 2;
                     const logoY = rect.top + rect.height / 2;
@@ -3149,7 +3043,7 @@
             }
         }
 
-        // Scroll Effects - FIXED
+        // Enhanced Scroll Effects - FIXED
         function setupScrollEffects() {
             const navbar = document.getElementById('navbar');
             const scrollProgress = document.getElementById('scrollProgress');
@@ -3189,41 +3083,7 @@
             updateScrollEffects(); // Initial call
         }
 
-        // Pricing Toggle
-        function setupPricingToggle() {
-            const toggle = document.getElementById('pricingToggle');
-            const monthlyLabel = document.getElementById('monthlyLabel');
-            const yearlyLabel = document.getElementById('yearlyLabel');
-
-            if (toggle && monthlyLabel && yearlyLabel) {
-                toggle.addEventListener('click', function() {
-                    isYearlyPricing = !isYearlyPricing;
-                    toggle.classList.toggle('active');
-                    
-                    monthlyLabel.classList.toggle('active', !isYearlyPricing);
-                    yearlyLabel.classList.toggle('active', isYearlyPricing);
-
-                    updatePricing();
-                });
-            }
-        }
-
-        function updatePricing() {
-            const pricing = isYearlyPricing ? pricingData.yearly : pricingData.monthly;
-            const period = isYearlyPricing ? 'per year' : 'per month';
-
-            const proPrice = document.getElementById('proPrice');
-            const proPeriod = document.getElementById('proPeriod');
-            const teamPrice = document.getElementById('teamPrice');
-            const teamPeriod = document.getElementById('teamPeriod');
-
-            if (proPrice) proPrice.textContent = '₹' + pricing.pro;
-            if (proPeriod) proPeriod.textContent = period;
-            if (teamPrice) teamPrice.textContent = '₹' + pricing.team;
-            if (teamPeriod) teamPeriod.textContent = period;
-        }
-
-        // Mobile Menu
+        // Enhanced Mobile Menu
         function setupMobileMenu() {
             const mobileMenuBtn = document.getElementById('mobileMenuBtn');
             const mobileMenu = document.getElementById('mobileMenu');
@@ -3243,10 +3103,19 @@
                         document.body.style.overflow = '';
                     }
                 });
+
+                // Close on outside click
+                document.addEventListener('click', function(e) {
+                    if (!mobileMenu.contains(e.target) && !mobileMenuBtn.contains(e.target)) {
+                        mobileMenuBtn.classList.remove('active');
+                        mobileMenu.classList.remove('active');
+                        document.body.style.overflow = '';
+                    }
+                });
             }
         }
 
-        // Animations
+        // Enhanced Animations with Intersection Observer
         function setupAnimations() {
             const observerOptions = {
                 threshold: 0.1,
@@ -3257,6 +3126,18 @@
                 entries.forEach(entry => {
                     if (entry.isIntersecting) {
                         entry.target.classList.add('visible');
+                        
+                        // Add staggered animation for timeline items
+                        if (entry.target.classList.contains('timeline-content')) {
+                            const timelineItems = document.querySelectorAll('.timeline-content');
+                            timelineItems.forEach((item, index) => {
+                                if (item === entry.target) {
+                                    setTimeout(() => {
+                                        item.classList.add('visible');
+                                    }, index * 200);
+                                }
+                            });
+                        }
                     }
                 });
             }, observerOptions);
@@ -3266,12 +3147,20 @@
             });
         }
 
-        // Modal Management
+        // Advanced Modal Management
         function openModal(modalId) {
             const modal = document.getElementById(modalId);
             if (modal) {
                 modal.classList.add('active');
                 document.body.style.overflow = 'hidden';
+                
+                // Focus on first input
+                setTimeout(() => {
+                    const firstInput = modal.querySelector('input');
+                    if (firstInput) {
+                        firstInput.focus();
+                    }
+                }, 300);
             }
         }
 
@@ -3280,6 +3169,10 @@
             if (modal) {
                 modal.classList.remove('active');
                 document.body.style.overflow = '';
+                
+                // Clear any messages
+                const messages = modal.querySelectorAll('.message');
+                messages.forEach(msg => msg.remove());
             }
         }
 
@@ -3288,7 +3181,7 @@
             setTimeout(() => openModal(newModalId), 200);
         }
 
-        // Show Success/Error Message
+        // Enhanced Message System
         function showMessage(message, type = 'success') {
             // Remove existing messages
             document.querySelectorAll('.message').forEach(msg => msg.remove());
@@ -3306,22 +3199,45 @@
                 modalContent.insertBefore(messageEl, modalContent.querySelector('h2').nextSibling);
                 
                 // Auto remove after 5 seconds
-                setTimeout(() => messageEl.remove(), 5000);
+                setTimeout(() => {
+                    if (messageEl.parentNode) {
+                        messageEl.remove();
+                    }
+                }, 5000);
             }
         }
 
-        // Authentication Handlers - UPDATED to redirect to dashboard
+        // Enhanced Authentication Handlers - UPDATED to redirect to dashboard
         function handleLogin(event) {
             event.preventDefault();
             const submitBtn = event.target.querySelector('button[type="submit"]');
             const originalText = submitBtn.innerHTML;
+            const formData = new FormData(event.target);
             
             submitBtn.innerHTML = '<span>⏳</span> Signing In...';
             submitBtn.disabled = true;
 
+            // Basic form validation
+            const email = event.target.querySelector('input[type="email"]').value;
+            const password = event.target.querySelector('input[type="password"]').value;
+
+            if (!email || !password) {
+                showMessage('Please fill in all fields', 'error');
+                submitBtn.innerHTML = originalText;
+                submitBtn.disabled = false;
+                return;
+            }
+
             // Simulate API call
             setTimeout(() => {
                 showMessage('Successfully signed in! Redirecting to dashboard...', 'success');
+                
+                // Store user data
+                localStorage.setItem('user', JSON.stringify({
+                    email: email,
+                    name: email.split('@')[0],
+                    loginTime: new Date().toISOString()
+                }));
                 
                 setTimeout(() => {
                     closeModal('loginModal');
@@ -3342,9 +3258,35 @@
             submitBtn.innerHTML = '<span>⏳</span> Creating Account...';
             submitBtn.disabled = true;
 
+            // Basic form validation
+            const name = event.target.querySelector('input[type="text"]').value;
+            const email = event.target.querySelector('input[type="email"]').value;
+            const password = event.target.querySelector('input[type="password"]').value;
+
+            if (!name || !email || !password) {
+                showMessage('Please fill in all fields', 'error');
+                submitBtn.innerHTML = originalText;
+                submitBtn.disabled = false;
+                return;
+            }
+
+            if (password.length < 6) {
+                showMessage('Password must be at least 6 characters long', 'error');
+                submitBtn.innerHTML = originalText;
+                submitBtn.disabled = false;
+                return;
+            }
+
             // Simulate API call
             setTimeout(() => {
                 showMessage('Account created successfully! Redirecting to dashboard...', 'success');
+                
+                // Store user data
+                localStorage.setItem('user', JSON.stringify({
+                    email: email,
+                    name: name,
+                    signupTime: new Date().toISOString()
+                }));
                 
                 setTimeout(() => {
                     closeModal('signupModal');
@@ -3361,15 +3303,29 @@
             console.log('Social login with:', provider);
             showMessage(`Redirecting to ${provider} authentication...`, 'success');
             
+            // Track social login attempt
+            trackEvent('Social_Login_Attempt', {
+                provider: provider,
+                timestamp: new Date().toISOString()
+            });
+            
             // Simulate OAuth redirect
             setTimeout(() => {
+                // Store demo user data
+                localStorage.setItem('user', JSON.stringify({
+                    email: `demo@${provider}.com`,
+                    name: 'Demo User',
+                    provider: provider,
+                    loginTime: new Date().toISOString()
+                }));
+                
                 // In real implementation, redirect to OAuth provider
                 // window.location.href = `/auth/${provider}`;
                 window.location.href = 'dashboard.html';
             }, 2000);
         }
 
-        // Utility Functions
+        // Enhanced Utility Functions
         function scrollToSection(sectionId) {
             const element = document.getElementById(sectionId);
             if (element) {
@@ -3379,13 +3335,22 @@
                     top: offsetTop,
                     behavior: 'smooth'
                 });
+
+                // Track navigation
+                trackEvent('Section_Navigate', {
+                    section: sectionId,
+                    method: 'smooth_scroll'
+                });
             }
         }
 
-        // Event Listeners
+        // Enhanced Event Listeners
         document.addEventListener('click', function(e) {
             if (e.target.id === 'themeToggle' || e.target.closest('#themeToggle')) {
                 toggleTheme();
+                trackEvent('Theme_Toggle', {
+                    new_theme: currentTheme === 'light' ? 'dark' : 'light'
+                });
             }
         });
 
@@ -3393,10 +3358,14 @@
         document.addEventListener('click', function(e) {
             if (e.target.classList.contains('modal')) {
                 closeModal(e.target.id);
+                trackEvent('Modal_Close', {
+                    modal: e.target.id,
+                    method: 'outside_click'
+                });
             }
         });
 
-        // Smooth scrolling for anchor links
+        // Enhanced smooth scrolling for anchor links
         document.addEventListener('click', function(e) {
             if (e.target.matches('a[href^="#"]')) {
                 e.preventDefault();
@@ -3407,9 +3376,10 @@
             }
         });
 
-        // Keyboard navigation
+        // Enhanced keyboard navigation
         document.addEventListener('keydown', function(e) {
             if (e.key === 'Escape') {
+                // Close any active modals
                 document.querySelectorAll('.modal.active').forEach(modal => {
                     closeModal(modal.id);
                 });
@@ -3423,11 +3393,429 @@
                     document.body.style.overflow = '';
                 }
             }
+
+            // Keyboard shortcuts
+            if ((e.ctrlKey || e.metaKey) && !e.shiftKey && !e.altKey) {
+                switch(e.key.toLowerCase()) {
+                    case 'k':
+                        e.preventDefault();
+                        openModal('signupModal');
+                        trackEvent('Keyboard_Shortcut', { action: 'open_signup' });
+                        break;
+                    case 'l':
+                        e.preventDefault();
+                        openModal('loginModal');
+                        trackEvent('Keyboard_Shortcut', { action: 'open_login' });
+                        break;
+                }
+            }
         });
 
-        // Performance optimization
+        // Performance optimization and monitoring
+        function initPerformanceMonitoring() {
+            // Monitor Core Web Vitals
+            if ('PerformanceObserver' in window) {
+                const observer = new PerformanceObserver((list) => {
+                    for (const entry of list.getEntries()) {
+                        switch (entry.entryType) {
+                            case 'largest-contentful-paint':
+                                trackEvent('Core_Web_Vital', {
+                                    metric: 'LCP',
+                                    value: Math.round(entry.startTime),
+                                    rating: entry.startTime < 2500 ? 'good' : entry.startTime < 4000 ? 'needs-improvement' : 'poor'
+                                });
+                                break;
+                            case 'first-input':
+                                const fid = entry.processingStart - entry.startTime;
+                                trackEvent('Core_Web_Vital', {
+                                    metric: 'FID',
+                                    value: Math.round(fid),
+                                    rating: fid < 100 ? 'good' : fid < 300 ? 'needs-improvement' : 'poor'
+                                });
+                                break;
+                            case 'layout-shift':
+                                if (!entry.hadRecentInput) {
+                                    trackEvent('Core_Web_Vital', {
+                                        metric: 'CLS',
+                                        value: entry.value,
+                                        rating: entry.value < 0.1 ? 'good' : entry.value < 0.25 ? 'needs-improvement' : 'poor'
+                                    });
+                                }
+                                break;
+                        }
+                    }
+                });
+
+                observer.observe({
+                    entryTypes: ['largest-contentful-paint', 'first-input', 'layout-shift']
+                });
+            }
+
+            // Monitor page load performance
+            window.addEventListener('load', () => {
+                const navigation = performance.getEntriesByType('navigation')[0];
+                if (navigation) {
+                    trackEvent('Page_Load_Performance', {
+                        dom_content_loaded: Math.round(navigation.domContentLoadedEventEnd - navigation.navigationStart),
+                        load_complete: Math.round(navigation.loadEventEnd - navigation.navigationStart),
+                        first_byte: Math.round(navigation.responseStart - navigation.navigationStart),
+                        dns_lookup: Math.round(navigation.domainLookupEnd - navigation.domainLookupStart),
+                        connection_time: Math.round(navigation.connectEnd - navigation.connectStart)
+                    });
+                }
+            });
+        }
+
+        // Enhanced Accessibility Features
+        function setupAccessibility() {
+            // Skip to main content link
+            const skipLink = document.createElement('a');
+            skipLink.href = '#home';
+            skipLink.className = 'skip-link';
+            skipLink.textContent = 'Skip to main content';
+            skipLink.style.cssText = `
+                position: absolute;
+                top: -40px;
+                left: 6px;
+                background: var(--primary);
+                color: white;
+                padding: 8px 12px;
+                text-decoration: none;
+                border-radius: 4px;
+                z-index: 10000;
+                transition: top 0.3s;
+                font-weight: 600;
+            `;
+            
+            skipLink.addEventListener('focus', function() {
+                this.style.top = '6px';
+            });
+            
+            skipLink.addEventListener('blur', function() {
+                this.style.top = '-40px';
+            });
+            
+            document.body.insertBefore(skipLink, document.body.firstChild);
+
+            // Enhanced keyboard navigation for modals
+            document.addEventListener('keydown', function(e) {
+                const activeModal = document.querySelector('.modal.active');
+                if (activeModal && e.key === 'Tab') {
+                    const focusableElements = activeModal.querySelectorAll(
+                        'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+                    );
+                    const firstElement = focusableElements[0];
+                    const lastElement = focusableElements[focusableElements.length - 1];
+
+                    if (e.shiftKey) {
+                        if (document.activeElement === firstElement) {
+                            lastElement.focus();
+                            e.preventDefault();
+                        }
+                    } else {
+                        if (document.activeElement === lastElement) {
+                            firstElement.focus();
+                            e.preventDefault();
+                        }
+                    }
+                }
+            });
+
+            // Screen reader announcements
+            const announcer = document.createElement('div');
+            announcer.setAttribute('aria-live', 'polite');
+            announcer.setAttribute('aria-atomic', 'true');
+            announcer.style.cssText = `
+                position: absolute;
+                left: -10000px;
+                width: 1px;
+                height: 1px;
+                overflow: hidden;
+            `;
+            document.body.appendChild(announcer);
+
+            window.announceToScreenReader = function(message) {
+                announcer.textContent = message;
+                setTimeout(() => {
+                    announcer.textContent = '';
+                }, 1000);
+            };
+        }
+
+        // Advanced Analytics Tracking
+        function trackEvent(eventName, properties = {}) {
+            // Enhanced event tracking with more context
+            const eventData = {
+                event: eventName,
+                properties: {
+                    ...properties,
+                    timestamp: new Date().toISOString(),
+                    page_url: window.location.href,
+                    user_agent: navigator.userAgent,
+                    viewport_width: window.innerWidth,
+                    viewport_height: window.innerHeight,
+                    screen_resolution: `${screen.width}x${screen.height}`,
+                    device_pixel_ratio: window.devicePixelRatio || 1,
+                    color_scheme: currentTheme,
+                    session_id: getOrCreateSessionId()
+                }
+            };
+
+            console.log('Event tracked:', eventData);
+            
+            // In production, send to your analytics service
+            if (typeof gtag !== 'undefined') {
+                gtag('event', eventName, properties);
+            }
+            
+            if (typeof mixpanel !== 'undefined') {
+                mixpanel.track(eventName, properties);
+            }
+
+            // Store in localStorage for debugging
+            const events = JSON.parse(localStorage.getItem('lumina_events') || '[]');
+            events.push(eventData);
+            // Keep only last 100 events
+            if (events.length > 100) {
+                events.shift();
+            }
+            localStorage.setItem('lumina_events', JSON.stringify(events));
+        }
+
+        function getOrCreateSessionId() {
+            let sessionId = sessionStorage.getItem('session_id');
+            if (!sessionId) {
+                sessionId = 'session_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+                sessionStorage.setItem('session_id', sessionId);
+            }
+            return sessionId;
+        }
+
+        // Track important user interactions
+        document.addEventListener('click', function(e) {
+            if (e.target.classList.contains('btn-primary')) {
+                trackEvent('CTA_Clicked', {
+                    button_text: e.target.textContent.trim(),
+                    page_section: e.target.closest('section')?.id || 'unknown',
+                    button_position: getElementPosition(e.target)
+                });
+            }
+            
+            if (e.target.classList.contains('nav-link')) {
+                trackEvent('Navigation_Used', {
+                    link_text: e.target.textContent.trim(),
+                    destination: e.target.getAttribute('href'),
+                    navigation_type: 'main_nav'
+                });
+            }
+
+            if (e.target.classList.contains('social-link')) {
+                trackEvent('Social_Link_Clicked', {
+                    platform: e.target.getAttribute('aria-label'),
+                    url: e.target.getAttribute('href')
+                });
+            }
+        });
+
+        function getElementPosition(element) {
+            const rect = element.getBoundingClientRect();
+            return {
+                x: Math.round(rect.left + rect.width / 2),
+                y: Math.round(rect.top + rect.height / 2),
+                viewport_percentage_x: Math.round((rect.left + rect.width / 2) / window.innerWidth * 100),
+                viewport_percentage_y: Math.round((rect.top + rect.height / 2) / window.innerHeight * 100)
+            };
+        }
+
+        // Enhanced scroll depth tracking
+        let maxScrollDepth = 0;
+        let scrollMilestones = [25, 50, 75, 100];
+        let trackedMilestones = new Set();
+
+        window.addEventListener('scroll', function() {
+            const scrollDepth = Math.round((window.scrollY / (document.body.scrollHeight - window.innerHeight)) * 100);
+            if (scrollDepth > maxScrollDepth) {
+                maxScrollDepth = scrollDepth;
+                
+                scrollMilestones.forEach(milestone => {
+                    if (scrollDepth >= milestone && !trackedMilestones.has(milestone)) {
+                        trackedMilestones.add(milestone);
+                        trackEvent('Scroll_Depth', {
+                            depth_percentage: milestone,
+                            time_to_reach: Date.now() - (window.pageStartTime || Date.now())
+                        });
+                    }
+                });
+            }
+        }, { passive: true });
+
+        // Track page visibility changes
+        document.addEventListener('visibilitychange', function() {
+            trackEvent('Page_Visibility_Change', {
+                visibility_state: document.visibilityState,
+                hidden: document.hidden
+            });
+        });
+
+        // Track page exit
+        let startTime = Date.now();
+        window.pageStartTime = startTime;
+
+        window.addEventListener('beforeunload', function() {
+            const timeOnPage = Math.round((Date.now() - startTime) / 1000);
+            const data = {
+                time_on_page_seconds: timeOnPage,
+                max_scroll_depth: maxScrollDepth,
+                interactions: document.querySelectorAll('*').length // Rough interaction count
+            };
+
+            // Use sendBeacon for reliable data transmission
+            if (navigator.sendBeacon) {
+                navigator.sendBeacon('/analytics/page-exit', JSON.stringify(data));
+            }
+            
+            trackEvent('Page_Exit', data);
+        });
+
+        // Service Worker Registration for PWA
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', function() {
+                navigator.serviceWorker.register('service-worker.js')
+                    .then(function(registration) {
+                        console.log('✅ ServiceWorker registration successful');
+                        trackEvent('PWA_ServiceWorker_Registered', {
+                            scope: registration.scope
+                        });
+                    })
+                    .catch(function(err) {
+                        console.log('❌ ServiceWorker registration failed: ', err);
+                        trackEvent('PWA_ServiceWorker_Failed', {
+                            error: err.message
+                        });
+                    });
+            });
+        }
+
+        // Enhanced Error Boundary
+        class ErrorBoundary {
+            constructor() {
+                this.errorCount = 0;
+                this.maxErrors = 5;
+                this.setupErrorHandling();
+            }
+
+            setupErrorHandling() {
+                window.addEventListener('error', (event) => {
+                    this.handleError(event.error, event.filename, event.lineno, event.colno, 'javascript');
+                });
+
+                window.addEventListener('unhandledrejection', (event) => {
+                    this.handleError(event.reason, 'Promise rejection', 0, 0, 'promise');
+                });
+            }
+
+            handleError(error, source, line, column, type) {
+                this.errorCount++;
+                
+                const errorInfo = {
+                    message: error?.message || String(error),
+                    source,
+                    line,
+                    column,
+                    stack: error?.stack,
+                    type,
+                    userAgent: navigator.userAgent,
+                    timestamp: new Date().toISOString(),
+                    url: window.location.href,
+                    count: this.errorCount
+                };
+
+                console.error('🚨 Application Error:', errorInfo);
+
+                // Track error in analytics
+                trackEvent('JavaScript_Error', {
+                    error_message: errorInfo.message,
+                    error_source: source,
+                    error_line: line,
+                    error_type: type,
+                    error_count: this.errorCount
+                });
+
+                // Show user-friendly error message if too many errors
+                if (this.errorCount >= this.maxErrors) {
+                    this.showErrorFallback();
+                }
+            }
+
+            showErrorFallback() {
+                const errorDiv = document.createElement('div');
+                errorDiv.innerHTML = `
+                    <div style="
+                        position: fixed;
+                        top: 0;
+                        left: 0;
+                        right: 0;
+                        bottom: 0;
+                        background: rgba(0,0,0,0.9);
+                        z-index: 10002;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        backdrop-filter: blur(10px);
+                    ">
+                        <div style="
+                            background: var(--bg-glass-strong);
+                            backdrop-filter: blur(20px);
+                            border: 1px solid var(--border);
+                            border-radius: 20px;
+                            padding: 3rem;
+                            max-width: 500px;
+                            text-align: center;
+                            box-shadow: 0 20px 60px var(--shadow-strong);
+                            margin: 2rem;
+                        ">
+                            <h3 style="color: var(--error); margin-bottom: 1rem; font-size: 1.5rem;">⚠️ Technical Difficulties</h3>
+                            <p style="color: var(--text-secondary); margin-bottom: 2rem; line-height: 1.6;">
+                                We're experiencing some technical issues. Our team has been notified and is working on a fix.
+                            </p>
+                            <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
+                                <button onclick="window.location.reload()" style="
+                                    background: var(--primary);
+                                    color: white;
+                                    border: none;
+                                    padding: 0.75rem 1.5rem;
+                                    border-radius: 12px;
+                                    cursor: pointer;
+                                    font-weight: 600;
+                                    transition: all 0.3s ease;
+                                " onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
+                                    🔄 Refresh Page
+                                </button>
+                                <button onclick="window.location.href='mailto:support@luminaai.com'" style="
+                                    background: transparent;
+                                    color: var(--primary);
+                                    border: 2px solid var(--primary);
+                                    padding: 0.75rem 1.5rem;
+                                    border-radius: 12px;
+                                    cursor: pointer;
+                                    font-weight: 600;
+                                    transition: all 0.3s ease;
+                                " onmouseover="this.style.background='var(--primary)'; this.style.color='white'" onmouseout="this.style.background='transparent'; this.style.color='var(--primary)'">
+                                    📧 Contact Support
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                document.body.appendChild(errorDiv);
+            }
+        }
+
+        // Initialize error boundary
+        new ErrorBoundary();
+
+        // Preload critical resources
         window.addEventListener('load', function() {
-            // Preload critical resources
             const criticalImages = [
                 'lumina-logo.png',
                 'lumina-main-logo.png'
@@ -3436,36 +3824,41 @@
             criticalImages.forEach(src => {
                 const img = new Image();
                 img.src = src;
+                img.onload = () => trackEvent('Resource_Preloaded', { resource: src, status: 'success' });
+                img.onerror = () => trackEvent('Resource_Preloaded', { resource: src, status: 'failed' });
             });
-        });
 
-        // Service Worker Registration for PWA
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', function() {
-                navigator.serviceWorker.register('service-worker.js')
-                    .then(function(registration) {
-                        console.log('ServiceWorker registration successful');
-                    })
-                    .catch(function(err) {
-                        console.log('ServiceWorker registration failed: ', err);
-                    });
+            // Track load complete
+            trackEvent('Page_Load_Complete', {
+                load_time: Date.now() - startTime,
+                dom_interactive: performance.timing.domInteractive - performance.timing.navigationStart,
+                dom_complete: performance.timing.domComplete - performance.timing.navigationStart
             });
-        }
-
-        // Error Handling
-        window.addEventListener('error', function(e) {
-            console.error('Global error:', e.error);
-        });
-
-        window.addEventListener('unhandledrejection', function(e) {
-            console.error('Unhandled promise rejection:', e.reason);
         });
 
         // Theme system preference detection
         window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function(e) {
             if (!localStorage.getItem('theme')) {
                 setTheme(e.matches ? 'dark' : 'light');
+                trackEvent('Theme_Auto_Switch', {
+                    new_theme: e.matches ? 'dark' : 'light',
+                    trigger: 'system_preference'
+                });
             }
+        });
+
+        // Final initialization
+        console.log('🚀 Lumina AI Landing Page initialized successfully!');
+        console.log('📊 Performance monitoring active');
+        console.log('♿ Accessibility features enabled');
+        console.log('🔒 Security measures in place');
+        console.log('📱 PWA capabilities ready');
+        console.log('📈 Analytics tracking active');
+        
+        trackEvent('Page_Initialized', {
+            version: '2.0.0',
+            features_enabled: ['analytics', 'pwa', 'accessibility', 'performance_monitoring', 'error_boundary'],
+            initialization_time: Date.now() - startTime
         });
     </script>
 </body>
