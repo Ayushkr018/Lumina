@@ -1,0 +1,2527 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Lumina AI - Holographic Exercise Trainer</title>
+    <meta name="description" content="Advanced holographic AI trainer with voice guidance and realistic face demonstrations">
+    
+    <!-- Fonts -->
+    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" as="style">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    
+    <!-- PWA Meta -->
+    <link rel="manifest" href="/manifest.json">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#6366f1">
+    
+    <!-- Favicon -->
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='35' fill='%236366f1'/><circle cx='50' cy='50' r='20' fill='white'/><circle cx='50' cy='50' r='8' fill='%236366f1'/></svg>">
+  <style>
+        /* ==================== CSS VARIABLES ==================== */
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --primary-light: #8b5cf6;
+            --secondary: #06b6d4;
+            --accent: #f59e0b;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --error: #ef4444;
+            
+            /* Gradients */
+            --gradient-primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --gradient-secondary: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            --gradient-accent: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            --gradient-success: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            --gradient-dark: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+            
+            /* Light Theme */
+            --bg-primary: #ffffff;
+            --bg-secondary: #f8fafc;
+            --bg-tertiary: #f1f5f9;
+            --bg-glass: rgba(255, 255, 255, 0.9);
+            --bg-glass-strong: rgba(255, 255, 255, 0.95);
+            --text-primary: #0f172a;
+            --text-secondary: #64748b;
+            --text-muted: #94a3b8;
+            --text-inverse: #ffffff;
+            --border: #e2e8f0;
+            --border-light: rgba(255, 255, 255, 0.3);
+            --shadow: rgba(15, 23, 42, 0.1);
+            --shadow-strong: rgba(15, 23, 42, 0.2);
+            --shadow-colored: rgba(99, 102, 241, 0.3);
+            
+            /* Typography */
+            --font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            --font-mono: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace;
+            
+            /* Transitions */
+            --transition-base: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            --transition-bounce: 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            --transition-smooth: 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            
+            /* Safe Areas for Mobile */
+            --safe-top: env(safe-area-inset-top, 0px);
+            --safe-bottom: env(safe-area-inset-bottom, 0px);
+            --safe-left: env(safe-area-inset-left, 0px);
+            --safe-right: env(safe-area-inset-right, 0px);
+            
+            /* Z-Index Scale */
+            --z-dropdown: 1000;
+            --z-sticky: 1020;
+            --z-fixed: 1030;
+            --z-modal-backdrop: 1040;
+            --z-modal: 1050;
+            --z-popover: 1060;
+            --z-tooltip: 1070;
+            --z-toast: 1080;
+        }
+
+        /* Dark Theme */
+        [data-theme="dark"] {
+            --bg-primary: #0f172a;
+            --bg-secondary: #1e293b;
+            --bg-tertiary: #334155;
+            --bg-glass: rgba(30, 41, 59, 0.9);
+            --bg-glass-strong: rgba(30, 41, 59, 0.95);
+            --text-primary: #f8fafc;
+            --text-secondary: #cbd5e1;
+            --text-muted: #94a3b8;
+            --text-inverse: #0f172a;
+            --border: #475569;
+            --border-light: rgba(148, 163, 184, 0.3);
+            --shadow: rgba(0, 0, 0, 0.5);
+            --shadow-strong: rgba(0, 0, 0, 0.7);
+            --shadow-colored: rgba(99, 102, 241, 0.5);
+        }
+
+        /* ==================== GLOBAL STYLES ==================== */
+        *, *::before, *::after {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+            overflow-x: hidden;
+            height: 100%;
+            -webkit-text-size-adjust: 100%;
+            -ms-text-size-adjust: 100%;
+        }
+
+        body {
+            font-family: var(--font-family);
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            overflow-x: hidden;
+            min-height: 100vh;
+            min-height: -webkit-fill-available;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            -webkit-overflow-scrolling: touch;
+            transition: background-color var(--transition-base), color var(--transition-base);
+            font-feature-settings: 'kern' 1, 'liga' 1, 'calt' 1, 'pnum' 1, 'tnum' 0, 'onum' 1, 'lnum' 0, 'dlig' 0;
+        }
+
+        /* ==================== NON-SELECTABLE TEXT PROPERTY ==================== */
+        /* Make all text unselectable except inputs */
+        html, body, div, span, applet, object, iframe,
+        h1, h2, h3, h4, h5, h6, p, blockquote, pre,
+        a, abbr, acronym, address, big, cite, code,
+        del, dfn, em, img, ins, kbd, q, s, samp,
+        small, strike, strong, sub, sup, tt, var,
+        b, u, i, center,
+        dl, dt, dd, ol, ul, li,
+        fieldset, form, label, legend,
+        table, caption, tbody, tfoot, thead, tr, th, td,
+        article, aside, canvas, details, embed,
+        figure, figcaption, footer, header, hgroup,
+        menu, nav, output, ruby, section, summary,
+        time, mark, audio, video {
+            -webkit-user-select: none !important;
+            -moz-user-select: none !important;
+            -ms-user-select: none !important;
+            user-select: none !important;
+        }
+
+        /* Allow inputs and textarea to be selectable */
+        input, textarea, select {
+            -webkit-user-select: text !important;
+            -moz-user-select: text !important;
+            -ms-user-select: text !important;
+            user-select: text !important;
+        }
+
+        /* Mobile Viewport Fix */
+        @supports (-webkit-touch-callout: none) {
+            body {
+                min-height: -webkit-fill-available;
+            }
+        }
+
+        /* Form Elements */
+        input, textarea, button, select {
+            font-family: inherit;
+            font-size: 16px; /* Prevent zoom on iOS */
+            -webkit-appearance: none;
+            appearance: none;
+        }
+
+        button {
+            background: none;
+            border: none;
+            cursor: pointer;
+            outline: none;
+            touch-action: manipulation;
+        }
+
+        a {
+            color: inherit;
+            text-decoration: none;
+            touch-action: manipulation;
+        }
+
+        img {
+            max-width: 100%;
+            height: auto;
+            vertical-align: middle;
+        }
+
+        /* Selection */
+        ::selection {
+            background: var(--primary);
+            color: var(--text-inverse);
+        }
+
+        ::-moz-selection {
+            background: var(--primary);
+            color: var(--text-inverse);
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--bg-tertiary);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--border);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--text-muted);
+        }
+
+        /* ==================== PROGRESS BAR ==================== */
+        .scroll-progress {
+            position: fixed;
+            top: calc(var(--safe-top) + 0px);
+            left: 0;
+            width: 0%;
+            height: 3px;
+            background: var(--gradient-primary);
+            z-index: var(--z-toast);
+            transition: width 0.1s ease;
+            box-shadow: 0 0 10px var(--primary);
+        }
+
+        /* ==================== BACKGROUND EFFECTS ==================== */
+        .bg-effects {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+            overflow: hidden;
+        }
+
+        .gradient-orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(60px);
+            opacity: 0.3;
+            animation: orbFloat 20s ease-in-out infinite;
+        }
+
+        .orb-1 {
+            width: 300px;
+            height: 300px;
+            background: var(--gradient-primary);
+            top: -150px;
+            right: -150px;
+            animation-delay: 0s;
+        }
+
+        .orb-2 {
+            width: 250px;
+            height: 250px;
+            background: var(--gradient-secondary);
+            bottom: -125px;
+            left: -125px;
+            animation-delay: -10s;
+        }
+
+        .orb-3 {
+            width: 200px;
+            height: 200px;
+            background: var(--gradient-accent);
+            top: 50%;
+            left: 70%;
+            animation-delay: -5s;
+        }
+
+        .orb-4 {
+            width: 180px;
+            height: 180px;
+            background: var(--gradient-success);
+            top: 80%;
+            right: 10%;
+            animation-delay: -15s;
+        }
+
+        @keyframes orbFloat {
+            0%, 100% { 
+                transform: translate(0, 0) scale(1) rotate(0deg); 
+            }
+            25% { 
+                transform: translate(20px, -20px) scale(1.1) rotate(90deg); 
+            }
+            50% { 
+                transform: translate(-15px, 15px) scale(0.9) rotate(180deg); 
+            }
+            75% { 
+                transform: translate(15px, 20px) scale(1.05) rotate(270deg); 
+            }
+        }
+
+        /* Animated Particles */
+        .particles {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+        }
+
+        .particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: var(--primary);
+            border-radius: 50%;
+            opacity: 0.6;
+            animation: particleFloat 8s ease-in-out infinite;
+        }
+
+        .particle:nth-child(1) { top: 20%; left: 10%; animation-delay: 0s; }
+        .particle:nth-child(2) { top: 40%; right: 15%; animation-delay: -2s; }
+        .particle:nth-child(3) { bottom: 30%; left: 20%; animation-delay: -4s; }
+        .particle:nth-child(4) { bottom: 60%; right: 25%; animation-delay: -1s; }
+        .particle:nth-child(5) { top: 60%; left: 60%; animation-delay: -3s; }
+
+        @keyframes particleFloat {
+            0%, 100% { 
+                transform: translateY(0) scale(1); 
+                opacity: 0.6; 
+            }
+            50% { 
+                transform: translateY(-30px) scale(1.2); 
+                opacity: 1; 
+            }
+        }
+
+        /* ==================== MAIN CONTAINER ==================== */
+        .container {
+            min-height: 100vh;
+            min-height: -webkit-fill-available;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        /* ==================== HEADER ==================== */
+        .header {
+            position: fixed;
+            top: var(--safe-top);
+            left: 0;
+            right: 0;
+            height: 70px;
+            background: var(--bg-glass);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border-light);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 max(1rem, var(--safe-left)) 0 max(1rem, var(--safe-right));
+            z-index: var(--z-sticky);
+            box-shadow: 0 2px 20px var(--shadow);
+            transition: all var(--transition-base);
+        }
+
+        .header.scrolled {
+            background: var(--bg-glass-strong);
+            box-shadow: 0 4px 30px var(--shadow-strong);
+            border-bottom-color: var(--border);
+        }
+
+        /* Header Left */
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+            flex: 1;
+            min-width: 0;
+        }
+
+        .logo-section {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            cursor: pointer;
+            padding: 0.25rem 0.5rem;
+            border-radius: 12px;
+            transition: all var(--transition-bounce);
+            flex-shrink: 0;
+        }
+
+        .logo-section:hover {
+            background: rgba(99, 102, 241, 0.1);
+            transform: scale(1.02);
+        }
+
+        /* Logo */
+        .dashboard-logo {
+            width: 36px;
+            height: 28px;
+            position: relative;
+        }
+
+        .logo-eye {
+            width: 36px;
+            height: 28px;
+            background: var(--gradient-primary);
+            border-radius: 50%;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 3px 12px var(--shadow-colored);
+            animation: logoFloat 3s ease-in-out infinite;
+            border: 2px solid var(--border-light);
+        }
+
+        .logo-eye::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 18px;
+            height: 18px;
+            background: var(--text-inverse);
+            border-radius: 50%;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            animation: eyeballFloat 2s ease-in-out infinite;
+        }
+
+        .logo-pupil {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 7px;
+            height: 7px;
+            background: var(--primary-dark);
+            border-radius: 50%;
+            animation: pupilTrack 4s ease-in-out infinite;
+            box-shadow: 0 0 6px rgba(79, 70, 229, 0.8);
+        }
+
+        @keyframes logoFloat {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-1px) rotate(1deg); }
+        }
+
+        @keyframes eyeballFloat {
+            0%, 100% { transform: translate(-50%, -50%) scale(1); }
+            50% { transform: translate(-50%, -50%) scale(1.05); }
+        }
+
+        @keyframes pupilTrack {
+            0%, 100% { transform: translate(-50%, -50%) translateX(0); }
+            25% { transform: translate(-50%, -50%) translateX(2px); }
+            75% { transform: translate(-50%, -50%) translateX(-2px); }
+        }
+
+        .logo-text {
+            font-weight: 900;
+            font-size: 1.2rem;
+            background: var(--gradient-primary);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            white-space: nowrap;
+            letter-spacing: -0.02em;
+        }
+
+        /* Navigation */
+        .nav-menu {
+            display: none;
+        }
+
+        @media (min-width: 768px) {
+            .nav-menu {
+                display: flex;
+                align-items: center;
+                gap: 0.5rem;
+                background: var(--bg-glass);
+                backdrop-filter: blur(15px);
+                -webkit-backdrop-filter: blur(15px);
+                border-radius: 20px;
+                padding: 0.5rem;
+                border: 1px solid var(--border-light);
+            }
+        }
+
+        .nav-item {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-weight: 600;
+            padding: 0.5rem 1rem;
+            border-radius: 15px;
+            transition: all var(--transition-base);
+            font-size: 0.9rem;
+            position: relative;
+            overflow: hidden;
+            white-space: nowrap;
+        }
+
+        .nav-item::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: var(--gradient-primary);
+            transition: left var(--transition-base);
+            z-index: -1;
+        }
+
+        .nav-item:hover::before,
+        .nav-item.active::before {
+            left: 0;
+        }
+
+        .nav-item:hover,
+        .nav-item.active {
+            color: var(--text-inverse);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px var(--shadow-colored);
+        }
+
+        /* Header Right */
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            flex-shrink: 0;
+        }
+
+        .user-info {
+            display: none;
+        }
+
+        @media (min-width: 768px) {
+            .user-info {
+                display: flex;
+                align-items: center;
+                gap: 0.75rem;
+                color: var(--text-secondary);
+                font-weight: 600;
+                background: var(--bg-glass);
+                backdrop-filter: blur(15px);
+                -webkit-backdrop-filter: blur(15px);
+                padding: 0.5rem 1rem;
+                border-radius: 15px;
+                border: 1px solid var(--border-light);
+                font-size: 0.9rem;
+                transition: all var(--transition-base);
+            }
+
+            .user-info:hover {
+                background: var(--bg-primary);
+                border-color: var(--primary);
+            }
+        }
+
+        .user-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: var(--gradient-primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-inverse);
+            font-weight: 700;
+            font-size: 0.85rem;
+            animation: avatarGlow 3s ease-in-out infinite;
+            border: 2px solid var(--border-light);
+        }
+
+        @keyframes avatarGlow {
+            0%, 100% { 
+                box-shadow: 0 0 15px var(--shadow-colored); 
+            }
+            50% { 
+                box-shadow: 0 0 25px var(--shadow-colored); 
+            }
+        }
+
+        .theme-toggle {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: 2px solid var(--border-light);
+            background: var(--bg-glass);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all var(--transition-bounce);
+            flex-shrink: 0;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .theme-toggle::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: var(--gradient-primary);
+            transition: left var(--transition-base);
+            opacity: 0.2;
+        }
+
+        .theme-toggle:hover::before {
+            left: 0;
+        }
+
+        .theme-toggle:hover {
+            transform: scale(1.05) rotate(15deg);
+            border-color: var(--primary);
+            box-shadow: 0 4px 15px var(--shadow-colored);
+        }
+
+        .theme-toggle svg {
+            width: 18px;
+            height: 18px;
+            stroke: var(--text-secondary);
+            transition: all var(--transition-base);
+            z-index: 1;
+        }
+
+        /* Mobile Menu Button */
+        .mobile-menu-btn {
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+            background: var(--bg-glass);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 2px solid var(--border-light);
+            border-radius: 6px;
+            padding: 0.4rem;
+            cursor: pointer;
+            transition: all var(--transition-base);
+            flex-shrink: 0;
+        }
+
+        @media (min-width: 768px) {
+            .mobile-menu-btn {
+                display: none;
+            }
+        }
+
+        .mobile-menu-btn span {
+            width: 18px;
+            height: 2px;
+            background: var(--text-primary);
+            transition: all var(--transition-base);
+            border-radius: 1px;
+        }
+
+        .mobile-menu-btn:hover {
+            background: var(--bg-primary);
+            border-color: var(--primary);
+        }
+
+        .mobile-menu-btn.active span:nth-child(1) {
+            transform: rotate(45deg) translate(4px, 4px);
+        }
+
+        .mobile-menu-btn.active span:nth-child(2) {
+            opacity: 0;
+        }
+
+        .mobile-menu-btn.active span:nth-child(3) {
+            transform: rotate(-45deg) translate(4px, -4px);
+        }
+
+        /* Mobile Menu */
+        .mobile-menu {
+            position: fixed;
+            top: calc(var(--safe-top) + 70px);
+            left: 0.75rem;
+            right: 0.75rem;
+            background: var(--bg-glass-strong);
+            backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(25px);
+            border: 1px solid var(--border-light);
+            border-radius: 16px;
+            transform: translateY(-10px);
+            transition: all var(--transition-smooth);
+            z-index: var(--z-dropdown);
+            opacity: 0;
+            visibility: hidden;
+            box-shadow: 0 8px 40px var(--shadow-strong);
+        }
+
+        .mobile-menu.active {
+            transform: translateY(0);
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .mobile-nav-links {
+            display: flex;
+            flex-direction: column;
+            padding: 1.5rem;
+            gap: 0.75rem;
+        }
+
+        .mobile-nav-links .nav-item {
+            padding: 0.875rem 1rem;
+            border-radius: 10px;
+            background: var(--bg-primary);
+            border: 1px solid var(--border);
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.9rem;
+            transition: all var(--transition-base);
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .mobile-nav-links .nav-item::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: var(--gradient-primary);
+            transition: left var(--transition-base);
+            z-index: -1;
+        }
+
+        .mobile-nav-links .nav-item.active::before {
+            left: 0;
+        }
+
+        .mobile-nav-links .nav-item.active {
+            color: var(--text-inverse);
+            border-color: transparent;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 15px var(--shadow-colored);
+        }
+
+        .mobile-nav-links .nav-item:hover:not(.active) {
+            background: var(--bg-tertiary);
+            border-color: var(--primary);
+            transform: translateY(-1px);
+        }
+
+        /* ==================== MAIN CONTENT ==================== */
+        .main-content {
+            flex: 1;
+            padding: calc(var(--safe-top) + 90px) max(1rem, var(--safe-left)) calc(var(--safe-bottom) + 2rem) max(1rem, var(--safe-right));
+            max-width: 100%;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        @media (min-width: 768px) {
+            .main-content {
+                padding: calc(var(--safe-top) + 100px) 2rem calc(var(--safe-bottom) + 3rem);
+                max-width: 1600px;
+                margin: 0 auto;
+            }
+        }
+
+        /* ==================== DASHBOARD HEADER ==================== */
+        .dashboard-header {
+            text-align: center;
+            margin-bottom: 3rem;
+            padding: 1rem 0.5rem 2.5rem;
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeInUp 1s ease forwards 0.3s;
+            position: relative;
+            z-index: 10;
+        }
+
+        @keyframes fadeInUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .dashboard-title {
+            font-size: clamp(1.75rem, 6vw, 3.5rem);
+            font-weight: 900;
+            line-height: 1.2;
+            margin-bottom: 2rem;
+            background: var(--gradient-primary);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            position: relative;
+            display: block;
+            padding-bottom: 1.5rem;
+            word-wrap: break-word;
+            hyphens: auto;
+            letter-spacing: -0.02em;
+        }
+
+        .dashboard-title::after {
+            content: '';
+            position: absolute;
+            bottom: 0.5rem;
+            left: 50%;
+            transform: translateX(-50%);
+            width: clamp(100px, 40vw, 200px);
+            height: clamp(3px, 0.8vw, 5px);
+            background: var(--gradient-primary);
+            border-radius: 2px;
+            animation: lineGrow 1s ease forwards 1s;
+            transform-origin: center;
+            scale: 0;
+        }
+
+        @keyframes lineGrow {
+            to { 
+                scale: 1; 
+            }
+        }
+
+        .dashboard-subtitle {
+            color: var(--text-secondary);
+            font-size: clamp(0.95rem, 3vw, 1.25rem);
+            margin-bottom: 1.75rem;
+            max-width: 90%;
+            margin-left: auto;
+            margin-right: auto;
+            font-weight: 500;
+            line-height: 1.6;
+            opacity: 0.9;
+        }
+
+        /* ==================== EXERCISES GRID ==================== */
+        .exercises-section {
+            opacity: 0;
+            animation: fadeInUp 1s ease forwards 0.7s;
+        }
+
+        .exercises-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 2rem;
+        }
+
+        .exercise-card {
+            background: var(--bg-glass);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--border-light);
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 8px 32px var(--shadow);
+            transition: all var(--transition-base);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .exercise-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px var(--shadow-strong);
+        }
+
+        .exercise-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .exercise-icon {
+            width: 60px;
+            height: 60px;
+            background: var(--gradient-success);
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 6px 20px rgba(16, 185, 129, 0.3);
+        }
+
+        .exercise-icon svg {
+            width: 30px;
+            height: 30px;
+            stroke: var(--text-inverse);
+        }
+
+        .exercise-info h3 {
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin-bottom: 0.25rem;
+            color: var(--text-primary);
+        }
+
+        .exercise-duration {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .exercise-description {
+            color: var(--text-secondary);
+            margin-bottom: 1.5rem;
+            line-height: 1.6;
+        }
+
+        .exercise-actions {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all var(--transition-base);
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.9rem;
+        }
+
+        .btn-primary {
+            background: var(--gradient-primary);
+            color: var(--text-inverse);
+            flex: 1;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px var(--shadow-colored);
+        }
+
+        /* ==================== HOLOGRAPHIC TRAINER MODAL ==================== */
+        .exercise-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: var(--z-modal);
+            opacity: 0;
+            visibility: hidden;
+            transition: all var(--transition-base);
+            padding: 1rem;
+        }
+
+        .exercise-modal.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal-content {
+            background: var(--bg-primary);
+            border-radius: 24px;
+            padding: 2rem;
+            max-width: 800px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 60px var(--shadow-strong);
+            transform: scale(0.9);
+            transition: all var(--transition-bounce);
+            text-align: center;
+            position: relative;
+        }
+
+        .exercise-modal.active .modal-content {
+            transform: scale(1);
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            width: 40px;
+            height: 40px;
+            border: none;
+            background: var(--bg-tertiary);
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all var(--transition-base);
+        }
+
+        .modal-close:hover {
+            background: var(--error);
+            color: var(--text-inverse);
+            transform: scale(1.1);
+        }
+
+        /* ==================== HOLOGRAPHIC TRAINER FACE ==================== */
+        .holographic-trainer {
+            width: 320px;
+            height: 320px;
+            margin: 0 auto 2rem;
+            position: relative;
+            background: linear-gradient(45deg, rgba(99, 102, 241, 0.1), rgba(139, 92, 246, 0.1));
+            border-radius: 50%;
+            border: 3px solid var(--primary);
+            box-shadow: 
+                0 0 30px rgba(99, 102, 241, 0.3),
+                inset 0 0 30px rgba(99, 102, 241, 0.1);
+            animation: hologramGlow 3s ease-in-out infinite;
+            overflow: hidden;
+        }
+
+        @keyframes hologramGlow {
+            0%, 100% { 
+                box-shadow: 
+                    0 0 30px rgba(99, 102, 241, 0.3),
+                    inset 0 0 30px rgba(99, 102, 241, 0.1);
+            }
+            50% { 
+                box-shadow: 
+                    0 0 50px rgba(99, 102, 241, 0.6),
+                    inset 0 0 50px rgba(99, 102, 241, 0.2);
+            }
+        }
+
+        .trainer-face {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            background: radial-gradient(circle at 50% 40%, #ffeaa0, #ffcc70, #ff9a56);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            overflow: hidden;
+        }
+
+        /* Holographic Scan Lines */
+        .hologram-scan {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(
+                90deg,
+                transparent 0%,
+                rgba(99, 102, 241, 0.1) 25%,
+                rgba(99, 102, 241, 0.3) 50%,
+                rgba(99, 102, 241, 0.1) 75%,
+                transparent 100%
+            );
+            animation: scanLine 2s linear infinite;
+            pointer-events: none;
+            z-index: 10;
+        }
+
+        @keyframes scanLine {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        /* Realistic Trainer Features */
+        .trainer-eyes {
+            position: absolute;
+            top: 35%;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 35px;
+            z-index: 5;
+        }
+
+        .trainer-eye {
+            width: 45px;
+            height: 45px;
+            background: white;
+            border-radius: 50%;
+            position: relative;
+            border: 2px solid #333;
+            box-shadow: inset 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .trainer-eyeball {
+            width: 28px;
+            height: 28px;
+            background: #2563eb;
+            border-radius: 50%;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            transition: all 0.4s ease;
+        }
+
+        .trainer-eyeball::before {
+            content: '';
+            width: 8px;
+            height: 8px;
+            background: white;
+            border-radius: 50%;
+            position: absolute;
+            top: 25%;
+            right: 25%;
+            box-shadow: 0 0 5px rgba(255,255,255,0.8);
+        }
+
+        .trainer-eyeball::after {
+            content: '';
+            width: 12px;
+            height: 12px;
+            background: #1e40af;
+            border-radius: 50%;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        /* Trainer Mouth */
+        .trainer-mouth {
+            position: absolute;
+            bottom: 35%;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60px;
+            height: 30px;
+            background: #dc2626;
+            border-radius: 0 0 60px 60px;
+            border: 2px solid #333;
+            transition: all 0.4s ease;
+            z-index: 5;
+        }
+
+        .trainer-mouth::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 8px;
+            right: 8px;
+            height: 10px;
+            background: #ef4444;
+            border-radius: 20px;
+        }
+
+        /* Trainer Hair */
+        .trainer-hair {
+            position: absolute;
+            top: 5%;
+            left: 10%;
+            right: 10%;
+            height: 40%;
+            background: linear-gradient(135deg, #8B4513, #A0522D);
+            border-radius: 50% 50% 0 0;
+            z-index: 3;
+        }
+
+        /* Eyebrows */
+        .trainer-eyebrow {
+            position: absolute;
+            width: 35px;
+            height: 6px;
+            background: #654321;
+            border-radius: 3px;
+            top: 28%;
+            transition: all 0.3s ease;
+            z-index: 6;
+        }
+
+        .trainer-eyebrow.left {
+            left: 22%;
+            transform: rotate(-8deg);
+        }
+
+        .trainer-eyebrow.right {
+            right: 22%;
+            transform: rotate(8deg);
+        }
+
+        /* Nose */
+        .trainer-nose {
+            position: absolute;
+            top: 48%;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 12px;
+            height: 20px;
+            background: linear-gradient(135deg, #ffcc70, #ff9a56);
+            border-radius: 50%;
+            box-shadow: inset -2px -2px 4px rgba(0,0,0,0.1);
+            z-index: 5;
+        }
+
+        /* Holographic Effects */
+        .hologram-particles {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 8;
+        }
+
+        .hologram-particle {
+            position: absolute;
+            width: 3px;
+            height: 3px;
+            background: var(--primary);
+            border-radius: 50%;
+            opacity: 0.7;
+            animation: particleFloat 4s ease-in-out infinite;
+        }
+
+        .hologram-particle:nth-child(1) { top: 20%; left: 15%; animation-delay: 0s; }
+        .hologram-particle:nth-child(2) { top: 30%; right: 20%; animation-delay: -1s; }
+        .hologram-particle:nth-child(3) { bottom: 25%; left: 25%; animation-delay: -2s; }
+        .hologram-particle:nth-child(4) { bottom: 35%; right: 15%; animation-delay: -0.5s; }
+        .hologram-particle:nth-child(5) { top: 50%; left: 10%; animation-delay: -1.5s; }
+
+        @keyframes particleFloat {
+            0%, 100% { 
+                transform: translateY(0) scale(1); 
+                opacity: 0.7; 
+            }
+            50% { 
+                transform: translateY(-15px) scale(1.2); 
+                opacity: 1; 
+            }
+        }
+
+        /* ==================== TRAINER ANIMATIONS ==================== */
+        
+        /* Blinking Animation */
+        .blink-animation .trainer-eye {
+            animation: trainerBlink 3s infinite;
+        }
+
+        @keyframes trainerBlink {
+            0%, 90%, 100% { height: 45px; }
+            95% { height: 8px; }
+        }
+
+        /* Eye Rolling Animation */
+        .roll-animation .trainer-eyeball {
+            animation: trainerRoll 2s infinite linear;
+        }
+
+        @keyframes trainerRoll {
+            0% { transform: translate(-50%, -50%); }
+            25% { transform: translate(-25%, -75%); }
+            50% { transform: translate(-50%, -50%); }
+            75% { transform: translate(-75%, -25%); }
+            100% { transform: translate(-50%, -50%); }
+        }
+
+        /* Focus Animation */
+        .focus-animation .trainer-eyeball {
+            animation: trainerFocus 1.5s infinite ease-in-out;
+        }
+
+        @keyframes trainerFocus {
+            0%, 100% { width: 28px; height: 28px; }
+            50% { width: 20px; height: 20px; }
+        }
+
+        /* Figure 8 Animation */
+        .figure8-animation .trainer-eyeball {
+            animation: trainerFigure8 3s infinite ease-in-out;
+        }
+
+        @keyframes trainerFigure8 {
+            0% { transform: translate(-50%, -50%); }
+            12.5% { transform: translate(-25%, -75%); }
+            25% { transform: translate(-50%, -50%); }
+            37.5% { transform: translate(-75%, -25%); }
+            50% { transform: translate(-50%, -50%); }
+            62.5% { transform: translate(-25%, -25%); }
+            75% { transform: translate(-50%, -50%); }
+            87.5% { transform: translate(-75%, -75%); }
+            100% { transform: translate(-50%, -50%); }
+        }
+
+        /* Near Far Animation */
+        .near-far-animation .trainer-eyeball {
+            animation: trainerNearFar 2s infinite ease-in-out;
+        }
+
+        @keyframes trainerNearFar {
+            0%, 100% { transform: translate(-50%, -50%) scale(1); }
+            50% { transform: translate(-50%, -50%) scale(1.4); }
+        }
+
+        /* Speaking Animation */
+        .speaking-animation .trainer-mouth {
+            animation: trainerSpeak 0.5s ease-in-out infinite;
+        }
+
+        @keyframes trainerSpeak {
+            0%, 100% { 
+                height: 30px; 
+                width: 60px; 
+                border-radius: 0 0 60px 60px; 
+            }
+            50% { 
+                height: 20px; 
+                width: 50px; 
+                border-radius: 0 0 50px 50px; 
+            }
+        }
+
+        /* Happy Animation */
+        .happy-animation .trainer-mouth {
+            width: 80px;
+            height: 40px;
+            border-radius: 0 0 80px 80px;
+            animation: trainerSmile 2s ease-in-out infinite;
+        }
+
+        .happy-animation .trainer-eyebrow.left {
+            transform: rotate(-15deg);
+        }
+
+        .happy-animation .trainer-eyebrow.right {
+            transform: rotate(15deg);
+        }
+
+        @keyframes trainerSmile {
+            0%, 100% { transform: translateX(-50%) scale(1); }
+            50% { transform: translateX(-50%) scale(1.1); }
+        }
+
+        /* ==================== EXERCISE CONTENT ==================== */
+        .modal-title {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            background: var(--gradient-primary);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .exercise-timer {
+            font-size: 4rem;
+            font-weight: 900;
+            color: var(--primary);
+            margin-bottom: 2rem;
+            font-variant-numeric: tabular-nums;
+            text-shadow: 0 2px 20px var(--shadow-colored);
+        }
+
+        .voice-instruction {
+            background: var(--bg-glass);
+            border-radius: 16px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            border: 1px solid var(--border-light);
+            font-size: 1.1rem;
+            color: var(--text-primary);
+            font-weight: 600;
+            animation: instructionPulse 2s ease-in-out infinite;
+        }
+
+        @keyframes instructionPulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.8; }
+        }
+
+        .exercise-instructions {
+            background: var(--bg-glass);
+            border-radius: 16px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            border: 1px solid var(--border-light);
+            text-align: left;
+        }
+
+        .instructions-title {
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 1.2rem;
+        }
+
+        .instruction-step {
+            margin-bottom: 1rem;
+            color: var(--text-secondary);
+            display: flex;
+            align-items: flex-start;
+            gap: 1rem;
+            padding: 0.75rem;
+            background: var(--bg-primary);
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            transition: all var(--transition-base);
+        }
+
+        .instruction-step:hover {
+            background: var(--bg-tertiary);
+            border-color: var(--primary);
+            transform: translateX(5px);
+        }
+
+        .step-number {
+            background: var(--primary);
+            color: var(--text-inverse);
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.9rem;
+            font-weight: 700;
+            flex-shrink: 0;
+            margin-top: 0.1rem;
+            box-shadow: 0 2px 8px var(--shadow-colored);
+        }
+
+        .step-text {
+            flex: 1;
+            line-height: 1.6;
+            font-size: 0.95rem;
+        }
+
+        .timer-controls {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+        }
+
+        .timer-btn {
+            width: 60px;
+            height: 60px;
+            border: none;
+            border-radius: 50%;
+            background: var(--gradient-primary);
+            color: var(--text-inverse);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all var(--transition-bounce);
+            box-shadow: 0 6px 20px var(--shadow-colored);
+        }
+
+        .timer-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 8px 30px var(--shadow-colored);
+        }
+
+        .timer-btn.pause {
+            background: var(--gradient-accent);
+        }
+
+        .timer-btn.reset {
+            background: var(--bg-tertiary);
+            color: var(--text-secondary);
+            box-shadow: 0 4px 15px var(--shadow);
+        }
+
+        /* ==================== RESPONSIVE DESIGN ==================== */
+        @media (max-width: 768px) {
+            .exercises-grid {
+                grid-template-columns: 1fr;
+                gap: 1.5rem;
+            }
+
+            .modal-content {
+                padding: 1.5rem;
+                margin: 0.5rem;
+            }
+
+            .holographic-trainer {
+                width: 260px;
+                height: 260px;
+            }
+
+            .exercise-timer {
+                font-size: 3rem;
+            }
+
+            .trainer-eyes {
+                gap: 28px;
+            }
+
+            .trainer-eye {
+                width: 38px;
+                height: 38px;
+            }
+
+            .trainer-eyeball {
+                width: 22px;
+                height: 22px;
+            }
+
+            .timer-controls {
+                flex-wrap: wrap;
+            }
+        }
+
+        /* ==================== ANIMATIONS ==================== */
+        .fade-in {
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all var(--transition-base);
+        }
+
+        .fade-in.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .timer-pulse {
+            animation: timerPulse 1s ease-in-out infinite;
+        }
+
+        @keyframes timerPulse {
+            0%, 100% { 
+                transform: scale(1); 
+                color: var(--primary); 
+            }
+            50% { 
+                transform: scale(1.05); 
+                color: var(--error); 
+            }
+        }
+</style>
+
+</head>
+<body>
+    <!-- Progress Bar -->
+    <div class="scroll-progress" id="scrollProgress"></div>
+
+    <!-- Background Effects -->
+    <div class="bg-effects">
+        <div class="gradient-orb orb-1"></div>
+        <div class="gradient-orb orb-2"></div>
+        <div class="gradient-orb orb-3"></div>
+        <div class="gradient-orb orb-4"></div>
+        <div class="particles">
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- Header -->
+        <header class="header" id="header">
+            <div class="header-left">
+                <div class="logo-section" onclick="window.location.href='dashboard.html'">
+                    <div class="dashboard-logo">
+                        <div class="logo-eye">
+                            <div class="logo-pupil"></div>
+                        </div>
+                    </div>
+                    <div class="logo-text">Lumina AI</div>
+                </div>
+                
+                <nav class="nav-menu">
+                    <a href="dashboard.html" class="nav-item">Dashboard</a>
+                    <a href="monitor.html" class="nav-item">Monitor</a>
+                    <a href="analytics.html" class="nav-item">Analytics</a>
+                    <a href="exercises.html" class="nav-item active">Exercises</a>
+                    <a href="profile.html" class="nav-item">Profile</a>
+                    <a href="settings.html" class="nav-item">Settings</a>
+                </nav>
+            </div>
+            
+            <div class="header-right">
+                <div class="user-info">
+                    <div class="user-avatar">U</div>
+                    <span>Dr. User</span>
+                </div>
+                <button class="theme-toggle" id="themeToggle">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                </button>
+                <button class="mobile-menu-btn" id="mobileMenuBtn">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </button>
+            </div>
+        </header>
+
+        <!-- Mobile Menu -->
+        <nav class="mobile-menu" id="mobileMenu">
+            <div class="mobile-nav-links">
+                <a href="dashboard.html" class="nav-item">Dashboard</a>
+                <a href="monitor.html" class="nav-item">Monitor</a>
+                <a href="analytics.html" class="nav-item">Analytics</a>
+                <a href="exercises.html" class="nav-item active">Exercises</a>
+                <a href="profile.html" class="nav-item">Profile</a>
+                <a href="settings.html" class="nav-item">Settings</a>
+            </div>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Page Header -->
+            <div class="dashboard-header">
+                <h1 class="dashboard-title"> Eye Exercise Trainer</h1>
+                <p class="dashboard-subtitle">
+                     Professional eye exercises with medical guidelines, realistic SVG trainer and expert voice guidance.
+                </p>
+            </div>
+
+            <!-- Exercises Section -->
+            <section class="exercises-section">
+                <div class="exercises-grid" id="exercisesGrid">
+                    <!-- Exercise cards will be populated by JavaScript -->
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Holographic Trainer Modal -->
+    <div class="exercise-modal" id="exerciseModal">
+        <div class="modal-content">
+            <button class="modal-close" id="modalClose">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+            </button>
+            
+            <!-- Holographic Trainer -->
+            <div class="holographic-trainer" id="holographicTrainer">
+                <div class="trainer-face">
+                    <div class="trainer-hair"></div>
+                    <div class="trainer-eyebrow left"></div>
+                    <div class="trainer-eyebrow right"></div>
+                    <div class="trainer-eyes">
+                        <div class="trainer-eye left">
+                            <div class="trainer-eyeball"></div>
+                        </div>
+                        <div class="trainer-eye right">
+                            <div class="trainer-eyeball"></div>
+                        </div>
+                    </div>
+                    <div class="trainer-nose"></div>
+                    <div class="trainer-mouth"></div>
+                </div>
+                
+                <div class="hologram-scan"></div>
+                
+                <div class="hologram-particles">
+                    <div class="hologram-particle"></div>
+                    <div class="hologram-particle"></div>
+                    <div class="hologram-particle"></div>
+                    <div class="hologram-particle"></div>
+                    <div class="hologram-particle"></div>
+                </div>
+            </div>
+            
+            <h2 class="modal-title" id="modalTitle">Holographic Exercise Trainer</h2>
+            <div class="exercise-timer" id="exerciseTimer">00:30</div>
+            
+            <div class="voice-instruction" id="voiceInstruction">
+                Holographic trainer is ready to guide you...
+            </div>
+            
+            <div class="exercise-instructions" id="exerciseInstructions">
+                <h4 class="instructions-title">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M9 11l3 3L22 4"/>
+                        <path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/>
+                    </svg>
+                    Step-by-Step Instructions
+                </h4>
+                <div id="instructionsList"></div>
+            </div>
+            
+            <div class="timer-controls">
+                <button class="timer-btn" id="startBtn">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polygon points="5,3 19,12 5,21"/>
+                    </svg>
+                </button>
+                <button class="timer-btn pause" id="pauseBtn" style="display: none;">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="6" y="4" width="4" height="16"/>
+                        <rect x="14" y="4" width="4" height="16"/>
+                    </svg>
+                </button>
+                <button class="timer-btn reset" id="resetBtn">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="23,4 23,10 17,10"/>
+                        <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ==================== EXERCISE DATA WITH DETAILED INSTRUCTIONS ==================== 
+        const exercises = [
+            {
+                id: 1,
+                title: "20-20-20 Rule",
+                duration: 20,
+                category: "relaxation",
+                description: "Every 20 minutes, look at something 20 feet away for 20 seconds to reduce digital eye strain and prevent computer vision syndrome.",
+                animation: "focus-animation",
+                instructions: [
+                    "Position yourself comfortably in your chair with good posture",
+                    "Set up your environment by identifying an object 20 feet (6 meters) away - like a tree, building, or distant wall",
+                    "Start by looking at your screen or current work as normal",
+                    "When ready, slowly shift your focus away from the screen",
+                    "Look directly at the distant object you identified earlier",
+                    "Keep your focus steady on that distant object for the full 20 seconds",
+                    "Blink naturally during this time to keep your eyes lubricated",
+                    "Take a deep breath and relax your shoulders while focusing",
+                    "Avoid looking at your phone or other close objects during this time",
+                    "After 20 seconds, slowly return your focus to your screen",
+                    "Notice how your eyes feel more relaxed and refreshed",
+                    "Remember to repeat this every 20 minutes throughout your workday"
+                ],
+                voiceInstructions: [
+                    "Welcome to the 20-20-20 rule exercise. This will help reduce your digital eye strain.",
+                    "First, sit comfortably and find an object about 20 feet away from you.",
+                    "Now, look away from your screen and focus on that distant object.",
+                    "Keep your gaze steady on the distant object. Let your eyes relax.",
+                    "Breathe naturally and blink normally while maintaining your focus.",
+                    "Great! You're giving your focusing muscles a much-needed break.",
+                    "Keep looking at that distant object. Your eyes are adjusting beautifully.",
+                    "Almost there! Continue focusing on the distance.",
+                    "Perfect! You can now slowly return your focus to your screen.",
+                    "Exercise complete! Your eyes should feel more refreshed and comfortable."
+                ],
+                benefits: [
+                    "Reduces digital eye strain and fatigue",
+                    "Prevents computer vision syndrome symptoms",
+                    "Relaxes focusing muscles in your eyes",
+                    "Improves overall visual comfort during screen time"
+                ],
+                icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"/>
+                    <polyline points="12,6 12,12 16,14"/>
+                </svg>`
+            },
+            {
+                id: 2,
+                title: "Conscious Blinking",
+                duration: 60,
+                category: "relaxation",
+                description: "Deliberate, slow blinking exercise to lubricate eyes and improve tear film distribution for better eye comfort.",
+                animation: "blink-animation",
+                instructions: [
+                    "Sit in a comfortable position with your back straight and shoulders relaxed",
+                    "Close your eyes gently - don't squeeze them shut, just let the eyelids come together naturally",
+                    "Keep your eyes closed for 2-3 seconds, feeling the moisture spread across your eye surface",
+                    "Slowly open your eyes, allowing them to open gradually rather than quickly",
+                    "Pause for 2-3 seconds with your eyes fully open, noticing how they feel",
+                    "Repeat this slow, deliberate blinking pattern throughout the exercise",
+                    "Focus on the quality of each blink rather than the quantity",
+                    "Feel the gentle massage effect on your eyelids and eye muscles",
+                    "Notice how each blink spreads moisture evenly across your eye surface",
+                    "Pay attention to any areas of dryness or tension around your eyes",
+                    "Continue this mindful blinking until you feel your eyes are well-lubricated",
+                    "End by taking a moment to appreciate how refreshed your eyes feel"
+                ],
+                voiceInstructions: [
+                    "Let's begin conscious blinking to lubricate and refresh your eyes.",
+                    "Close your eyes gently - don't squeeze them, just let them come together naturally.",
+                    "Hold them closed for 2 seconds, feeling the moisture spread across your eyes.",
+                    "Now slowly open your eyes, allowing them to open gradually.",
+                    "Pause for a moment with your eyes open, then close them again gently.",
+                    "Feel each blink providing a gentle massage to your eye muscles.",
+                    "Notice how the moisture is being distributed evenly across your eye surface.",
+                    "Continue this slow, deliberate blinking pattern. You're doing great!",
+                    "Each blink is helping to clean and lubricate your eyes naturally.",
+                    "Perfect! Your eyes should feel much more comfortable and refreshed now."
+                ],
+                benefits: [
+                    "Improves tear film distribution",
+                    "Reduces dry eye symptoms",
+                    "Cleans the eye surface naturally",
+                    "Relaxes eyelid and facial muscles"
+                ],
+                icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"/>
+                    <line x1="8" y1="14" x2="16" y2="14"/>
+                    <line x1="9" y1="9" x2="9.01" y2="9"/>
+                    <line x1="15" y1="9" x2="15.01" y2="9"/>
+                </svg>`
+            },
+            {
+                id: 3,
+                title: "Eye Rolling Exercise",
+                duration: 90,
+                category: "strength",
+                description: "Gentle circular eye movements to strengthen and stretch all the muscles around your eyes while improving flexibility.",
+                animation: "roll-animation",
+                instructions: [
+                    "Sit up straight with your shoulders relaxed and head in a neutral position",
+                    "Keep your head completely still throughout the exercise - only your eyes should move",
+                    "Start by looking straight ahead at a comfortable focal point",
+                    "Slowly look up toward the ceiling, moving only your eyes",
+                    "From the up position, slowly move your eyes to the right as far as comfortable",
+                    "Continue the circle by looking down toward the floor",
+                    "Complete the circle by moving your eyes to the left",
+                    "Return to the starting position looking straight ahead",
+                    "This completes one clockwise circle - perform 5 complete circles clockwise",
+                    "After 5 clockwise circles, reverse direction for 5 counter-clockwise circles",
+                    "Move slowly and smoothly - avoid quick or jerky movements",
+                    "If you feel any strain, make smaller circles or take a brief pause"
+                ],
+                voiceInstructions: [
+                    "Let's strengthen your eye muscles with gentle rolling exercises.",
+                    "Keep your head still and look straight ahead to start.",
+                    "Now slowly look up toward the ceiling with just your eyes.",
+                    "Move your eyes to the right, keeping the movement smooth and controlled.",
+                    "Look down toward the floor, continuing the circular motion.",
+                    "Move your eyes to the left to complete the circle.",
+                    "Excellent! That's one complete clockwise circle.",
+                    "Continue making slow, smooth circles. You're strengthening important eye muscles.",
+                    "Now let's reverse direction - make circles counter-clockwise.",
+                    "Perfect! Your eye muscles are getting stronger and more flexible."
+                ],
+                benefits: [
+                    "Strengthens all eye muscles evenly",
+                    "Improves eye movement flexibility",
+                    "Reduces muscle tension and stiffness",
+                    "Enhances eye muscle coordination"
+                ],
+                icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"/>
+                    <path d="M8 14s1.5 2 4 2 4-2 4-2"/>
+                    <line x1="9" y1="9" x2="9.01" y2="9"/>
+                    <line x1="15" y1="9" x2="15.01" y2="9"/>
+                </svg>`
+            },
+            {
+                id: 4,
+                title: "Figure 8 Tracking",
+                duration: 120,
+                category: "focus",
+                description: "Advanced eye coordination exercise where you trace an imaginary figure 8 pattern to improve tracking and binocular coordination.",
+                animation: "figure8-animation",
+                instructions: [
+                    "Sit comfortably about 3 feet away from a wall or clear space",
+                    "Imagine a large figure 8 (or infinity symbol ∞) about 6 feet wide in front of you",
+                    "Keep your head completely stationary - only your eyes should move",
+                    "Start at the center of the figure 8 where the lines cross",
+                    "Trace the upper right loop slowly with your eyes, moving smoothly upward and around",
+                    "Come back to the center crossing point, maintaining smooth eye movement",
+                    "Now trace the upper left loop, moving upward and around the left side",
+                    "Return to center and repeat the pattern: right loop, center, left loop, center",
+                    "Focus on making the movements as smooth as possible - avoid jerky motions",
+                    "After 1 minute, reverse the direction of your figure 8 tracing",
+                    "If you lose track of the pattern, pause and restart from the center",
+                    "Maintain steady, controlled movements throughout the entire exercise"
+                ],
+                voiceInstructions: [
+                    "Welcome to figure 8 tracking. This will improve your eye coordination significantly.",
+                    "Imagine a large figure 8 in front of you, about 6 feet wide.",
+                    "Start at the center where the lines cross and keep your head perfectly still.",
+                    "Trace the upper right loop slowly with your eyes, moving smoothly upward.",
+                    "Come back to the center crossing point with controlled movement.",
+                    "Now trace the upper left loop, maintaining that smooth motion.",
+                    "Excellent! You're developing better eye muscle coordination.",
+                    "Keep the movements smooth and controlled. Your tracking skills are improving.",
+                    "Now let's reverse direction - trace the figure 8 the opposite way.",
+                    "Perfect! You've completed an excellent eye coordination workout."
+                ],
+                benefits: [
+                    "Improves eye tracking and coordination",
+                    "Enhances binocular vision skills",
+                    "Strengthens eye movement control",
+                    "Develops smooth pursuit eye movements"
+                ],
+                icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M8 18s4-9 8-10a6 6 0 0 0-6-6 6 6 0 0 0-6 6 6 6 0 0 0 6 6s4-9-2-8"/>
+                </svg>`
+            },
+            {
+                id: 5,
+                title: "Near and Far Focus",
+                duration: 120,
+                category: "focus",
+                description: "Dynamic focusing exercise that alternates between near and far objects to strengthen your accommodation muscles.",
+                animation: "near-far-animation",
+                instructions: [
+                    "Find a comfortable seated position with good posture and adequate lighting",
+                    "Hold your thumb or index finger about 10 inches (25 cm) from your face",
+                    "Choose a distant object at least 10-20 feet away (like a clock, picture, or window view)",
+                    "Start by focusing clearly on your thumb - notice the details like fingerprints or nail",
+                    "Hold this near focus for 3-5 seconds, ensuring the image is sharp and clear",
+                    "Quickly shift your focus to the distant object you selected",
+                    "Allow your eyes 3-5 seconds to adjust and achieve clear focus on the far object",
+                    "Notice how your eyes physically adjust and the distant object becomes sharp",
+                    "Shift your focus back to your thumb, waiting for clear near focus again",
+                    "Continue alternating between near (thumb) and far (distant object) focus",
+                    "Pay attention to how quickly your eyes can change focus between distances",
+                    "If you experience any strain, slow down the transitions or take brief pauses"
+                ],
+                voiceInstructions: [
+                    "Let's strengthen your focusing muscles with near and far focus training.",
+                    "Hold your thumb about 10 inches from your face and focus on it clearly.",
+                    "See the details of your thumb - the fingerprints, the texture of your skin.",
+                    "Now quickly shift your focus to a distant object across the room.",
+                    "Allow your eyes to adjust and bring that distant object into sharp focus.",
+                    "Excellent! Now focus back on your thumb, waiting for it to become clear.",
+                    "Your focusing muscles are working hard to adjust between distances.",
+                    "Continue alternating. Notice how your eyes adapt to each distance.",
+                    "Great work! Your accommodation system is getting stronger.",
+                    "Perfect! Your eyes' focusing flexibility has improved significantly."
+                ],
+                benefits: [
+                    "Strengthens accommodation (focusing) muscles",
+                    "Improves focusing speed and accuracy",
+                    "Reduces focusing fatigue from screen work",
+                    "Enhances depth perception abilities"
+                ],
+                icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="3"/>
+                    <path d="M12 1v6M12 17v6M4.22 4.22l4.24 4.24M15.54 15.54l4.24 4.24M1 12h6M17 12h6M4.22 19.78l4.24-4.24M15.54 8.46l4.24-4.24"/>
+                </svg>`
+            },
+            {
+                id: 6,
+                title: "Palming Relaxation",
+                duration: 180,
+                category: "relaxation",
+                description: "Deep relaxation technique using warm palms to provide complete darkness and rest for overworked eyes.",
+                animation: "happy-animation",
+                instructions: [
+                    "Sit comfortably at a table or desk where you can rest your elbows comfortably",
+                    "Remove glasses or contacts if you're wearing them for this exercise",
+                    "Rub your palms together vigorously for 10-15 seconds to generate warmth",
+                    "Cup your hands and gently place your palms over your closed eyes",
+                    "Ensure no light is entering - your palms should create complete darkness",
+                    "Don't press on your eyeballs - let your palms rest on your cheekbones and forehead",
+                    "Your fingers can overlap on your forehead, with palms covering your eyes",
+                    "Focus on the complete darkness - this gives your retinas a chance to rest",
+                    "Take slow, deep breaths and feel the warmth from your palms",
+                    "Let your eye muscles completely relax - don't try to focus on anything",
+                    "If you see colors or patterns, just observe them without trying to control them",
+                    "Remain in this position for the full duration, enjoying the deep rest"
+                ],
+                voiceInstructions: [
+                    "Welcome to palming - one of the most effective eye relaxation techniques.",
+                    "Rub your palms together to create warmth, then cup them over your closed eyes.",
+                    "Make sure you have complete darkness with no light entering around your palms.",
+                    "Don't press on your eyes - let your palms rest gently on your cheekbones.",
+                    "Feel the soothing warmth from your palms spreading around your eye area.",
+                    "Take slow, deep breaths and let all the tension leave your eye muscles.",
+                    "Enjoy this complete rest for your eyes - they're getting deeply rejuvenated.",
+                    "Let your mind wander or simply focus on the peaceful darkness.",
+                    "Your eyes are getting the deep rest they need from constant focusing.",
+                    "Wonderful! When ready, slowly remove your palms and gently open your eyes."
+                ],
+                benefits: [
+                    "Provides complete visual rest and darkness",
+                    "Deeply relaxes all eye muscles",
+                    "Reduces eye strain and fatigue",
+                    "Promotes natural eye moisture and comfort"
+                ],
+                icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                    <circle cx="12" cy="12" r="3"/>
+                </svg>`
+            }
+        ];
+
+        // ==================== GLOBAL VARIABLES ====================
+        let currentTheme = localStorage.getItem('theme') || 'dark';
+        let isMenuOpen = false;
+        let currentExercise = null;
+        let exerciseTimer = null;
+        let timeRemaining = 0;
+        let isTimerRunning = false;
+        let currentVoiceIndex = 0;
+        let speechSynthesis = null;
+        let audioContext = null;
+
+        // DOM elements
+        const header = document.getElementById('header');
+        const scrollProgress = document.getElementById('scrollProgress');
+        const themeToggle = document.getElementById('themeToggle');
+        const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+        const mobileMenu = document.getElementById('mobileMenu');
+        const exercisesGrid = document.getElementById('exercisesGrid');
+        const exerciseModal = document.getElementById('exerciseModal');
+        const modalClose = document.getElementById('modalClose');
+        const modalTitle = document.getElementById('modalTitle');
+        const holographicTrainer = document.getElementById('holographicTrainer');
+        const exerciseTimerDisplay = document.getElementById('exerciseTimer');
+        const voiceInstruction = document.getElementById('voiceInstruction');
+        const exerciseInstructions = document.getElementById('exerciseInstructions');
+        const instructionsList = document.getElementById('instructionsList');
+        const startBtn = document.getElementById('startBtn');
+        const pauseBtn = document.getElementById('pauseBtn');
+        const resetBtn = document.getElementById('resetBtn');
+
+        // ==================== INITIALIZATION ====================
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeApp();
+        });
+
+        function initializeApp() {
+            console.log('🎭 Initializing Holographic Exercise Trainer...');
+            
+            setTheme(currentTheme);
+            setupScrollEffects();
+            setupMobileMenu();
+            setupEventListeners();
+            renderExercises();
+            setupAnimations();
+            setupSpeechSynthesis();
+            setupAudioContext();
+            
+            console.log('✅ Holographic Exercise Trainer initialized successfully!');
+        }
+
+        // ==================== SPEECH SYNTHESIS SETUP ====================
+        function setupSpeechSynthesis() {
+            if ('speechSynthesis' in window) {
+                speechSynthesis = window.speechSynthesis;
+                console.log('🔊 Speech synthesis ready');
+            } else {
+                console.warn('Speech synthesis not supported');
+            }
+        }
+
+        function speakInstruction(text) {
+            if (!speechSynthesis) return;
+            
+            speechSynthesis.cancel();
+            
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.rate = 0.85;
+            utterance.pitch = 1.0;
+            utterance.volume = 0.8;
+            
+            const voices = speechSynthesis.getVoices();
+            const preferredVoice = voices.find(voice => 
+                voice.name.includes('Google US English Female') ||
+                voice.name.includes('Samantha') || 
+                voice.name.includes('Karen') ||
+                (voice.lang.includes('en-US') && voice.name.toLowerCase().includes('female'))
+            );
+            
+            if (preferredVoice) {
+                utterance.voice = preferredVoice;
+            }
+            
+            speechSynthesis.speak(utterance);
+            
+            // Add speaking animation
+            if (currentExercise) {
+                holographicTrainer.classList.add('speaking-animation');
+                setTimeout(() => {
+                    holographicTrainer.classList.remove('speaking-animation');
+                }, utterance.text.length * 80); // Rough estimate based on text length
+            }
+        }
+
+        // ==================== AUDIO CONTEXT FOR SOUND EFFECTS ====================
+        function setupAudioContext() {
+            try {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                console.log('🎵 Audio context ready');
+            } catch (e) {
+                console.warn('Audio context not supported');
+            }
+        }
+
+        function playTimerSound() {
+            if (!audioContext) return;
+            
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            
+            oscillator.frequency.value = 800;
+            oscillator.type = 'sine';
+            
+            gainNode.gain.setValueAtTime(0, audioContext.currentTime);
+            gainNode.gain.linearRampToValueAtTime(0.08, audioContext.currentTime + 0.01);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
+            
+            oscillator.start(audioContext.currentTime);
+            oscillator.stop(audioContext.currentTime + 0.3);
+        }
+
+        function playCompletionSound() {
+            if (!audioContext) return;
+            
+            const frequencies = [523, 659, 784, 1047]; // C, E, G, C
+            
+            frequencies.forEach((freq, index) => {
+                const oscillator = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+                
+                oscillator.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+                
+                oscillator.frequency.value = freq;
+                oscillator.type = 'sine';
+                
+                const startTime = audioContext.currentTime + (index * 0.15);
+                const endTime = startTime + 0.3;
+                
+                gainNode.gain.setValueAtTime(0, startTime);
+                gainNode.gain.linearRampToValueAtTime(0.1, startTime + 0.01);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, endTime);
+                
+                oscillator.start(startTime);
+                oscillator.stop(endTime);
+            });
+        }
+
+        // ==================== THEME MANAGEMENT ====================
+        function setTheme(theme) {
+            currentTheme = theme;
+            document.documentElement.setAttribute('data-theme', theme);
+            localStorage.setItem('theme', theme);
+            
+            if (themeToggle) {
+                const icon = themeToggle.querySelector('svg');
+                if (theme === 'dark') {
+                    icon.innerHTML = '<circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>';
+                } else {
+                    icon.innerHTML = '<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>';
+                }
+            }
+        }
+
+        function toggleTheme() {
+            const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+            setTheme(newTheme);
+        }
+
+        // ==================== SCROLL EFFECTS ====================
+        function setupScrollEffects() {
+            let ticking = false;
+
+            function updateScrollEffects() {
+                const scrollTop = window.pageYOffset;
+                const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+                const scrollPercent = Math.min((scrollTop / docHeight) * 100, 100);
+
+                if (scrollProgress) {
+                    scrollProgress.style.width = scrollPercent + '%';
+                }
+
+                if (header) {
+                    if (scrollTop > 50) {
+                        header.classList.add('scrolled');
+                    } else {
+                        header.classList.remove('scrolled');
+                    }
+                }
+
+                ticking = false;
+            }
+
+            function requestScrollUpdate() {
+                if (!ticking) {
+                    requestAnimationFrame(updateScrollEffects);
+                    ticking = true;
+                }
+            }
+
+            window.addEventListener('scroll', requestScrollUpdate, { passive: true });
+        }
+
+        // ==================== MOBILE MENU ====================
+        function setupMobileMenu() {
+            if (!mobileMenuBtn || !mobileMenu) return;
+
+            mobileMenuBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                toggleMobileMenu();
+            });
+
+            mobileMenu.addEventListener('click', function(e) {
+                if (e.target.classList.contains('nav-item')) {
+                    closeMobileMenu();
+                }
+            });
+
+            document.addEventListener('click', function(e) {
+                if (isMenuOpen && !mobileMenu.contains(e.target) && !mobileMenuBtn.contains(e.target)) {
+                    closeMobileMenu();
+                }
+            });
+        }
+
+        function toggleMobileMenu() {
+            if (isMenuOpen) {
+                closeMobileMenu();
+            } else {
+                openMobileMenu();
+            }
+        }
+
+        function openMobileMenu() {
+            isMenuOpen = true;
+            mobileMenuBtn.classList.add('active');
+            mobileMenu.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeMobileMenu() {
+            isMenuOpen = false;
+            mobileMenuBtn.classList.remove('active');
+            mobileMenu.classList.remove('active');
+            document.body.style.overflow = '';
+        }
+
+        // ==================== EVENT LISTENERS ====================
+        function setupEventListeners() {
+            if (themeToggle) {
+                themeToggle.addEventListener('click', toggleTheme);
+            }
+
+            if (modalClose) {
+                modalClose.addEventListener('click', closeModal);
+            }
+
+            if (exerciseModal) {
+                exerciseModal.addEventListener('click', function(e) {
+                    if (e.target === exerciseModal) {
+                        closeModal();
+                    }
+                });
+            }
+
+            if (startBtn) {
+                startBtn.addEventListener('click', startTimer);
+            }
+            if (pauseBtn) {
+                pauseBtn.addEventListener('click', pauseTimer);
+            }
+            if (resetBtn) {
+                resetBtn.addEventListener('click', resetTimer);
+            }
+
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape' && exerciseModal.classList.contains('active')) {
+                    closeModal();
+                }
+                if (e.key === ' ' && exerciseModal.classList.contains('active')) {
+                    e.preventDefault();
+                    if (isTimerRunning) {
+                        pauseTimer();
+                    } else {
+                        startTimer();
+                    }
+                }
+            });
+        }
+
+        // ==================== RENDER EXERCISES ====================
+        function renderExercises() {
+            if (!exercisesGrid) return;
+
+            const exerciseCards = exercises.map(exercise => `
+                <div class="exercise-card fade-in" data-exercise-id="${exercise.id}">
+                    <div class="exercise-header">
+                        <div class="exercise-icon">
+                            ${exercise.icon}
+                        </div>
+                        <div class="exercise-info">
+                            <h3>${exercise.title}</h3>
+                            <div class="exercise-duration">${formatTime(exercise.duration)} • AI Guided</div>
+                        </div>
+                    </div>
+                    
+                    <p class="exercise-description">${exercise.description}</p>
+                    
+                    <div class="exercise-actions">
+                        <button class="btn btn-primary" onclick="startExercise(${exercise.id})">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polygon points="5,3 19,12 5,21"/>
+                            </svg>
+                            Start with Trainer
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+
+            exercisesGrid.innerHTML = exerciseCards;
+        }
+
+        // ==================== EXERCISE FUNCTIONS ====================
+        function startExercise(exerciseId) {
+            const exercise = exercises.find(ex => ex.id === exerciseId);
+            if (!exercise) return;
+
+            currentExercise = exercise;
+            timeRemaining = exercise.duration;
+            currentVoiceIndex = 0;
+            
+            showModal(exercise);
+            resetTimer();
+            
+            setTimeout(() => {
+                speakInstruction(exercise.voiceInstructions[0]);
+                updateVoiceInstruction(exercise.voiceInstructions[0]);
+            }, 500);
+        }
+
+        function showModal(exercise) {
+            modalTitle.textContent = exercise.title;
+            
+            // Apply trainer animation
+            holographicTrainer.className = `holographic-trainer ${exercise.animation}`;
+            
+            // Render detailed instructions
+            const instructionsHTML = exercise.instructions.map((instruction, index) => `
+                <div class="instruction-step">
+                    <div class="step-number">${index + 1}</div>
+                    <div class="step-text">${instruction}</div>
+                </div>
+            `).join('');
+            
+            instructionsList.innerHTML = instructionsHTML;
+            
+            exerciseModal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+            
+            updateTimerDisplay();
+        }
+
+        function closeModal() {
+            exerciseModal.classList.remove('active');
+            document.body.style.overflow = '';
+            
+            if (isTimerRunning) {
+                pauseTimer();
+            }
+            resetTimer();
+            
+            if (speechSynthesis) {
+                speechSynthesis.cancel();
+            }
+            
+            // Reset trainer animation
+            if (holographicTrainer) {
+                holographicTrainer.className = 'holographic-trainer happy-animation';
+            }
+            
+            currentExercise = null;
+        }
+
+        // ==================== TIMER FUNCTIONS ====================
+        function startTimer() {
+            if (!currentExercise || timeRemaining <= 0) return;
+            
+            isTimerRunning = true;
+            startBtn.style.display = 'none';
+            pauseBtn.style.display = 'flex';
+            
+            const instructionInterval = Math.floor(currentExercise.duration / currentExercise.voiceInstructions.length);
+            
+            exerciseTimer = setInterval(() => {
+                timeRemaining--;
+                updateTimerDisplay();
+                
+                if (timeRemaining % 10 === 0 && timeRemaining > 0) {
+                    playTimerSound();
+                }
+                
+                // Voice instruction timing
+                const elapsedTime = currentExercise.duration - timeRemaining;
+                const instructionInterval = Math.floor(currentExercise.duration / currentExercise.voiceInstructions.length);
+                
+                if (elapsedTime > 0 && elapsedTime % instructionInterval === 0) {
+                    const instructionIndex = Math.floor(elapsedTime / instructionInterval);
+                    if (instructionIndex < currentExercise.voiceInstructions.length && 
+                        instructionIndex > currentVoiceIndex) {
+                        
+                        currentVoiceIndex = instructionIndex;
+                        const instruction = currentExercise.voiceInstructions[currentVoiceIndex];
+                        speakInstruction(instruction);
+                        updateVoiceInstruction(instruction);
+                    }
+                }
+                
+                // Add pulse effect when time is low
+                if (timeRemaining <= 10) {
+                    exerciseTimerDisplay.classList.add('timer-pulse');
+                }
+                
+                if (timeRemaining <= 0) {
+                    completeExercise();
+                }
+            }, 1000);
+        }
+
+        function pauseTimer() {
+            if (exerciseTimer) {
+                clearInterval(exerciseTimer);
+                exerciseTimer = null;
+            }
+            
+            isTimerRunning = false;
+            startBtn.style.display = 'flex';
+            pauseBtn.style.display = 'none';
+            
+            exerciseTimerDisplay.classList.remove('timer-pulse');
+            
+            // Stop speech
+            if (speechSynthesis) {
+                speechSynthesis.cancel();
+            }
+        }
+
+        function resetTimer() {
+            pauseTimer();
+            
+            if (currentExercise) {
+                timeRemaining = currentExercise.duration;
+                currentVoiceIndex = 0;
+            }
+            
+            updateTimerDisplay();
+            exerciseTimerDisplay.classList.remove('timer-pulse');
+            
+            if (currentExercise) {
+                updateVoiceInstruction("Ready to start " + currentExercise.title);
+            }
+        }
+
+        function completeExercise() {
+            pauseTimer();
+            
+            // Show completion message
+            exerciseTimerDisplay.textContent = "Complete! 🎉";
+            exerciseTimerDisplay.style.color = 'var(--success)';
+            updateVoiceInstruction("Excellent! Exercise completed successfully! 🎉");
+            
+            // Add happy animation to trainer
+            holographicTrainer.className = 'holographic-trainer happy-animation';
+            
+            // Play completion sound and voice
+            playCompletionSound();
+            speakInstruction("Excellent! Exercise completed successfully!");
+            
+            // Auto close after 3 seconds
+            setTimeout(() => {
+                closeModal();
+            }, 3000);
+        }
+
+        function updateTimerDisplay() {
+            const formattedTime = formatTime(timeRemaining);
+            exerciseTimerDisplay.textContent = formattedTime;
+            exerciseTimerDisplay.style.color = timeRemaining <= 10 ? 'var(--error)' : 'var(--primary)';
+        }
+
+        function updateVoiceInstruction(text) {
+            if (voiceInstruction) {
+                voiceInstruction.textContent = text;
+            }
+        }
+
+        function formatTime(seconds) {
+            const mins = Math.floor(seconds / 60);
+            const secs = seconds % 60;
+            return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+        }
+
+        // ==================== ANIMATIONS ====================
+        function setupAnimations() {
+            const observerOptions = {
+                threshold: 0.1,
+                rootMargin: '0px 0px -50px 0px'
+            };
+
+            const observer = new IntersectionObserver(function(entries) {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('visible');
+                    }
+                });
+            }, observerOptions);
+
+            document.querySelectorAll('.fade-in').forEach(el => {
+                observer.observe(el);
+            });
+        }
+
+        // Global functions for onclick handlers
+        window.startExercise = startExercise;
+
+        console.log('🎭 Lumina AI Holographic Exercise Trainer loaded successfully! 👁️✨');
+        console.log('🔊 Voice guidance enabled');
+        console.log('🎵 Audio effects ready');
+        console.log('🎪 Realistic trainer face active');
+        console.log('📋 Detailed instructions included');
+    </script>
+</body>
+</html>
