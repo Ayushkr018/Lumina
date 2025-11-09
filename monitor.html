@@ -1,0 +1,1440 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lumina AI - Live Eye Monitoring Dashboard</title>
+    <meta name="description"
+        content="Real-time eye strain monitoring with AI-powered computer vision and advanced health analytics">
+
+    <!-- Preload critical resources -->
+    <link rel="preload"
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" as="style">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap"
+        rel="stylesheet">
+
+    <!-- PWA MANIFEST AND META TAGS -->
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#6366f1">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="Lumina AI">
+    <link rel="apple-touch-icon" href="/icons/icon-192x192.png">
+    <meta name="msapplication-TileColor" content="#6366f1">
+    <meta name="msapplication-config" content="/browserconfig.xml">
+
+    <!-- PWA SERVICE WORKER REGISTRATION -->
+    <script>
+        // Register Service Worker for PWA functionality
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', function () {
+                navigator.serviceWorker.register('/service-worker.js')
+                    .then(function (registration) {
+                        console.log('✅ PWA ServiceWorker registered:', registration.scope);
+
+                        // Check for updates
+                        registration.addEventListener('updatefound', () => {
+                            const newWorker = registration.installing;
+                            newWorker.addEventListener('statechange', () => {
+                                if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                                    // Show update notification using existing alert system
+                                    if (typeof showAlert === 'function') {
+                                        showAlert('📱 New version available! Refresh to update.', 'success');
+                                    }
+                                }
+                            });
+                        });
+                    })
+                    .catch(function (error) {
+                        console.warn('❌ PWA ServiceWorker registration failed:', error);
+                    });
+            });
+        }
+
+        // PWA Install Prompt Handler
+        let deferredPrompt;
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+
+            // Show PWA install notification
+            setTimeout(() => {
+                if (typeof showAlert === 'function') {
+                    showAlert('📱 Lumina AI can be installed! Look for the install option in your browser.', 'success');
+                }
+            }, 3000);
+        });
+
+        // PWA Installation Success
+        window.addEventListener('appinstalled', () => {
+            console.log('🎉 PWA installed successfully!');
+            if (typeof showAlert === 'function') {
+                showAlert('🎉 Lumina AI installed! Access from your home screen.', 'success');
+            }
+            deferredPrompt = null;
+        });
+
+        // Handle PWA display mode
+        function checkPWAMode() {
+            const isPWA = window.matchMedia('(display-mode: standalone)').matches ||
+                window.navigator.standalone === true;
+
+            if (isPWA) {
+                console.log('📱 Running as PWA!');
+                document.body.classList.add('pwa-mode');
+            }
+        }
+
+        // Check PWA mode when DOM is ready
+        document.addEventListener('DOMContentLoaded', checkPWAMode);
+    </script>
+
+    <!-- Favicons -->
+    <link rel="icon"
+        href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='35' fill='%236366f1'/><circle cx='50' cy='50' r='20' fill='white'/><circle cx='50' cy='50' r='8' fill='%236366f1'/></svg>">
+
+    <style>
+        :root {
+            /* Modern Color Palette */
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --primary-light: #8b5cf6;
+            --secondary: #06b6d4;
+            --accent: #f59e0b;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --error: #ef4444;
+            --gradient-primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --gradient-secondary: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            --gradient-accent: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            --gradient-success: linear-gradient(135deg, #10b981 0%, #059669 100%);
+
+            /* Light Theme */
+            --bg-primary: #ffffff;
+            --bg-secondary: #f8fafc;
+            --bg-tertiary: #f1f5f9;
+            --bg-glass: rgba(255, 255, 255, 0.85);
+            --bg-glass-strong: rgba(255, 255, 255, 0.95);
+            --text-primary: #0f172a;
+            --text-secondary: #64748b;
+            --text-muted: #94a3b8;
+            --text-inverse: #ffffff;
+            --border: #e2e8f0;
+            --border-light: rgba(255, 255, 255, 0.2);
+            --shadow: rgba(15, 23, 42, 0.1);
+            --shadow-strong: rgba(15, 23, 42, 0.2);
+            --backdrop: rgba(0, 0, 0, 0.6);
+
+            /* Typography */
+            --font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            --transition-base: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            --transition-bounce: 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+
+        [data-theme="dark"] {
+            --bg-primary: #0f172a;
+            --bg-secondary: #1e293b;
+            --bg-tertiary: #334155;
+            --bg-glass: rgba(30, 41, 59, 0.85);
+            --bg-glass-strong: rgba(30, 41, 59, 0.95);
+            --text-primary: #f8fafc;
+            --text-secondary: #cbd5e1;
+            --text-muted: #94a3b8;
+            --text-inverse: #0f172a;
+            --border: #475569;
+            --border-light: rgba(148, 163, 184, 0.2);
+            --shadow: rgba(0, 0, 0, 0.5);
+            --shadow-strong: rgba(0, 0, 0, 0.7);
+            --backdrop: rgba(0, 0, 0, 0.8);
+        }
+
+        /* PWA-specific styles */
+        .pwa-mode .header {
+            padding-top: env(safe-area-inset-top);
+        }
+
+        /* Global Styles */
+        *,
+        *::before,
+        *::after {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--font-family);
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            transition: all var(--transition-base);
+            -webkit-font-smoothing: antialiased;
+            overflow-x: hidden;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            user-select: none;
+        }
+
+        input,
+        textarea,
+        button {
+            -webkit-user-select: text;
+            -moz-user-select: text;
+            user-select: text;
+        }
+
+        /* Scroll Progress Bar */
+        .scroll-progress {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 0%;
+            height: 3px;
+            background: var(--gradient-primary);
+            z-index: 10001;
+            transition: width 0.1s ease;
+            box-shadow: 0 0 10px var(--primary);
+        }
+
+        /* Background Effects */
+        .bg-effects {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+            overflow: hidden;
+        }
+
+        .gradient-orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(100px);
+            opacity: 0.4;
+            animation: orbFloat 25s ease-in-out infinite;
+        }
+
+        .orb-1 {
+            width: 400px;
+            height: 400px;
+            background: var(--gradient-primary);
+            top: -200px;
+            right: -200px;
+            animation-delay: 0s;
+        }
+
+        .orb-2 {
+            width: 300px;
+            height: 300px;
+            background: var(--gradient-secondary);
+            bottom: -150px;
+            left: -150px;
+            animation-delay: -12s;
+        }
+
+        .orb-3 {
+            width: 250px;
+            height: 250px;
+            background: var(--gradient-accent);
+            top: 40%;
+            left: 60%;
+            animation-delay: -8s;
+        }
+
+        @keyframes orbFloat {
+
+            0%,
+            100% {
+                transform: translate(0, 0) scale(1) rotate(0deg);
+            }
+
+            25% {
+                transform: translate(30px, -30px) scale(1.1) rotate(90deg);
+            }
+
+            50% {
+                transform: translate(-20px, 20px) scale(0.9) rotate(180deg);
+            }
+
+            75% {
+                transform: translate(20px, 30px) scale(1.05) rotate(270deg);
+            }
+        }
+
+        .container {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        /* FIXED Revolutionary Header */
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: var(--bg-glass);
+            backdrop-filter: blur(30px);
+            border-bottom: 1px solid var(--border-light);
+            padding: 1rem 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            z-index: 1000;
+            box-shadow: 0 8px 32px rgba(99, 102, 241, 0.3);
+            transition: all var(--transition-base);
+        }
+
+        .header.scrolled {
+            background: var(--bg-glass-strong);
+            box-shadow: 0 12px 40px var(--shadow-strong);
+            border-bottom-color: var(--border);
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+            flex: 1;
+        }
+
+        .logo-section {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            cursor: pointer;
+            transition: all var(--transition-bounce);
+            position: relative;
+            padding: 0.5rem;
+            border-radius: 25px;
+        }
+
+        .logo-section:hover {
+            transform: scale(1.05);
+            background: rgba(99, 102, 241, 0.1);
+        }
+
+        /* Clean Eye Logo WITHOUT LASHES */
+        .dashboard-logo {
+            position: relative;
+            width: 50px;
+            height: 35px;
+        }
+
+        .logo-eye {
+            width: 50px;
+            height: 35px;
+            background: var(--gradient-primary);
+            border-radius: 50%;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 6px 25px rgba(99, 102, 241, 0.4);
+            animation: logoFloat 4s ease-in-out infinite;
+            border: 2px solid var(--border-light);
+        }
+
+        .logo-eye::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 25px;
+            height: 25px;
+            background: var(--text-inverse);
+            border-radius: 50%;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            animation: eyeballFloat 3s ease-in-out infinite;
+        }
+
+        .logo-pupil {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 10px;
+            height: 10px;
+            background: var(--primary-dark);
+            border-radius: 50%;
+            animation: pupilTrack 5s ease-in-out infinite;
+            box-shadow: 0 0 8px rgba(79, 70, 229, 0.8);
+        }
+
+        @keyframes logoFloat {
+
+            0%,
+            100% {
+                transform: translateY(0) rotate(0deg);
+            }
+
+            50% {
+                transform: translateY(-2px) rotate(2deg);
+            }
+        }
+
+        @keyframes eyeballFloat {
+
+            0%,
+            100% {
+                transform: translate(-50%, -50%) scale(1);
+            }
+
+            50% {
+                transform: translate(-50%, -50%) scale(1.05);
+            }
+        }
+
+        @keyframes pupilTrack {
+
+            0%,
+            100% {
+                transform: translate(-50%, -50%) translateX(0);
+            }
+
+            25% {
+                transform: translate(-50%, -50%) translateX(4px);
+            }
+
+            75% {
+                transform: translate(-50%, -50%) translateX(-4px);
+            }
+        }
+
+        .logo-text {
+            font-weight: 900;
+            font-size: 1.5rem;
+            background: var(--gradient-primary);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            position: relative;
+        }
+
+        .nav-menu {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: var(--bg-glass);
+            backdrop-filter: blur(20px);
+            border-radius: 25px;
+            padding: 0.5rem;
+            border: 1px solid var(--border-light);
+        }
+
+        .nav-item {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-weight: 600;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            transition: all var(--transition-base);
+            position: relative;
+            overflow: hidden;
+            font-size: 0.9rem;
+        }
+
+        .nav-item::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: var(--gradient-primary);
+            transition: left 0.3s ease;
+            z-index: -1;
+        }
+
+        .nav-item:hover::before,
+        .nav-item.active::before {
+            left: 0;
+        }
+
+        .nav-item:hover,
+        .nav-item.active {
+            color: var(--text-inverse);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            color: var(--text-secondary);
+            font-weight: 600;
+            background: var(--bg-glass);
+            backdrop-filter: blur(20px);
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            border: 1px solid var(--border-light);
+            font-size: 0.9rem;
+        }
+
+        .user-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: var(--gradient-primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-inverse);
+            font-weight: 700;
+            font-size: 0.9rem;
+            animation: avatarGlow 3s ease-in-out infinite;
+        }
+
+        @keyframes avatarGlow {
+
+            0%,
+            100% {
+                box-shadow: 0 0 15px rgba(99, 102, 241, 0.3);
+            }
+
+            50% {
+                box-shadow: 0 0 25px rgba(99, 102, 241, 0.5);
+            }
+        }
+
+        .theme-toggle {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: 2px solid var(--border-light);
+            background: var(--bg-glass);
+            backdrop-filter: blur(20px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all var(--transition-bounce);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .theme-toggle::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: var(--gradient-primary);
+            transition: left 0.3s ease;
+            opacity: 0.2;
+        }
+
+        .theme-toggle:hover::before {
+            left: 0;
+        }
+
+        .theme-toggle:hover {
+            transform: scale(1.1) rotate(180deg);
+            box-shadow: 0 6px 20px rgba(99, 102, 241, 0.3);
+            border-color: var(--primary);
+        }
+
+        .theme-toggle svg {
+            width: 18px;
+            height: 18px;
+            stroke: var(--text-secondary);
+            transition: all var(--transition-base);
+        }
+
+        /* Mobile Menu Button */
+        .mobile-menu-btn {
+            display: none;
+            flex-direction: column;
+            gap: 3px;
+            background: var(--bg-glass);
+            backdrop-filter: blur(10px);
+            border: 2px solid var(--border-light);
+            border-radius: 8px;
+            padding: 0.5rem;
+            transition: all var(--transition-base);
+            cursor: pointer;
+        }
+
+        .mobile-menu-btn span {
+            width: 20px;
+            height: 2px;
+            background: var(--text-primary);
+            transition: all var(--transition-base);
+            border-radius: 1px;
+        }
+
+        .mobile-menu-btn.active span:nth-child(1) {
+            transform: rotate(45deg) translate(5px, 5px);
+        }
+
+        .mobile-menu-btn.active span:nth-child(2) {
+            opacity: 0;
+        }
+
+        .mobile-menu-btn.active span:nth-child(3) {
+            transform: rotate(-45deg) translate(5px, -5px);
+        }
+
+        /* Mobile Menu */
+        .mobile-menu {
+            position: fixed;
+            top: 70px;
+            left: 1rem;
+            right: 1rem;
+            background: var(--bg-glass-strong);
+            backdrop-filter: blur(30px);
+            border: 1px solid var(--border-light);
+            border-radius: 20px;
+            transform: translateY(-20px);
+            transition: all var(--transition-base);
+            z-index: 999;
+            opacity: 0;
+            visibility: hidden;
+            box-shadow: 0 8px 40px var(--shadow-strong);
+        }
+
+        .mobile-menu.active {
+            transform: translateY(0);
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .mobile-nav-links {
+            display: flex;
+            flex-direction: column;
+            padding: 2rem;
+            gap: 1rem;
+        }
+
+        .mobile-nav-links .nav-item {
+            padding: 1rem;
+            border-radius: 12px;
+            background: var(--bg-primary);
+            border: 1px solid var(--border);
+        }
+
+        /* Main Content with proper spacing for fixed header */
+        .main-content {
+            flex: 1;
+            padding: 6rem 2rem 3rem;
+            max-width: 1600px;
+            margin: 0 auto;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: calc(100vh - 6rem);
+        }
+
+        /* Monitoring Section */
+        .monitoring-section {
+            text-align: center;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .status-text {
+            font-size: 2.5rem;
+            font-weight: 800;
+            background: var(--gradient-primary);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 1rem;
+            animation: statusPulse 2s ease-in-out infinite;
+        }
+
+        @keyframes statusPulse {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.8;
+            }
+        }
+
+        .instructions {
+            background: var(--bg-glass);
+            backdrop-filter: blur(30px);
+            border: 1px solid var(--border-light);
+            border-radius: 20px;
+            padding: 2rem;
+            margin: 2rem 0;
+            box-shadow: 0 10px 40px var(--shadow);
+        }
+
+        .instructions h3 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            justify-content: center;
+        }
+
+        .instruction-list {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .instruction-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem;
+            background: var(--bg-primary);
+            border-radius: 12px;
+            border-left: 4px solid var(--primary);
+            transition: all var(--transition-base);
+        }
+
+        .instruction-item:hover {
+            transform: translateX(5px);
+            box-shadow: 0 4px 20px var(--shadow);
+        }
+
+        .instruction-icon {
+            min-width: 2.5rem;
+            height: 2.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--gradient-primary);
+            border-radius: 50%;
+            color: white;
+        }
+
+        .instruction-icon svg {
+            width: 20px;
+            height: 20px;
+            stroke: currentColor;
+            fill: none;
+            stroke-width: 2;
+        }
+
+        .instruction-text {
+            font-size: 1rem;
+            color: var(--text-secondary);
+            line-height: 1.5;
+        }
+
+        /* WAVING RED BUTTON - BEAUTIFUL! */
+        .red-button-container {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2rem;
+            margin: 3rem 0;
+        }
+
+        .waving-button {
+            position: relative;
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background: linear-gradient(145deg, #ff4757, #ff3742, #ff2837);
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            color: white;
+            font-weight: 800;
+            transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            box-shadow:
+                0 0 0 0 rgba(255, 71, 87, 0.7),
+                0 10px 30px rgba(255, 71, 87, 0.4);
+            animation: wavingPulse 2s ease-in-out infinite;
+            z-index: 10;
+        }
+
+        .waving-button::before {
+            content: '';
+            position: absolute;
+            top: -10px;
+            left: -10px;
+            right: -10px;
+            bottom: -10px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, transparent, rgba(255, 71, 87, 0.3), transparent);
+            animation: wavingRing 3s ease-in-out infinite;
+            z-index: -1;
+        }
+
+        .waving-button::after {
+            content: '';
+            position: absolute;
+            top: -20px;
+            left: -20px;
+            right: -20px;
+            bottom: -20px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, transparent, rgba(255, 71, 87, 0.2), transparent);
+            animation: wavingRing 3s ease-in-out infinite 0.5s;
+            z-index: -2;
+        }
+
+        .waving-button:hover {
+            transform: scale(1.1);
+            box-shadow:
+                0 0 0 20px rgba(255, 71, 87, 0.2),
+                0 15px 40px rgba(255, 71, 87, 0.6);
+        }
+
+        .waving-button:active {
+            transform: scale(0.95);
+        }
+
+        .waving-button svg {
+            width: 32px;
+            height: 32px;
+            stroke: currentColor;
+            fill: none;
+            stroke-width: 2;
+            animation: handWave 1.5s ease-in-out infinite;
+        }
+
+        @keyframes wavingPulse {
+
+            0%,
+            100% {
+                box-shadow:
+                    0 0 0 0 rgba(255, 71, 87, 0.7),
+                    0 10px 30px rgba(255, 71, 87, 0.4);
+            }
+
+            50% {
+                box-shadow:
+                    0 0 0 15px rgba(255, 71, 87, 0.0),
+                    0 15px 40px rgba(255, 71, 87, 0.6);
+            }
+        }
+
+        @keyframes wavingRing {
+            0% {
+                transform: rotate(0deg) scale(1);
+                opacity: 1;
+            }
+
+            50% {
+                transform: rotate(180deg) scale(1.2);
+                opacity: 0.5;
+            }
+
+            100% {
+                transform: rotate(360deg) scale(1);
+                opacity: 1;
+            }
+        }
+
+        @keyframes handWave {
+
+            0%,
+            100% {
+                transform: rotate(0deg);
+            }
+
+            25% {
+                transform: rotate(15deg);
+            }
+
+            75% {
+                transform: rotate(-15deg);
+            }
+        }
+
+        .button-label {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            text-align: center;
+        }
+
+        /* Alert System */
+        .alert-container {
+            position: fixed;
+            top: 6rem;
+            right: 2rem;
+            z-index: 1001;
+            max-width: 400px;
+        }
+
+        .alert {
+            background: var(--bg-glass-strong);
+            backdrop-filter: blur(30px);
+            border: 1px solid var(--border-light);
+            border-radius: 16px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            box-shadow: 0 8px 32px var(--shadow-strong);
+            transform: translateX(100%);
+            transition: all var(--transition-bounce);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .alert.show {
+            transform: translateX(0);
+        }
+
+        .alert::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+        }
+
+        .alert.warning::before {
+            background: var(--warning);
+        }
+
+        .alert.error::before {
+            background: var(--error);
+        }
+
+        .alert.success::before {
+            background: var(--success);
+        }
+
+        .alert-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+        }
+
+        .alert-title {
+            font-weight: 700;
+            font-size: 1rem;
+        }
+
+        .alert-close {
+            background: none;
+            border: none;
+            font-size: 1.2rem;
+            cursor: pointer;
+            color: var(--text-muted);
+            padding: 0;
+        }
+
+        .alert-message {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        /* RESPONSIVE DESIGN */
+        @media (max-width: 768px) {
+            .nav-menu {
+                display: none;
+            }
+
+            .mobile-menu-btn {
+                display: flex;
+            }
+
+            .header {
+                padding: 1rem;
+            }
+
+            .main-content {
+                padding: 5rem 1rem 2rem;
+            }
+
+            .status-text {
+                font-size: 2rem;
+            }
+
+            .instructions {
+                padding: 1.5rem;
+            }
+
+            .instruction-list {
+                gap: 0.75rem;
+            }
+
+            .instruction-item {
+                padding: 0.75rem;
+            }
+
+            .waving-button {
+                width: 100px;
+                height: 100px;
+                font-size: 1.5rem;
+            }
+
+            .waving-button svg {
+                width: 28px;
+                height: 28px;
+            }
+
+            .alert-container {
+                right: 1rem;
+                left: 1rem;
+                max-width: none;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .header {
+                padding: 0.75rem;
+            }
+
+            .main-content {
+                padding: 4.5rem 0.75rem 1.5rem;
+            }
+
+            .logo-text {
+                font-size: 1.2rem;
+            }
+
+            .user-info span {
+                display: none;
+            }
+
+            .status-text {
+                font-size: 1.5rem;
+            }
+
+            .instructions {
+                padding: 1rem;
+            }
+
+            .instruction-item {
+                flex-direction: column;
+                text-align: center;
+                gap: 0.5rem;
+            }
+
+            .waving-button {
+                width: 80px;
+                height: 80px;
+                font-size: 1.2rem;
+            }
+
+            .waving-button svg {
+                width: 24px;
+                height: 24px;
+            }
+        }
+
+        /* Utility Classes */
+        .fade-in {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all var(--transition-base);
+        }
+
+        .fade-in.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Scroll Progress Bar -->
+    <div class="scroll-progress" id="scrollProgress"></div>
+
+    <!-- Background Effects -->
+    <div class="bg-effects">
+        <div class="gradient-orb orb-1"></div>
+        <div class="gradient-orb orb-2"></div>
+        <div class="gradient-orb orb-3"></div>
+    </div>
+
+    <!-- Alert Container -->
+    <div class="alert-container" id="alertContainer"></div>
+
+    <div class="container">
+        <!-- Header -->
+        <header class="header" id="header">
+            <div class="header-left">
+                <div class="logo-section" onclick="window.location.href='index.html'" title="Return to Landing Page">
+                    <div class="dashboard-logo">
+                        <div class="logo-eye">
+                            <div class="logo-pupil"></div>
+                        </div>
+                    </div>
+                    <div class="logo-text">Lumina AI</div>
+                </div>
+
+                <nav class="nav-menu">
+                    
+                    <a href="monitor.html" class="nav-item active">Monitor</a>
+            
+                    <a href="exercises.html" class="nav-item">Exercises</a>
+                    <a href="gammm.html" class="nav-item">Games</a>
+                    <a href="info page.html" class="nav-item">Info</a>
+                </nav>
+            </div>
+
+            <div class="header-right">
+                <div class="user-info">
+                    <div class="user-avatar">U</div>
+                    <span>Dr. User</span>
+                </div>
+                <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                </button>
+                <button class="mobile-menu-btn" id="mobileMenuBtn">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </button>
+            </div>
+        </header>
+
+        <!-- Mobile Menu -->
+        <div class="mobile-menu" id="mobileMenu">
+            <div class="mobile-nav-links">
+                <a href="monitor.html" class="nav-item active">Monitor</a>
+               
+                <a href="exercises.html" class="nav-item">Exercises</a>
+           
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="monitoring-section fade-in">
+                <!-- Status Text -->
+                <h1 class="status-text">Ready for Monitoring</h1>
+
+                <!-- Eye Instructions -->
+                <div class="instructions fade-in">
+                    <h3>
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <circle cx="12" cy="12" r="3" />
+                            <path
+                                d="M12 1v6M12 17v6M4.22 4.22l4.24 4.24M15.54 15.54l4.24 4.24M1 12h6M17 12h6M4.22 19.78l4.24-4.24M15.54 8.46l4.24-4.24" />
+                        </svg>
+                        Eye Monitoring Instructions
+                    </h3>
+                    <ul class="instruction-list">
+                        <li class="instruction-item">
+                            <div class="instruction-icon">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
+                                    <circle cx="12" cy="10" r="3" />
+                                </svg>
+                            </div>
+                            <span class="instruction-text">Position yourself 18-24 inches away from the screen for
+                                optimal tracking</span>
+                        </li>
+                        <li class="instruction-item">
+                            <div class="instruction-icon">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <circle cx="12" cy="12" r="5" />
+                                    <path
+                                        d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" />
+                                </svg>
+                            </div>
+                            <span class="instruction-text">Ensure adequate lighting - avoid glare and shadows on your
+                                face</span>
+                        </li>
+                        <li class="instruction-item">
+                            <div class="instruction-icon">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <circle cx="12" cy="12" r="3" />
+                                    <path
+                                        d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+                                </svg>
+                            </div>
+                            <span class="instruction-text">Look directly at the camera for accurate eye detection and
+                                blink analysis</span>
+                        </li>
+                        <li class="instruction-item">
+                            <div class="instruction-icon">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <circle cx="12" cy="12" r="10" />
+                                    <polyline points="12,6 12,12 16,14" />
+                                </svg>
+                            </div>
+                            <span class="instruction-text">Take regular breaks every 20 minutes for healthy eye strain
+                                management</span>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Beautiful Waving Red Button -->
+                <div class="red-button-container fade-in">
+                    <button class="waving-button" id="wavingButton" title="Start Eye Monitoring">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path
+                                d="M7 7h.01M7 3h5c.512 0 .853.61.62 1.1l-2 4.2c-.058.126-.172.2-.3.2H6.14c-.474 0-.897-.33-.974-.796L4.71 3.69A.5.5 0 0 1 5.196 3H7z" />
+                            <path d="M14 12v8" />
+                            <path d="M14 12s0-2 1-2 1 2 1 2" />
+                            <path d="M16 12s0-2 1-2 1 2 1 2" />
+                            <path d="M18 12s0-2 1-2 1 2 1 2" />
+                        </svg>
+                    </button>
+                    <div class="button-label">Click to Start Monitoring</div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // Global Variables
+        let currentTheme = localStorage.getItem('theme') || 'light';
+
+        // Initialize App
+        document.addEventListener('DOMContentLoaded', function () {
+            initializeApp();
+        });
+
+        function initializeApp() {
+            setTheme(currentTheme);
+            setupScrollEffects();
+            setupMobileMenu();
+            setupAnimations();
+            setupWavingButton();
+            console.log('🎯 Lumina AI Ready for Monitoring!');
+        }
+
+        // Theme Management
+        function setTheme(theme) {
+            currentTheme = theme;
+            document.documentElement.setAttribute('data-theme', theme);
+            localStorage.setItem('theme', theme);
+
+            const themeToggle = document.getElementById('themeToggle');
+            if (themeToggle) {
+                const icon = themeToggle.querySelector('svg');
+                if (theme === 'dark') {
+                    icon.innerHTML = '<circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>';
+                } else {
+                    icon.innerHTML = '<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>';
+                }
+            }
+        }
+
+        function toggleTheme() {
+            const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+            setTheme(newTheme);
+        }
+
+        // WAVING BUTTON FUNCTIONALITY
+        function setupWavingButton() {
+            const wavingBtn = document.getElementById('wavingButton');
+
+            wavingBtn.addEventListener('click', () => {
+                // Add click effect
+                wavingBtn.style.transform = 'scale(0.95)';
+
+                setTimeout(() => {
+                    wavingBtn.style.transform = 'scale(1)';
+
+                    // Show success message
+                    showAlert('🎉 Starting Eye Monitoring System!', 'success');
+
+                    // Open main UI using Electron API after 1 second
+                    setTimeout(() => {
+                        if (window.electronAPI && window.electronAPI.openMainUI) {
+                            window.electronAPI.openMainUI();
+                        } else {
+                            console.error('Electron API not available');
+                        }
+                    }, 1000);
+
+                }, 150);
+            });
+
+            wavingBtn.addEventListener('mouseenter', () => {
+                wavingBtn.style.transform = 'scale(1.1)';
+            });
+
+            wavingBtn.addEventListener('mouseleave', () => {
+                wavingBtn.style.transform = 'scale(1)';
+            });
+
+            // Keyboard support
+            wavingBtn.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    wavingBtn.click();
+                }
+            });
+        }
+
+        // Theme Toggle
+        document.getElementById('themeToggle').addEventListener('click', toggleTheme);
+
+        // Alert System
+        function showAlert(message, type = 'info') {
+            const alertContainer = document.getElementById('alertContainer');
+
+            const alert = document.createElement('div');
+            alert.className = `alert ${type}`;
+            alert.innerHTML = `
+                <div class="alert-header">
+                    <div class="alert-title">
+                        ${type === 'error' ? '⚠️ Alert' : type === 'warning' ? '🟡 Warning' : type === 'success' ? '✅ Success' : 'ℹ️ Info'}
+                    </div>
+                    <button class="alert-close">&times;</button>
+                </div>
+                <div class="alert-message">${message}</div>
+            `;
+
+            alert.querySelector('.alert-close').addEventListener('click', () => {
+                alert.classList.remove('show');
+                setTimeout(() => alert.remove(), 300);
+            });
+
+            alertContainer.appendChild(alert);
+            setTimeout(() => alert.classList.add('show'), 100);
+
+            setTimeout(() => {
+                if (alert.parentNode) {
+                    alert.classList.remove('show');
+                    setTimeout(() => alert.remove(), 300);
+                }
+            }, 5000);
+        }
+
+        // Scroll Effects
+        function setupScrollEffects() {
+            const header = document.getElementById('header');
+            const scrollProgress = document.getElementById('scrollProgress');
+
+            let ticking = false;
+
+            function updateScrollEffects() {
+                const scrollTop = window.pageYOffset;
+                const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+                const scrollPercent = Math.min((scrollTop / docHeight) * 100, 100);
+
+                if (scrollProgress) {
+                    scrollProgress.style.width = scrollPercent + '%';
+                }
+
+                if (header) {
+                    if (scrollTop > 100) {
+                        header.classList.add('scrolled');
+                    } else {
+                        header.classList.remove('scrolled');
+                    }
+                }
+
+                ticking = false;
+            }
+
+            function requestScrollUpdate() {
+                if (!ticking) {
+                    requestAnimationFrame(updateScrollEffects);
+                    ticking = true;
+                }
+            }
+
+            window.addEventListener('scroll', requestScrollUpdate, { passive: true });
+            updateScrollEffects();
+        }
+
+        // Mobile Menu
+        function setupMobileMenu() {
+            const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+            const mobileMenu = document.getElementById('mobileMenu');
+
+            if (mobileMenuBtn && mobileMenu) {
+                mobileMenuBtn.addEventListener('click', function () {
+                    mobileMenuBtn.classList.toggle('active');
+                    mobileMenu.classList.toggle('active');
+                    document.body.style.overflow = mobileMenu.classList.contains('active') ? 'hidden' : '';
+                });
+
+                mobileMenu.addEventListener('click', function (e) {
+                    if (e.target.classList.contains('nav-item')) {
+                        mobileMenuBtn.classList.remove('active');
+                        mobileMenu.classList.remove('active');
+                        document.body.style.overflow = '';
+                    }
+                });
+            }
+        }
+
+        // Animations
+        function setupAnimations() {
+            const observerOptions = {
+                threshold: 0.1,
+                rootMargin: '0px 0px -50px 0px'
+            };
+
+            const observer = new IntersectionObserver(function (entries) {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('visible');
+                    }
+                });
+            }, observerOptions);
+
+            document.querySelectorAll('.fade-in').forEach(el => {
+                observer.observe(el);
+            });
+        }
+
+        // PWA functionality preserved
+        function checkPWAMode() {
+            const isPWA = window.matchMedia('(display-mode: standalone)').matches ||
+                window.navigator.standalone === true;
+
+            if (isPWA) {
+                console.log('📱 Running as PWA!');
+                document.body.classList.add('pwa-mode');
+            }
+        }
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+
+            switch (e.code) {
+                case 'KeyT':
+                    e.preventDefault();
+                    toggleTheme();
+                    break;
+                case 'Space':
+                case 'Enter':
+                    if (e.target.id === 'wavingButton') {
+                        e.preventDefault();
+                        document.getElementById('wavingButton').click();
+                    }
+                    break;
+            }
+        });
+
+        // Welcome message
+        setTimeout(() => {
+            showAlert('👋 Welcome to Lumina AI! Follow the instructions and click the button to start.', 'success');
+        }, 2000);
+
+        console.log('🎯 Lumina AI Ready! Professional icons with beautiful waving button! 🌊✨');
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,1688 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lumina AI - Eye Blink Detection</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='35' fill='%236366f1'/><circle cx='50' cy='50' r='20' fill='white'/><circle cx='50' cy='50' r='8' fill='%236366f1'/></svg>">
+    <style>
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --primary-light: #8b5cf6;
+            --secondary: #06b6d4;
+            --accent: #f59e0b;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --error: #ef4444;
+            --gradient-primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --gradient-secondary: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            --gradient-accent: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            --gradient-success: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            --bg-primary: #ffffff;
+            --bg-secondary: #f8fafc;
+            --bg-tertiary: #f1f5f9;
+            --bg-glass: rgba(255, 255, 255, 0.85);
+            --bg-glass-strong: rgba(255, 255, 255, 0.95);
+            --text-primary: #0f172a;
+            --text-secondary: #64748b;
+            --text-muted: #94a3b8;
+            --text-inverse: #ffffff;
+            --border: #e2e8f0;
+            --border-light: rgba(255, 255, 255, 0.2);
+            --shadow: rgba(15, 23, 42, 0.1);
+            --shadow-strong: rgba(15, 23, 42, 0.2);
+            --backdrop: rgba(0, 0, 0, 0.6);
+            --font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            --transition-base: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            --transition-bounce: 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+
+        [data-theme="dark"] {
+            --bg-primary: #0f172a;
+            --bg-secondary: #1e293b;
+            --bg-tertiary: #334155;
+            --bg-glass: rgba(30, 41, 59, 0.85);
+            --bg-glass-strong: rgba(30, 41, 59, 0.95);
+            --text-primary: #f8fafc;
+            --text-secondary: #cbd5e1;
+            --text-muted: #94a3b8;
+            --text-inverse: #0f172a;
+            --border: #475569;
+            --border-light: rgba(148, 163, 184, 0.2);
+            --shadow: rgba(0, 0, 0, 0.5);
+            --shadow-strong: rgba(0, 0, 0, 0.7);
+            --backdrop: rgba(0, 0, 0, 0.8);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            transition: all var(--transition-base);
+            -webkit-font-smoothing: antialiased;
+            overflow-x: hidden;
+        }
+
+        /* Background Effects */
+        .bg-effects {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+            overflow: hidden;
+        }
+
+        .gradient-orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(100px);
+            opacity: 0.4;
+            animation: orbFloat 25s ease-in-out infinite;
+        }
+
+        .orb-1 {
+            width: 400px;
+            height: 400px;
+            background: var(--gradient-primary);
+            top: -200px;
+            right: -200px;
+            animation-delay: 0s;
+        }
+
+        .orb-2 {
+            width: 300px;
+            height: 300px;
+            background: var(--gradient-secondary);
+            bottom: -150px;
+            left: -150px;
+            animation-delay: -12s;
+        }
+
+        .orb-3 {
+            width: 250px;
+            height: 250px;
+            background: var(--gradient-accent);
+            top: 40%;
+            left: 60%;
+            animation-delay: -8s;
+        }
+
+        @keyframes orbFloat {
+            0%, 100% {
+                transform: translate(0, 0) scale(1) rotate(0deg);
+            }
+            25% {
+                transform: translate(30px, -30px) scale(1.1) rotate(90deg);
+            }
+            50% {
+                transform: translate(-20px, 20px) scale(0.9) rotate(180deg);
+            }
+            75% {
+                transform: translate(20px, 30px) scale(1.05) rotate(270deg);
+            }
+        }
+
+        /* Scroll Progress Bar */
+        .scroll-progress {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 0%;
+            height: 3px;
+            background: var(--gradient-primary);
+            z-index: 10001;
+            transition: width 0.1s ease;
+            box-shadow: 0 0 10px var(--primary);
+        }
+
+        /* HEADER */
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: var(--bg-glass);
+            backdrop-filter: blur(30px);
+            border-bottom: 1px solid var(--border-light);
+            padding: 1rem 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            z-index: 1000;
+            box-shadow: 0 8px 32px rgba(99, 102, 241, 0.3);
+            transition: all var(--transition-base);
+        }
+
+        .header.scrolled {
+            background: var(--bg-glass-strong);
+            box-shadow: 0 12px 40px var(--shadow-strong);
+            border-bottom-color: var(--border);
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+            flex: 1;
+        }
+
+        .logo-section {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            cursor: pointer;
+            transition: all var(--transition-bounce);
+            position: relative;
+            padding: 0.5rem;
+            border-radius: 25px;
+        }
+
+        .logo-section:hover {
+            transform: scale(1.05);
+            background: rgba(99, 102, 241, 0.1);
+        }
+
+        .dashboard-logo {
+            position: relative;
+            width: 50px;
+            height: 35px;
+        }
+
+        .logo-eye {
+            width: 50px;
+            height: 35px;
+            background: var(--gradient-primary);
+            border-radius: 50%;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 6px 25px rgba(99, 102, 241, 0.4);
+            animation: logoFloat 4s ease-in-out infinite;
+            border: 2px solid var(--border-light);
+        }
+
+        .logo-eye::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 25px;
+            height: 25px;
+            background: var(--text-inverse);
+            border-radius: 50%;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            animation: eyeballFloat 3s ease-in-out infinite;
+        }
+
+        .logo-pupil {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 10px;
+            height: 10px;
+            background: var(--primary-dark);
+            border-radius: 50%;
+            animation: pupilTrack 5s ease-in-out infinite;
+            box-shadow: 0 0 8px rgba(79, 70, 229, 0.8);
+        }
+
+        @keyframes logoFloat {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-2px) rotate(2deg); }
+        }
+
+        @keyframes eyeballFloat {
+            0%, 100% { transform: translate(-50%, -50%) scale(1); }
+            50% { transform: translate(-50%, -50%) scale(1.05); }
+        }
+
+        @keyframes pupilTrack {
+            0%, 100% { transform: translate(-50%, -50%) translateX(0); }
+            25% { transform: translate(-50%, -50%) translateX(4px); }
+            75% { transform: translate(-50%, -50%) translateX(-4px); }
+        }
+
+        .logo-text {
+            font-weight: 900;
+            font-size: 1.5rem;
+            background: var(--gradient-primary);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .nav-menu {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: var(--bg-glass);
+            backdrop-filter: blur(20px);
+            border-radius: 25px;
+            padding: 0.5rem;
+            border: 1px solid var(--border-light);
+        }
+
+        .nav-item {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-weight: 600;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            transition: all var(--transition-base);
+            position: relative;
+            overflow: hidden;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .nav-item::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: var(--gradient-primary);
+            transition: left 0.3s ease;
+            z-index: -1;
+        }
+
+        .nav-item:hover::before,
+        .nav-item.active::before {
+            left: 0;
+        }
+
+        .nav-item:hover,
+        .nav-item.active {
+            color: var(--text-inverse);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
+        }
+
+        .nav-item i {
+            font-size: 1.1em;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .theme-toggle {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: 2px solid var(--border-light);
+            background: var(--bg-glass);
+            backdrop-filter: blur(20px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all var(--transition-bounce);
+            position: relative;
+            overflow: hidden;
+            color: var(--text-secondary);
+            font-size: 1.2em;
+        }
+
+        .theme-toggle::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: var(--gradient-primary);
+            transition: left 0.3s ease;
+            opacity: 0.2;
+            z-index: -1;
+        }
+
+        .theme-toggle:hover::before {
+            left: 0;
+        }
+
+        .theme-toggle:hover {
+            transform: scale(1.1) rotate(180deg);
+            box-shadow: 0 6px 20px rgba(99, 102, 241, 0.3);
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        /* Container */
+        .container {
+            min-height: 100vh;
+            padding-top: 80px;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Section Styles */
+        .section {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 80px 2rem;
+        }
+
+        .section-title {
+            font-size: 3.5rem;
+            font-weight: 900;
+            background: var(--gradient-primary);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 20px;
+            animation: fadeInDown 0.8s ease;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .section-title i {
+            font-size: 1.1em;
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .section-subtitle {
+            font-size: 1.3rem;
+            color: var(--text-secondary);
+            margin-bottom: 50px;
+            line-height: 1.8;
+            animation: fadeInUp 0.8s ease 0.2s backwards;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Hero Section */
+        .hero {
+            min-height: calc(100vh - 80px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            position: relative;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(circle at 50% 50%, rgba(99, 102, 241, 0.1) 0%, transparent 70%);
+            animation: pulse 4s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 0.5; transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.05); }
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 2;
+            max-width: 900px;
+        }
+
+        .hero h1 {
+            font-size: 4.5rem;
+            font-weight: 900;
+            margin-bottom: 25px;
+            background: var(--gradient-primary);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: fadeInDown 0.8s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+        }
+
+        .hero h1 i {
+            font-size: 1em;
+            background: var(--gradient-primary);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: heroEyeFloat 3s ease-in-out infinite;
+            filter: drop-shadow(0 0 15px rgba(99, 102, 241, 0.5));
+        }
+
+        @keyframes heroEyeFloat {
+            0%, 100% { transform: translateY(0) scale(1); }
+            50% { transform: translateY(-8px) scale(1.08); }
+        }
+
+        .hero p {
+            font-size: 1.4rem;
+            color: var(--text-secondary);
+            margin-bottom: 40px;
+            line-height: 1.7;
+            animation: fadeInUp 0.8s ease 0.2s backwards;
+        }
+
+        .hero-buttons {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            flex-wrap: wrap;
+            animation: fadeInUp 0.8s ease 0.4s backwards;
+        }
+
+        .btn {
+            padding: 15px 40px;
+            font-size: 1.1em;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all var(--transition-base);
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-primary {
+            background: var(--gradient-primary);
+            color: white;
+            box-shadow: 0 10px 30px rgba(99, 102, 241, 0.4);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 40px rgba(99, 102, 241, 0.6);
+        }
+
+        .btn-secondary {
+            background: transparent;
+            border: 2px solid var(--primary);
+            color: var(--text-primary);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(99, 102, 241, 0.1);
+            transform: translateY(-3px);
+        }
+
+        .btn i {
+            font-size: 1.2em;
+        }
+
+        /* Info Cards */
+        .info-card {
+            background: var(--bg-glass);
+            backdrop-filter: blur(30px);
+            border: 1px solid var(--border-light);
+            border-radius: 20px;
+            padding: 40px;
+            margin-bottom: 30px;
+            box-shadow: 0 15px 40px var(--shadow);
+            transition: all var(--transition-base);
+        }
+
+        .info-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 50px var(--shadow-strong);
+            border-color: rgba(99, 102, 241, 0.5);
+        }
+
+        .info-card h3 {
+            font-size: 1.8em;
+            margin-bottom: 20px;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .info-card h3 i {
+            font-size: 1.2em;
+        }
+
+        .info-card p {
+            font-size: 1.05em;
+            line-height: 1.8;
+            color: var(--text-secondary);
+            margin-bottom: 15px;
+        }
+
+        /* Feature Grid */
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 25px;
+            margin-top: 40px;
+        }
+
+        .feature-card {
+            background: var(--bg-glass);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--border-light);
+            padding: 30px;
+            border-radius: 15px;
+            transition: all var(--transition-base);
+            text-align: center;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-8px);
+            background: rgba(99, 102, 241, 0.1);
+            box-shadow: 0 15px 40px var(--shadow-strong);
+        }
+
+        .feature-icon {
+            font-size: 3em;
+            margin-bottom: 15px;
+            background: var(--gradient-primary);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: iconFloat 3s ease-in-out infinite;
+        }
+
+        @keyframes iconFloat {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-5px); }
+        }
+
+        .feature-card h4 {
+            font-size: 1.3em;
+            margin-bottom: 12px;
+            color: var(--primary);
+        }
+
+        .feature-card p {
+            font-size: 0.95em;
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+
+        /* Pros & Cons */
+        .pros-cons-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-top: 50px;
+        }
+
+        @media (max-width: 768px) {
+            .pros-cons-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .pros-card, .cons-card {
+            background: var(--bg-glass);
+            backdrop-filter: blur(30px);
+            border-radius: 20px;
+            padding: 40px;
+            border: 1px solid var(--border-light);
+            transition: all var(--transition-base);
+        }
+
+        .pros-card:hover, .cons-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 40px var(--shadow-strong);
+        }
+
+        .pros-card {
+            border-left: 5px solid var(--success);
+        }
+
+        .cons-card {
+            border-left: 5px solid var(--error);
+        }
+
+        .pros-card h3, .cons-card h3 {
+            font-size: 1.6em;
+            margin-bottom: 25px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .pros-card h3 {
+            color: var(--success);
+        }
+
+        .cons-card h3 {
+            color: var(--error);
+        }
+
+        .pros-card h3 i, .cons-card h3 i {
+            font-size: 1.3em;
+        }
+
+        .list-items {
+            list-style: none;
+        }
+
+        .list-items li {
+            padding: 12px 0;
+            padding-left: 35px;
+            position: relative;
+            border-bottom: 1px solid var(--border);
+            line-height: 1.6;
+            transition: all var(--transition-base);
+        }
+
+        .list-items li:hover {
+            transform: translateX(5px);
+            color: var(--primary);
+        }
+
+        .list-items li:last-child {
+            border-bottom: none;
+        }
+
+        .pros-card .list-items li::before {
+            content: '\f058';
+            font-family: 'Font Awesome 6 Free';
+            font-weight: 900;
+            position: absolute;
+            left: 0;
+            color: var(--success);
+            font-size: 1.2em;
+        }
+
+        .cons-card .list-items li::before {
+            content: '\f057';
+            font-family: 'Font Awesome 6 Free';
+            font-weight: 900;
+            position: absolute;
+            left: 0;
+            color: var(--error);
+            font-size: 1.2em;
+        }
+
+        /* Treatment Grid */
+        .treatment-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 25px;
+            margin-top: 40px;
+        }
+
+        .treatment-card {
+            background: var(--bg-glass);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--border-light);
+            border-radius: 15px;
+            padding: 35px;
+            transition: all var(--transition-base);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .treatment-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 40px var(--shadow-strong);
+            border-color: rgba(99, 102, 241, 0.5);
+        }
+
+        .treatment-icon {
+            font-size: 3em;
+            margin-bottom: 15px;
+            background: var(--gradient-primary);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            position: relative;
+            z-index: 2;
+        }
+
+        .treatment-card h4 {
+            font-size: 1.4em;
+            color: var(--primary);
+            margin-bottom: 12px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .treatment-card p {
+            font-size: 0.95em;
+            line-height: 1.7;
+            color: var(--text-secondary);
+            position: relative;
+            z-index: 2;
+        }
+
+        /* Innovation & Impact Section */
+        .innovation-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-top: 50px;
+        }
+
+        .innovation-card {
+            background: var(--bg-glass);
+            backdrop-filter: blur(30px);
+            border: 1px solid var(--border-light);
+            border-radius: 20px;
+            padding: 35px;
+            transition: all var(--transition-base);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .innovation-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 5px;
+            background: var(--gradient-primary);
+        }
+
+        .innovation-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 50px var(--shadow-strong);
+            border-color: rgba(99, 102, 241, 0.5);
+        }
+
+        .innovation-icon {
+            font-size: 3.5em;
+            margin-bottom: 20px;
+            background: var(--gradient-primary);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: iconFloat 3s ease-in-out infinite;
+        }
+
+        .innovation-card h3 {
+            font-size: 1.6em;
+            color: var(--primary);
+            margin-bottom: 15px;
+        }
+
+        .innovation-card p {
+            font-size: 1.05em;
+            line-height: 1.8;
+            color: var(--text-secondary);
+            margin-bottom: 20px;
+        }
+
+        .innovation-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .innovation-list li {
+            padding: 10px 0;
+            padding-left: 30px;
+            position: relative;
+            color: var(--text-secondary);
+            font-size: 0.95em;
+            line-height: 1.6;
+        }
+
+        .innovation-list li::before {
+            content: '\f00c';
+            font-family: 'Font Awesome 6 Free';
+            font-weight: 900;
+            position: absolute;
+            left: 0;
+            color: var(--primary);
+            font-size: 1em;
+        }
+
+        /* Team Section - Updated with MP4 Video support */
+        .team-section {
+            background: var(--bg-glass);
+            backdrop-filter: blur(30px);
+            border: 1px solid var(--border-light);
+            border-radius: 30px;
+            padding: 60px 40px;
+            margin-top: 80px;
+            box-shadow: 0 20px 60px var(--shadow);
+        }
+
+        .team-header {
+            text-align: center;
+            margin-bottom: 50px;
+        }
+
+        .team-header h2 {
+            font-size: 3rem;
+            background: var(--gradient-primary);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        .team-header p {
+            font-size: 1.2rem;
+            color: var(--text-secondary);
+            line-height: 1.7;
+        }
+
+        .team-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 25px;
+        }
+
+        .team-member {
+            background: var(--bg-primary);
+            border: 2px solid var(--border);
+            border-radius: 20px;
+            padding: 35px 25px;
+            text-align: center;
+            transition: all var(--transition-base);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .team-member::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: var(--gradient-primary);
+            opacity: 0.1;
+            transition: left 0.4s ease;
+            z-index: 0;
+        }
+
+        .team-member:hover::before {
+            left: 0;
+        }
+
+        .team-member:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 12px 35px var(--shadow-strong);
+            border-color: var(--primary);
+        }
+
+        .team-member-content {
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Updated Team Avatar to support MP4 Video */
+        .team-avatar {
+            width: 120px;
+            height: 120px;
+            margin: 0 auto 20px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 8px 25px rgba(99, 102, 241, 0.4);
+            transition: all var(--transition-base);
+            overflow: hidden;
+            border: 4px solid transparent;
+            background: var(--gradient-primary);
+            position: relative;
+        }
+
+        /* Video styling for circular display */
+        .team-avatar video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 50%;
+            display: block;
+        }
+
+        /* Fallback for when no video is present */
+        .team-avatar:not(:has(video)) {
+            font-size: 2.5em;
+            color: white;
+        }
+
+        .team-member:hover .team-avatar {
+            transform: scale(1.15) rotate(360deg);
+            box-shadow: 0 15px 45px rgba(99, 102, 241, 0.7);
+            border-color: rgba(99, 102, 241, 0.5);
+        }
+
+        /* Prevent video from rotating during hover */
+        .team-member:hover .team-avatar video {
+            transform: rotate(-360deg);
+        }
+
+        .team-name {
+            font-size: 1.3em;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 8px;
+        }
+
+        .team-role {
+            font-size: 0.95em;
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        /* FAQ Section */
+        .faq-container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .faq-item {
+            background: var(--bg-glass);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--border-light);
+            border-radius: 15px;
+            margin-bottom: 15px;
+            overflow: hidden;
+            transition: all var(--transition-base);
+        }
+
+        .faq-item:hover {
+            border-color: rgba(99, 102, 241, 0.5);
+            box-shadow: 0 10px 30px var(--shadow);
+        }
+
+        .faq-question {
+            padding: 25px 30px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all var(--transition-base);
+            font-weight: 600;
+            font-size: 1.05em;
+        }
+
+        .faq-question:hover {
+            background: rgba(99, 102, 241, 0.1);
+            color: var(--primary);
+        }
+
+        .faq-icon {
+            transition: transform 0.3s ease;
+            color: var(--primary);
+            font-size: 1.2em;
+        }
+
+        .faq-item.active .faq-icon {
+            transform: rotate(180deg);
+        }
+
+        .faq-answer {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+            padding: 0 30px;
+            color: var(--text-secondary);
+            font-size: 0.95em;
+            line-height: 1.7;
+        }
+
+        .faq-item.active .faq-answer {
+            max-height: 500px;
+            padding: 0 30px 25px 30px;
+        }
+
+        /* Footer */
+        footer {
+            background: var(--bg-glass);
+            backdrop-filter: blur(30px);
+            border-top: 1px solid var(--border-light);
+            padding: 40px 20px;
+            text-align: center;
+            margin-top: 80px;
+        }
+
+        footer p {
+            color: var(--text-secondary);
+            line-height: 1.8;
+            margin-bottom: 10px;
+        }
+
+        footer a {
+            color: var(--primary);
+            text-decoration: none;
+            transition: opacity 0.3s ease;
+        }
+
+        footer a:hover {
+            opacity: 0.8;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .header {
+                padding: 1rem;
+            }
+
+            .nav-menu {
+                display: none;
+            }
+
+            .section {
+                padding: 50px 1rem;
+            }
+
+            .section-title {
+                font-size: 2.5rem;
+            }
+
+            .hero h1 {
+                font-size: 2.5rem;
+                flex-direction: column;
+            }
+
+            .hero p {
+                font-size: 1.1rem;
+            }
+
+            .hero-buttons {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .feature-grid,
+            .treatment-grid,
+            .innovation-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .pros-cons-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .info-card {
+                padding: 25px;
+            }
+
+            .treatment-card {
+                padding: 25px;
+            }
+
+            .team-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .team-section {
+                padding: 40px 20px;
+            }
+
+            .team-header h2 {
+                font-size: 2.2rem;
+                flex-direction: column;
+            }
+
+            .team-avatar {
+                width: 100px;
+                height: 100px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .header {
+                padding: 0.75rem;
+            }
+
+            .section {
+                padding: 40px 1rem;
+            }
+
+            .section-title {
+                font-size: 2rem;
+            }
+
+            .hero h1 {
+                font-size: 1.8rem;
+            }
+
+            .hero p {
+                font-size: 1rem;
+            }
+
+            .team-header h2 {
+                font-size: 1.8rem;
+            }
+
+            .team-avatar {
+                width: 90px;
+                height: 90px;
+            }
+        }
+    </style>
+</head>
+<body data-theme="light">
+    <!-- Scroll Progress Bar -->
+    <div class="scroll-progress" id="scrollProgress"></div>
+
+    <!-- Background Effects -->
+    <div class="bg-effects">
+        <div class="gradient-orb orb-1"></div>
+        <div class="gradient-orb orb-2"></div>
+        <div class="gradient-orb orb-3"></div>
+    </div>
+
+    <!-- Header -->
+    <header class="header" id="header">
+        <div class="header-left">
+            <div class="logo-section" onclick="window.location.href='index.html'">
+                <div class="dashboard-logo">
+                    <div class="logo-eye">
+                        <div class="logo-pupil"></div>
+                    </div>
+                </div>
+                <div class="logo-text">Lumina AI</div>
+            </div>
+
+            <nav class="nav-menu">
+                <a href="monitor.html" class="nav-item">Monitor</a>
+                <a href="exercises.html" class="nav-item">Exercises</a>
+                <a href="gammm.html" class="nav-item">Games</a>
+                <a href="info page.html" class="nav-item active">Info</a>
+            </nav>
+        </div>
+
+        <div class="header-right">
+            <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">
+                <i class="fas fa-moon"></i>
+            </button>
+        </div>
+    </header>
+
+    <div class="container">
+        <!-- Hero Section -->
+        <section class="hero">
+            <div class="hero-content">
+                <h1><i class="fas fa-eye"></i>Lumina AI</h1>
+                <p>AI-powered eye monitoring system that detects blink patterns to assess visual fatigue, screen dependency, and mental alertness in real-time</p>
+                <div class="hero-buttons">
+                    <button class="btn btn-primary" onclick="document.getElementById('about').scrollIntoView({behavior: 'smooth'})">
+                        <i class="fas fa-book"></i>Learn More
+                    </button>
+                    <button class="btn btn-secondary" onclick="document.getElementById('treatment').scrollIntoView({behavior: 'smooth'})">
+                        <i class="fas fa-flask-vial"></i>Solutions
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- What is Section -->
+        <section id="about" class="section">
+            <h2 class="section-title"><i class="fas fa-lightbulb"></i>What is Eye Blink Detection?</h2>
+            
+            <div class="info-card">
+                <h3><i class="fas fa-microscope"></i>Technology Overview</h3>
+                <p>Eye blink detection is a biometric technology that uses computer vision and AI to monitor eye movements and blink patterns. Using webcam feeds or specialized eye-tracking hardware, the system analyzes:</p>
+                
+                <div class="feature-grid">
+                    <div class="feature-card">
+                        <div class="feature-icon"><i class="fas fa-chart-line"></i></div>
+                        <h4>Blink Rate</h4>
+                        <p>Normal blink rate is 15-20 blinks per minute. Deviations indicate fatigue or concentration issues.</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon"><i class="fas fa-hourglass-end"></i></div>
+                        <h4>Blink Duration</h4>
+                        <p>Prolonged blinks (>200ms) suggest drowsiness or eye strain accumulating over time.</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon"><i class="fas fa-crosshairs"></i></div>
+                        <h4>Gaze Tracking</h4>
+                        <p>Monitors eye focus patterns to detect attention shifts and screen fixation levels.</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon"><i class="fas fa-brain"></i></div>
+                        <h4>Pattern Recognition</h4>
+                        <p>AI algorithms detect anomalies in blink patterns indicating health or behavioral changes.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Benefits & Limitations Section -->
+        <section id="benefits" class="section">
+            <h2 class="section-title"><i class="fas fa-scale-balanced"></i>Benefits & Limitations</h2>
+            
+            <div class="pros-cons-grid">
+                <!-- Benefits -->
+                <div class="pros-card">
+                    <h3><i class="fas fa-check-circle"></i>Benefits</h3>
+                    <ul class="list-items">
+                        <li>Non-invasive and contactless screening</li>
+                        <li>Real-time fatigue and drowsiness detection</li>
+                        <li>Early warning for eye strain conditions</li>
+                        <li>Helps reduce digital eye fatigue (DES)</li>
+                        <li>Improves driver and worker safety</li>
+                        <li>Personalized health insights and alerts</li>
+                        <li>Works with standard webcams</li>
+                        <li>Continuous 24/7 monitoring capability</li>
+                        <li>Data-driven interventions</li>
+                        <li>Cost-effective screening solution</li>
+                    </ul>
+                </div>
+
+                <!-- Limitations -->
+                <div class="cons-card">
+                    <h3><i class="fas fa-triangle-exclamation"></i>Limitations</h3>
+                    <ul class="list-items">
+                        <li>Requires good lighting conditions</li>
+                        <li>Affected by makeup or glasses</li>
+                        <li>Privacy concerns with continuous monitoring</li>
+                        <li>Not 100% accurate for all users</li>
+                        <li>Requires stable internet connection</li>
+                        <li>Can be disrupted by rapid head movements</li>
+                        <li>False positives in certain conditions</li>
+                        <li>Cannot diagnose clinical conditions alone</li>
+                        <li>Requires initial calibration per user</li>
+                        <li>Data security and storage considerations</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- Treatment Solutions -->
+        <section id="treatment" class="section">
+            <h2 class="section-title"><i class="fas fa-stethoscope"></i>Treatment & Solutions</h2>
+            <p class="section-subtitle">Comprehensive approaches to address eye blink-related concerns</p>
+
+            <div class="treatment-grid">
+                <div class="treatment-card">
+                    <div class="treatment-icon"><i class="fas fa-eye"></i></div>
+                    <h4>Digital Eye Strain Relief</h4>
+                    <p>Follow 20-20-20 rule: Every 20 minutes, look at something 20 feet away for 20 seconds. Regular breaks prevent strain accumulation.</p>
+                </div>
+
+                <div class="treatment-card">
+                    <div class="treatment-icon"><i class="fas fa-pills"></i></div>
+                    <h4>Medical Treatment</h4>
+                    <p>Artificial tears, anti-inflammatory drops, or prescription medications. Consult optometrist for personalized eye care solutions.</p>
+                </div>
+
+                <div class="treatment-card">
+                    <div class="treatment-icon"><i class="fas fa-laptop"></i></div>
+                    <h4>Screen Management</h4>
+                    <p>Reduce screen time, adjust display settings (brightness, contrast), use blue light filters, and maintain proper distance from screens.</p>
+                </div>
+
+                <div class="treatment-card">
+                    <div class="treatment-icon"><i class="fas fa-heart"></i></div>
+                    <h4>Lifestyle Changes</h4>
+                    <p>Sleep quality improvements, proper hydration, omega-3 supplements, and stress management reduce eye fatigue symptoms.</p>
+                </div>
+
+                <div class="treatment-card">
+                    <div class="treatment-icon"><i class="fas fa-glasses"></i></div>
+                    <h4>Corrective Aids</h4>
+                    <p>Blue light blocking glasses, prescription updates, or specialized computer glasses designed for screen work comfort.</p>
+                </div>
+
+                <div class="treatment-card">
+                    <div class="treatment-icon"><i class="fas fa-dumbbell"></i></div>
+                    <h4>Eye Exercises</h4>
+                    <p>Palming technique, eye rotations, focusing exercises strengthen eye muscles and improve blink reflex naturally.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Innovation & Impact Section -->
+        <section id="innovation" class="section">
+            <h2 class="section-title"><i class="fas fa-lightbulb"></i>Innovation & Impact</h2>
+            <p class="section-subtitle">How Lumina AI is transforming eye health monitoring and digital wellness</p>
+
+            <div class="innovation-grid">
+                <div class="innovation-card">
+                    <div class="innovation-icon"><i class="fas fa-robot"></i></div>
+                    <h3>AI-Powered Detection</h3>
+                    <p>Advanced machine learning algorithms provide real-time blink analysis with 95%+ accuracy, detecting subtle patterns invisible to the human eye.</p>
+                    <ul class="innovation-list">
+                        <li>Real-time pattern recognition</li>
+                        <li>Adaptive learning models</li>
+                        <li>Personalized health insights</li>
+                        <li>Predictive fatigue analysis</li>
+                    </ul>
+                </div>
+
+                <div class="innovation-card">
+                    <div class="innovation-icon"><i class="fas fa-shield-halved"></i></div>
+                    <h3>Privacy-First Approach</h3>
+                    <p>All processing happens locally on your device. No cloud storage, no data sharing, complete transparency in how your information is handled.</p>
+                    <ul class="innovation-list">
+                        <li>On-device processing</li>
+                        <li>No cloud data storage</li>
+                        <li>End-to-end encryption</li>
+                        <li>User data control</li>
+                    </ul>
+                </div>
+
+                <div class="innovation-card">
+                    <div class="innovation-icon"><i class="fas fa-users"></i></div>
+                    <h3>Accessible for Everyone</h3>
+                    <p>Works with standard webcams on any device. No expensive equipment, no professional setup required - just open and start monitoring.</p>
+                    <ul class="innovation-list">
+                        <li>Zero-cost entry barrier</li>
+                        <li>Standard hardware compatibility</li>
+                        <li>Simple user interface</li>
+                        <li>Multi-platform support</li>
+                    </ul>
+                </div>
+
+                <div class="innovation-card">
+                    <div class="innovation-icon"><i class="fas fa-briefcase-medical"></i></div>
+                    <h3>Workplace Wellness</h3>
+                    <p>Helping organizations protect employee eye health with non-intrusive monitoring, break reminders, and comprehensive wellness analytics.</p>
+                    <ul class="innovation-list">
+                        <li>Corporate wellness integration</li>
+                        <li>Productivity insights</li>
+                        <li>Break time optimization</li>
+                        <li>Health compliance tracking</li>
+                    </ul>
+                </div>
+
+                <div class="innovation-card">
+                    <div class="innovation-icon"><i class="fas fa-graduation-cap"></i></div>
+                    <h3>Educational Impact</h3>
+                    <p>Supporting students and educators with eye health monitoring during extended study sessions and online learning environments.</p>
+                    <ul class="innovation-list">
+                        <li>Student wellness monitoring</li>
+                        <li>Study break optimization</li>
+                        <li>Learning environment insights</li>
+                        <li>Parent/teacher dashboards</li>
+                    </ul>
+                </div>
+
+                <div class="innovation-card">
+                    <div class="innovation-icon"><i class="fas fa-car"></i></div>
+                    <h3>Driver Safety</h3>
+                    <p>Reducing accidents through real-time drowsiness detection, alerting drivers before fatigue becomes dangerous on the road.</p>
+                    <ul class="innovation-list">
+                        <li>Fatigue detection alerts</li>
+                        <li>Accident prevention</li>
+                        <li>Commercial fleet integration</li>
+                        <li>Emergency response triggers</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- FAQ Section -->
+        <section id="faq" class="section">
+            <h2 class="section-title"><i class="fas fa-circle-question"></i>Frequently Asked Questions</h2>
+            <p class="section-subtitle">Common questions about eye blink detection</p>
+
+            <div class="faq-container">
+                <div class="faq-item">
+                    <div class="faq-question">
+                        <span>How accurate is eye blink detection technology?</span>
+                        <span class="faq-icon"><i class="fas fa-chevron-down"></i></span>
+                    </div>
+                    <div class="faq-answer">
+                        Modern eye blink detection achieves 95%+ accuracy under ideal conditions. Accuracy varies based on lighting, camera quality, and user setup. Professional systems with IR cameras are more reliable than webcam-based solutions.
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <div class="faq-question">
+                        <span>Is eye blink detection safe and non-invasive?</span>
+                        <span class="faq-icon"><i class="fas fa-chevron-down"></i></span>
+                    </div>
+                    <div class="faq-answer">
+                        Completely safe and non-invasive. It only uses computer vision to analyze eye movements through a camera. No contact, no radiation, no medical procedures involved. Just visual monitoring.
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <div class="faq-question">
+                        <span>What conditions can eye blink detection help diagnose?</span>
+                        <span class="faq-icon"><i class="fas fa-chevron-down"></i></span>
+                    </div>
+                    <div class="faq-answer">
+                        Eye blink detection helps identify: digital eye strain, fatigue, drowsiness, sleep disorders, attention deficit issues, and neurological conditions. However, it's a screening tool - professional medical diagnosis is always necessary.
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <div class="faq-question">
+                        <span>Can glasses or contacts affect eye blink detection?</span>
+                        <span class="faq-icon"><i class="fas fa-chevron-down"></i></span>
+                    </div>
+                    <div class="faq-answer">
+                        Contacts don't affect detection. Glasses can cause slight reflections that may reduce accuracy. Non-reflective glasses or contact lenses are ideal. Modern systems compensate for minor reflections.
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <div class="faq-question">
+                        <span>What is a normal blink rate?</span>
+                        <span class="faq-icon"><i class="fas fa-chevron-down"></i></span>
+                    </div>
+                    <div class="faq-answer">
+                        Normal blink rate is 15-20 blinks per minute. During screen work, it drops to 5-8 blinks/min (reduced blinking syndrome). During reading or intense focus, blink rate decreases further.
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <div class="faq-question">
+                        <span>How does this help prevent eye diseases?</span>
+                        <span class="faq-icon"><i class="fas fa-chevron-down"></i></span>
+                    </div>
+                    <div class="faq-answer">
+                        Early detection of blink pattern abnormalities can indicate stress, fatigue, or emerging conditions. Timely interventions prevent chronic issues like digital eye strain from developing into serious conditions.
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <div class="faq-question">
+                        <span>Is my data private with eye blink detection systems?</span>
+                        <span class="faq-icon"><i class="fas fa-chevron-down"></i></span>
+                    </div>
+                    <div class="faq-answer">
+                        Privacy depends on the system. Look for solutions with local processing (data stays on your device), encryption, clear privacy policies, and no third-party sharing. Always verify before using.
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <div class="faq-question">
+                        <span>Can eye blink detection work in low light?</span>
+                        <span class="faq-icon"><i class="fas fa-chevron-down"></i></span>
+                    </div>
+                    <div class="faq-answer">
+                        IR (infrared) camera systems work well in low light. Standard webcams need adequate lighting. For best results, ensure good lighting or use devices with IR capability. Avoid backlighting which causes glare.
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Team Section (Developed By) - UPDATED WITH MP4 VIDEO SUPPORT -->
+        <section id="team" class="section">
+            <div class="team-section">
+                <div class="team-header">
+                    <h2><i class="fas fa-code"></i>Developed By</h2>
+                    <p>Student developers from HMR Institute of Technology & Management</p>
+                </div>
+
+                <div class="team-grid">
+                    <div class="team-member">
+                        <div class="team-member-content">
+                            <div class="team-avatar">
+                                <!-- Replace with your MP4 file for Ayush Kumar -->
+                                <video autoplay loop muted playsinline>
+                                    <source src="ima.mp4" type="video/mp4">
+                                </video>
+                            </div>
+                            <div class="team-name">Ayush Kumar</div>
+                            <div class="team-role">Student</div>
+                        </div>
+                    </div>
+
+                    <div class="team-member">
+                        <div class="team-member-content">
+                            <div class="team-avatar">
+                                <!-- Replace with your MP4 file for Nandan Pradhan -->
+                                <video autoplay loop muted playsinline>
+                                    <source src="im.mp4" type="video/mp4">
+                                </video>
+                            </div>
+                            <div class="team-name">Nandan Pradhan</div>
+                            <div class="team-role">Student</div>
+                        </div>
+                    </div>
+
+                    <div class="team-member">
+                        <div class="team-member-content">
+                            <div class="team-avatar">
+                                <!-- Replace with your MP4 file for Nishant Gupta -->
+                                <video autoplay loop muted playsinline>
+                                    <source src="imag.mp4" type="video/mp4">
+                                </video>
+                            </div>
+                            <div class="team-name">Nishant Gupta</div>
+                            <div class="team-role">Student</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <p><strong>Eye Blink Detection Information Portal</strong></p>
+        <p><i class="fas fa-circle-info"></i> Educational content about eye health and detection technology | <a href="#">Privacy Policy</a> | <a href="#">Contact Us</a></p>
+        <p style="margin-top: 15px; font-size: 0.85em; opacity: 0.7;">© 2025 Lumina AI. <i class="fas fa-triangle-exclamation"></i> Disclaimer: This content is educational only. Not a substitute for professional medical advice. Consult eye specialists for diagnosis.</p>
+    </footer>
+
+    <script>
+        let currentTheme = localStorage.getItem('theme') || 'light';
+
+        document.addEventListener('DOMContentLoaded', () => {
+            setTheme(currentTheme);
+            setupScrollEffects();
+            setupNavigation();
+            setupFAQ();
+            console.log('👁️ Eye Blink Detection Info Page Loaded!');
+        });
+
+        function setTheme(theme) {
+            currentTheme = theme;
+            document.documentElement.setAttribute('data-theme', theme);
+            localStorage.setItem('theme', theme);
+
+            const themeToggle = document.getElementById('themeToggle');
+            if (themeToggle) {
+                const icon = themeToggle.querySelector('i');
+                if (theme === 'dark') {
+                    icon.className = 'fas fa-sun';
+                } else {
+                    icon.className = 'fas fa-moon';
+                }
+            }
+        }
+
+        function toggleTheme() {
+            const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+            setTheme(newTheme);
+        }
+
+        document.getElementById('themeToggle').addEventListener('click', toggleTheme);
+
+        function setupScrollEffects() {
+            const header = document.getElementById('header');
+            const scrollProgress = document.getElementById('scrollProgress');
+
+            window.addEventListener('scroll', () => {
+                const scrollTop = window.pageYOffset;
+                const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+                const scrollPercent = (scrollTop / docHeight) * 100;
+
+                if (scrollProgress) {
+                    scrollProgress.style.width = scrollPercent + '%';
+                }
+
+                if (header) {
+                    if (scrollTop > 100) {
+                        header.classList.add('scrolled');
+                    } else {
+                        header.classList.remove('scrolled');
+                    }
+                }
+            });
+        }
+
+        function setupNavigation() {
+            const navItems = document.querySelectorAll('.nav-item');
+
+            navItems.forEach(item => {
+                item.addEventListener('click', function() {
+                    navItems.forEach(i => i.classList.remove('active'));
+                    this.classList.add('active');
+                });
+            });
+        }
+
+        function setupFAQ() {
+            const faqItems = document.querySelectorAll('.faq-item');
+
+            faqItems.forEach(item => {
+                const question = item.querySelector('.faq-question');
+                
+                question.addEventListener('click', () => {
+                    const isActive = item.classList.contains('active');
+                    faqItems.forEach(i => i.classList.remove('active'));
+                    if (!isActive) {
+                        item.classList.add('active');
+                    }
+                });
+            });
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,2646 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LUMINA Vision - Clinical Eye Testing System</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --bg-primary: #0a0e27;
+            --bg-secondary: rgba(10, 14, 39, 0.9);
+            --bg-card: rgba(255, 255, 255, 0.05);
+            --bg-card-hover: rgba(255, 255, 255, 0.08);
+            --text-primary: #ffffff;
+            --text-secondary: rgba(255, 255, 255, 0.8);
+            --accent-primary: #667eea;
+            --accent-secondary: #764ba2;
+            --accent-gold: #ffd700;
+            --border-color: rgba(255, 255, 255, 0.1);
+            --shadow-color: rgba(0, 0, 0, 0.5);
+            --success-color: #4caf50;
+            --error-color: #f44336;
+            --warning-color: #ff9800;
+        }
+
+        [data-theme="light"] {
+            --bg-primary: #f5f7fa;
+            --bg-secondary: rgba(255, 255, 255, 0.95);
+            --bg-card: rgba(102, 126, 234, 0.08);
+            --bg-card-hover: rgba(102, 126, 234, 0.15);
+            --text-primary: #1a1a1a;
+            --text-secondary: rgba(26, 26, 26, 0.8);
+            --border-color: rgba(102, 126, 234, 0.2);
+            --shadow-color: rgba(102, 126, 234, 0.3);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            user-select: none;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+        }
+
+        html, body {
+            width: 100%;
+            overflow-x: hidden;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--bg-primary);
+            min-height: 100vh;
+            color: var(--text-primary);
+            transition: background 0.3s ease, color 0.3s ease;
+        }
+
+        .stars {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+            opacity: 1;
+            transition: opacity 0.3s ease;
+        }
+
+        [data-theme="light"] .stars {
+            opacity: 0.1;
+        }
+
+        .star {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background: white;
+            border-radius: 50%;
+            animation: twinkle 3s infinite;
+        }
+
+        @keyframes twinkle {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 1; }
+        }
+
+        .theme-toggle {
+            position: fixed;
+            top: 15px;
+            right: 15px;
+            z-index: 1000;
+            background: var(--bg-card);
+            backdrop-filter: blur(10px);
+            border: 2px solid var(--border-color);
+            border-radius: 50px;
+            padding: 10px 20px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px var(--shadow-color);
+            font-size: 0.9em;
+        }
+
+        .theme-toggle:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px var(--shadow-color);
+        }
+
+        .theme-icon {
+            font-size: 1.3em;
+            width: 20px;
+            text-align: center;
+        }
+
+        .distance-warning {
+            position: fixed;
+            top: 65px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--warning-color);
+            color: white;
+            padding: 12px 25px;
+            border-radius: 50px;
+            z-index: 999;
+            font-weight: bold;
+            animation: pulse 2s infinite;
+            box-shadow: 0 5px 20px rgba(255, 152, 0, 0.5);
+            font-size: 0.9em;
+            white-space: nowrap;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: translateX(-50%) scale(1); }
+            50% { transform: translateX(-50%) scale(1.05); }
+        }
+
+        .container {
+            position: relative;
+            z-index: 10;
+            width: 100%;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .screen {
+            display: none;
+            width: 100%;
+            max-width: 1400px;
+        }
+
+        .screen.active {
+            display: block;
+            animation: screenFadeIn 0.5s ease;
+        }
+
+        @keyframes screenFadeIn {
+            from { opacity: 0; transform: scale(0.98); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        .home-wrapper {
+            text-align: center;
+            background: var(--bg-card);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 40px 30px;
+            border: 2px solid var(--border-color);
+            box-shadow: 0 20px 60px var(--shadow-color);
+            max-height: 90vh;
+            overflow-y: auto;
+            width: 100%;
+        }
+
+        h1 {
+            font-size: clamp(2em, 8vw, 4em);
+            background: linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-secondary) 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            color: transparent;
+            margin-bottom: 15px;
+            animation: glow 2s ease-in-out infinite;
+        }
+
+        @keyframes glow {
+            0%, 100% { filter: drop-shadow(0 0 20px rgba(102, 126, 234, 0.5)); }
+            50% { filter: drop-shadow(0 0 40px rgba(102, 126, 234, 0.8)); }
+        }
+
+        .subtitle {
+            font-size: clamp(1.1em, 4vw, 1.5em);
+            margin-bottom: 20px;
+            color: var(--text-secondary);
+        }
+
+        .btn {
+            background: linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-secondary) 100%);
+            color: white;
+            border: none;
+            padding: clamp(12px, 3vw, 20px) clamp(25px, 5vw, 50px);
+            font-size: clamp(0.9em, 3vw, 1.3em);
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+            margin: 10px;
+            position: relative;
+            overflow: hidden;
+            display: inline-block;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+
+        .btn:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 40px rgba(102, 126, 234, 0.6);
+        }
+
+        .btn-text {
+            position: relative;
+            z-index: 1;
+        }
+
+        .info-box {
+            background: var(--bg-card);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--border-color);
+            border-radius: 15px;
+            padding: clamp(20px, 4vw, 30px);
+            margin: 15px 0;
+            text-align: left;
+            transition: all 0.3s ease;
+        }
+
+        .info-box:hover {
+            transform: translateY(-3px);
+            background: var(--bg-card-hover);
+            border-color: rgba(102, 126, 234, 0.5);
+        }
+
+        .info-box h3 {
+            color: var(--accent-gold);
+            font-size: clamp(1.3em, 4vw, 1.8em);
+            margin-bottom: 12px;
+        }
+
+        .info-box p {
+            line-height: 1.7;
+            margin: 10px 0;
+            font-size: clamp(0.95em, 2vw, 1.1em);
+            color: var(--text-secondary);
+        }
+
+        .equipment-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            margin: 5px 5px 5px 0;
+        }
+
+        .mode-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: clamp(15px, 3vw, 25px);
+            margin: 30px 0;
+        }
+
+        .mode-card {
+            background: var(--bg-card);
+            border: 2px solid var(--border-color);
+            border-radius: 20px;
+            padding: clamp(20px, 4vw, 35px);
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.4s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .mode-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(102, 126, 234, 0.1) 0%, transparent 70%);
+            transform: rotate(45deg);
+            transition: all 0.6s ease;
+        }
+
+        .mode-card:hover::before {
+            top: -60%;
+            left: -60%;
+        }
+
+        .mode-card:hover {
+            transform: scale(1.03) translateY(-8px);
+            border-color: rgba(102, 126, 234, 0.8);
+            box-shadow: 0 20px 60px rgba(102, 126, 234, 0.4);
+        }
+
+        .mode-icon {
+            font-size: clamp(3em, 8vw, 4em);
+            margin-bottom: 15px;
+            display: block;
+            width: 100%;
+            text-align: center;
+        }
+
+        .mode-title {
+            font-size: clamp(1.3em, 4vw, 1.6em);
+            margin-bottom: 10px;
+            color: var(--accent-gold);
+        }
+
+        .mode-desc {
+            font-size: clamp(0.9em, 2.5vw, 1em);
+            color: var(--text-secondary);
+            line-height: 1.5;
+        }
+
+        .equipment-tag {
+            background: rgba(102, 126, 234, 0.2);
+            padding: 5px 10px;
+            border-radius: 10px;
+            font-size: 0.8em;
+            margin-top: 10px;
+            display: inline-block;
+        }
+
+        /* Game Screen */
+        .game-wrapper {
+            width: 100%;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            gap: clamp(10px, 2vw, 20px);
+            padding: clamp(10px, 2vw, 20px);
+        }
+
+        .game-header {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+            gap: clamp(8px, 2vw, 15px);
+            padding: clamp(12px, 2vw, 20px);
+            background: var(--bg-card);
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--border-color);
+            width: 100%;
+        }
+
+        .stat-box {
+            text-align: center;
+            padding: clamp(8px, 2vw, 15px);
+            min-width: 80px;
+        }
+
+        .stat-label {
+            font-size: clamp(0.7em, 2vw, 0.9em);
+            color: var(--text-secondary);
+            margin-bottom: 3px;
+        }
+
+        .stat-value {
+            font-size: clamp(1.3em, 4vw, 2em);
+            font-weight: bold;
+            color: var(--accent-gold);
+            text-shadow: 0 0 20px rgba(255, 215, 0, 0.3);
+        }
+
+        .game-area {
+            flex: 1;
+            position: relative;
+            background: var(--bg-secondary);
+            border-radius: 20px;
+            overflow: hidden;
+            border: 2px solid var(--border-color);
+            perspective: 1000px;
+            min-height: 400px;
+            width: 100%;
+        }
+
+        .snellen-grid {
+            position: absolute;
+            top: clamp(5%, 10vw, 10%);
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            flex-direction: column;
+            gap: clamp(15px, 3vw, 30px);
+            align-items: center;
+            opacity: 0.1;
+        }
+
+        .snellen-line {
+            display: flex;
+            gap: clamp(10px, 2vw, 20px);
+            font-family: 'Courier New', monospace;
+            font-weight: bold;
+            color: var(--text-primary);
+            font-size: clamp(2em, 8vw, 4em);
+        }
+
+        .game-object-container {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .game-object {
+            font-size: clamp(60px, 15vw, 100px);
+            font-weight: bold;
+            font-family: 'Courier New', monospace;
+            text-shadow: 0 0 30px rgba(255, 255, 255, 0.3);
+            transition: all 0.3s ease;
+            position: relative;
+            filter: blur(0px);
+            color: var(--text-primary);
+            letter-spacing: clamp(2px, 1vw, 5px);
+        }
+
+        .distance-indicator {
+            position: absolute;
+            top: clamp(15px, 3vw, 25px);
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: clamp(1.3em, 4vw, 2em);
+            font-weight: bold;
+            color: var(--accent-gold);
+            text-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
+            z-index: 100;
+            background: var(--bg-card);
+            padding: clamp(8px, 2vw, 15px) clamp(20px, 4vw, 35px);
+            border-radius: 50px;
+            backdrop-filter: blur(10px);
+            border: 2px solid var(--border-color);
+            white-space: nowrap;
+        }
+
+        .phase-indicator {
+            position: absolute;
+            top: clamp(60px, 10vw, 90px);
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: clamp(0.85em, 2.5vw, 1.2em);
+            color: var(--text-secondary);
+            background: var(--bg-card);
+            padding: clamp(6px, 1.5vw, 12px) clamp(15px, 3vw, 25px);
+            border-radius: 30px;
+            backdrop-filter: blur(10px);
+            z-index: 99;
+            white-space: nowrap;
+        }
+
+        .options-container {
+            position: absolute;
+            bottom: clamp(15px, 3vw, 30px);
+            left: 50%;
+            transform: translateX(-50%);
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(70px, 1fr));
+            gap: clamp(8px, 2vw, 15px);
+            z-index: 100;
+            max-width: 95%;
+            width: 100%;
+        }
+
+        .option-btn {
+            min-width: clamp(60px, 15vw, 100px);
+            height: clamp(60px, 15vw, 100px);
+            font-size: clamp(1.5em, 4vw, 2.2em);
+            font-weight: bold;
+            font-family: 'Courier New', monospace;
+            background: var(--bg-card);
+            border: 3px solid var(--border-color);
+            border-radius: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-primary);
+            padding: clamp(5px, 1vw, 10px);
+        }
+
+        .option-btn:hover {
+            background: var(--bg-card-hover);
+            transform: scale(1.08) translateY(-3px);
+            border-color: var(--accent-primary);
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.5);
+        }
+
+        .option-btn:focus,
+        .option-btn:focus-visible,
+        .option-btn:active {
+            outline: none !important;
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.5) !important;
+        }
+
+        .option-btn.correct {
+            background: rgba(76, 175, 80, 0.8);
+            border-color: var(--success-color);
+            animation: correctPulse 0.5s ease;
+        }
+
+        .option-btn.wrong {
+            background: rgba(244, 67, 54, 0.8);
+            border-color: var(--error-color);
+            animation: shake 0.5s ease;
+        }
+
+        @keyframes correctPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.15); }
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-8px); }
+            75% { transform: translateX(8px); }
+        }
+
+        .timer-bar {
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 6px;
+            background: linear-gradient(90deg, var(--success-color), var(--accent-gold), var(--error-color));
+            transition: width 0.1s linear;
+            z-index: 200;
+            width: 100%;
+            box-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+        }
+
+        .instruction-popup {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: var(--bg-secondary);
+            backdrop-filter: blur(20px);
+            padding: clamp(25px, 5vw, 45px);
+            border-radius: 25px;
+            border: 2px solid var(--border-color);
+            text-align: center;
+            z-index: 1000;
+            max-width: clamp(250px, 90vw, 700px);
+            animation: popIn 0.5s ease;
+            box-shadow: 0 20px 60px var(--shadow-color);
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        @keyframes popIn {
+            from { transform: translate(-50%, -50%) scale(0.5); opacity: 0; }
+            to { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+        }
+
+        .instruction-popup h2 {
+            color: var(--accent-gold);
+            margin-bottom: 15px;
+            font-size: clamp(1.5em, 4vw, 2.2em);
+        }
+
+        .instruction-popup p {
+            font-size: clamp(0.95em, 2.5vw, 1.2em);
+            line-height: 1.8;
+            margin: 12px 0;
+            color: var(--text-secondary);
+        }
+
+        .distance-setup {
+            background: rgba(255, 152, 0, 0.1);
+            border: 2px solid var(--warning-color);
+            padding: clamp(12px, 2vw, 20px);
+            border-radius: 12px;
+            margin: 12px 0;
+        }
+
+        .distance-setup h3 {
+            color: var(--warning-color);
+            margin-bottom: 8px;
+            font-size: clamp(1em, 3vw, 1.3em);
+        }
+
+        .tumbling-e {
+            font-size: clamp(100px, 25vw, 150px);
+            font-weight: 900;
+            font-family: 'Courier New', monospace;
+            color: var(--text-primary);
+            line-height: 1;
+            transition: transform 0.5s ease;
+        }
+
+        .direction-options {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+            gap: clamp(12px, 2vw, 20px);
+            max-width: 100%;
+            width: clamp(250px, 90vw, 550px);
+            margin: 0 auto;
+        }
+
+        .direction-btn {
+            width: 100%;
+            height: clamp(80px, 20vw, 120px);
+            font-size: clamp(1.3em, 3vw, 1.8em);
+            font-weight: bold;
+            background: var(--bg-card);
+            border: 3px solid var(--border-color);
+            border-radius: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            color: var(--text-primary);
+            padding: clamp(8px, 1vw, 12px);
+        }
+
+        .direction-btn .icon {
+            font-size: clamp(1.5em, 4vw, 2.5em);
+        }
+
+        .direction-btn:hover {
+            background: var(--bg-card-hover);
+            transform: scale(1.05);
+            border-color: var(--accent-primary);
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.5);
+        }
+
+        .direction-btn:focus,
+        .direction-btn:focus-visible,
+        .direction-btn:active {
+            outline: none !important;
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.5) !important;
+        }
+
+        .balls-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        .moving-ball {
+            position: absolute;
+            border-radius: 50%;
+            transition: all 0.05s linear;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: clamp(16px, 4vw, 28px);
+            font-weight: bold;
+            color: white;
+            text-shadow: 0 2px 8px rgba(0,0,0,0.5);
+            cursor: pointer;
+            border: 4px solid rgba(255, 255, 255, 0.4);
+            box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+        }
+
+        .moving-ball:hover {
+            transform: scale(1.25) !important;
+            box-shadow: 0 0 40px rgba(255, 255, 255, 0.9);
+            z-index: 10;
+            border-width: 5px;
+        }
+
+        .moving-ball:focus,
+        .moving-ball:focus-visible,
+        .moving-ball:active {
+            outline: none !important;
+            box-shadow: 0 0 40px rgba(255, 255, 255, 0.9) !important;
+        }
+
+        /* Manual Screen */
+        .manual-section {
+            background: var(--bg-card);
+            border: 2px solid var(--border-color);
+            border-radius: 15px;
+            padding: clamp(20px, 3vw, 30px);
+            margin: 20px 0;
+            text-align: left;
+        }
+
+        .manual-section h3 {
+            color: var(--accent-gold);
+            margin-bottom: 15px;
+            font-size: clamp(1.2em, 3vw, 1.6em);
+        }
+
+        .manual-section ul {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .manual-section li {
+            margin: 10px 0;
+            padding-left: 30px;
+            position: relative;
+            font-size: clamp(0.9em, 2vw, 1.1em);
+            line-height: 1.6;
+        }
+
+        .manual-section li::before {
+            content: '\f058';
+            font-family: 'Font Awesome 6 Free';
+            font-weight: 900;
+            position: absolute;
+            left: 0;
+            color: var(--success-color);
+        }
+
+        .manual-step {
+            background: rgba(102, 126, 234, 0.1);
+            border-left: 4px solid var(--accent-primary);
+            padding: 15px 20px;
+            margin: 15px 0;
+            border-radius: 8px;
+        }
+
+        .manual-step strong {
+            color: var(--accent-gold);
+            display: block;
+            margin-bottom: 8px;
+        }
+
+        /* Result Screen */
+        .result-wrapper {
+            text-align: center;
+            padding: clamp(20px, 3vw, 40px);
+            width: 100%;
+        }
+
+        .result-header {
+            font-size: clamp(2.5em, 8vw, 3.5em);
+            margin-bottom: 20px;
+            animation: resultAppear 0.8s ease;
+        }
+
+        @keyframes resultAppear {
+            from { transform: scale(0) rotate(-180deg); opacity: 0; }
+            to { transform: scale(1) rotate(0deg); opacity: 1; }
+        }
+
+        .score-display {
+            font-size: clamp(3em, 12vw, 6em);
+            font-weight: bold;
+            background: linear-gradient(135deg, var(--accent-gold) 0%, #ff6b6b 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            color: transparent;
+            margin: 20px 0;
+        }
+
+        .result-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: clamp(12px, 2vw, 20px);
+            margin: 30px 0;
+        }
+
+        .detail-card {
+            background: var(--bg-card);
+            padding: clamp(15px, 2vw, 25px);
+            border-radius: 15px;
+            border: 2px solid var(--border-color);
+            transition: all 0.3s ease;
+        }
+
+        .detail-card:hover {
+            transform: translateY(-3px);
+            border-color: var(--accent-primary);
+        }
+
+        .detail-card h4 {
+            color: var(--accent-gold);
+            margin-bottom: 8px;
+            font-size: clamp(1em, 3vw, 1.3em);
+        }
+
+        .detail-card p {
+            font-size: clamp(0.9em, 2vw, 1.1em);
+            line-height: 1.6;
+            color: var(--text-secondary);
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 30px;
+            background: var(--bg-card);
+            border-radius: 20px;
+            overflow: hidden;
+            margin: 20px 0;
+            border: 2px solid var(--border-color);
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--success-color), var(--accent-gold));
+            transition: width 1s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: clamp(0.8em, 2vw, 1.1em);
+            color: white;
+        }
+
+        .report-section {
+            background: var(--bg-card);
+            border: 2px solid var(--border-color);
+            border-radius: 15px;
+            padding: clamp(20px, 3vw, 35px);
+            margin: 25px 0;
+            text-align: left;
+            width: 100%;
+        }
+
+        .report-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid var(--border-color);
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .report-header h3 {
+            font-size: clamp(1.2em, 3vw, 1.5em);
+        }
+
+        .visual-acuity-score {
+            font-size: clamp(2.5em, 8vw, 3.5em);
+            font-weight: bold;
+            color: var(--accent-gold);
+            text-align: center;
+            margin: 20px 0;
+            text-shadow: 0 0 30px rgba(255, 215, 0, 0.3);
+        }
+
+        ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        li {
+            margin: 10px 0;
+            padding-left: 25px;
+            position: relative;
+            font-size: clamp(0.9em, 2vw, 1.1em);
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+
+        li::before {
+            content: '\f05d';
+            font-family: 'Font Awesome 6 Free';
+            font-weight: 900;
+            position: absolute;
+            left: 0;
+            color: var(--success-color);
+            font-size: 1.3em;
+        }
+
+        button:focus,
+        button:focus-visible,
+        button:active {
+            outline: none !important;
+            -webkit-appearance: none !important;
+            -moz-appearance: none !important;
+            appearance: none !important;
+        }
+
+        @media (max-width: 1024px) {
+            .mode-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .mode-grid {
+                grid-template-columns: 1fr;
+            }
+            .game-wrapper {
+                gap: 6px;
+                padding: 6px;
+            }
+            .option-btn {
+                min-width: 50px;
+                height: 50px;
+                font-size: 1.2em;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .distance-warning {
+                font-size: 0.75em;
+                padding: 8px 15px;
+            }
+            .theme-toggle {
+                top: 10px;
+                right: 10px;
+                padding: 8px 15px;
+                font-size: 0.8em;
+            }
+        }
+
+        @media print {
+            .theme-toggle,
+            .distance-warning,
+            .btn,
+            .instruction-popup {
+                display: none;
+            }
+            body {
+                background: white;
+                color: black;
+            }
+        }
+    </style>
+</head>
+<body data-theme="dark">
+    <div class="stars" id="starsContainer"></div>
+    
+    <div class="theme-toggle" onclick="toggleTheme()">
+        <span class="theme-icon" id="themeIcon"><i class="fas fa-moon"></i></span>
+        <span id="themeText">Dark</span>
+    </div>
+
+    <div class="distance-warning" id="distanceWarning" style="display: none;"></div>
+    
+    <div class="container">
+        <!-- Home Screen -->
+        <div id="homeScreen" class="screen active">
+            <div class="home-wrapper">
+                <h1><i class="fas fa-eye"></i> LUMINA VISION</h1>
+                <p class="subtitle">Clinical-Grade Vision Testing</p>
+                <p style="font-size: clamp(0.95em, 2.5vw, 1.3em); margin: 15px 0; opacity: 0.9;">
+                    Professional eye examination suite simulating medical equipment
+                </p>
+                <div style="margin-top: 25px;">
+                    <button class="btn" onclick="showScreen('aboutScreen')">
+                        <span class="btn-text"><i class="fas fa-book"></i> Medical Info</span>
+                    </button>
+                    <button class="btn" onclick="showScreen('manualScreen')">
+                        <span class="btn-text"><i class="fas fa-book-open"></i> Manual</span>
+                    </button>
+                    <button class="btn" onclick="showScreen('modeScreen')" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+                        <span class="btn-text"><i class="fas fa-gamepad"></i> START TEST</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- About Screen -->
+        <div id="aboutScreen" class="screen">
+            <div class="home-wrapper">
+                <h1><i class="fas fa-hospital"></i> Clinical Equipment Guide</h1>
+                
+                <div class="info-box">
+                    <h3><i class="fas fa-chart-simple"></i> Snellen Eye Chart</h3>
+                    <span class="equipment-badge">Distance Vision Test</span>
+                    <p><strong>Medical Purpose:</strong> Gold standard for visual acuity testing developed by Dutch ophthalmologist Herman Snellen in 1862.</p>
+                    <p><strong>What it detects:</strong> Myopia (nearsightedness), hypermetropia (farsightedness), general refractive errors.</p>
+                    <p><strong>Testing Distance:</strong> Professional standard is 20 feet (6 meters). For screen simulation, sit <strong>2-3 feet (60-90cm)</strong> from screen.</p>
+                    <p><strong>How it works:</strong> Characters decrease in size systematically. Your ability to identify them determines visual acuity score (20/20, 20/40, etc.).</p>
+                </div>
+
+                <div class="info-box">
+                    <h3><i class="fas fa-arrow-up"></i> Tumbling E Test</h3>
+                    <span class="equipment-badge">Non-Alphabetic Acuity</span>
+                    <p><strong>Medical Purpose:</strong> Visual acuity test that doesn't require alphabet knowledge. Used for children, non-literate patients, and aviation medical exams.</p>
+                    <p><strong>How it works:</strong> Letter "E" rotates in 4 directions (up, down, left, right). Patient identifies orientation direction. Size progressively decreases like Snellen chart.</p>
+                    <p><strong>Testing Distance:</strong> <strong>3 feet (90cm)</strong> optimal for screen-based simulation.</p>
+                    <p><strong>Clinical Use:</strong> FAA pilot vision testing, pediatric optometry, cross-cultural assessments.</p>
+                </div>
+
+                <div class="info-box">
+                    <h3><i class="fas fa-palette"></i> Other Tests Included</h3>
+                    <p><i class="fas fa-square"></i> <strong>Near Vision Reading</strong> - Tests hypermetropia (far-sightedness) and presbyopia</p>
+                    <p><i class="fas fa-hashtag"></i> <strong>Numeric Vision</strong> - Number-based acuity testing</p>
+                    <p><i class="fas fa-circle"></i> <strong>Multi-Ball Tracking</strong> - Dynamic visual field and peripheral vision assessment (3-4 moving targets)</p>
+                    <p><i class="fas fa-circle-half-stroke"></i> <strong>Contrast Sensitivity</strong> - Detects glaucoma, cataracts, and retinal disorders</p>
+                    <p><i class="fas fa-palette"></i> <strong>Color Vision (Ishihara)</strong> - Detects color blindness (deuteranopia, protanopia)</p>
+                </div>
+
+                <div class="info-box" style="background: rgba(255, 215, 0, 0.1); border-color: rgba(255, 215, 0, 0.3);">
+                    <h3><i class="fas fa-triangle-exclamation"></i> Medical Disclaimer</h3>
+                    <p><strong>IMPORTANT:</strong> This is an educational simulation tool ONLY. NOT a substitute for professional eye examination by licensed optometrist or ophthalmologist. Screen-based tests cannot match clinical equipment accuracy. Results are estimates. Consult eye care professional for medical diagnosis.</p>
+                </div>
+
+                <div style="text-align: center; margin-top: 20px;">
+                    <button class="btn" onclick="showScreen('homeScreen')"><i class="fas fa-house"></i> Home</button>
+                    <button class="btn" onclick="showScreen('manualScreen')"><i class="fas fa-book-open"></i> Manual</button>
+                    <button class="btn" onclick="showScreen('modeScreen')" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+                        <i class="fas fa-gamepad"></i> Start
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Manual/Instructions Screen -->
+        <div id="manualScreen" class="screen">
+            <div class="home-wrapper">
+                <h1><i class="fas fa-book-open"></i> Complete Testing Manual</h1>
+                
+                <div class="manual-section">
+                    <h3><i class="fas fa-clipboard-list"></i> Pre-Test Setup</h3>
+                    <div class="distance-setup">
+                        <h3><i class="fas fa-ruler"></i> Critical: Maintain Proper Distance</h3>
+                        <ul style="margin-top: 10px; line-height: 1.8;">
+                            <li><strong><i class="fas fa-chart-simple"></i> Snellen Chart:</strong> 2-3 feet (60-90cm) from screen</li>
+                            <li><strong><i class="fas fa-arrow-up"></i> Tumbling E:</strong> Exactly 3 feet (90cm)</li>
+                            <li><strong><i class="fas fa-book"></i> Near Vision:</strong> 1.5-2 feet (arm's length)</li>
+                            <li><strong><i class="fas fa-circle"></i> Multi-Ball Tracking:</strong> 2.5 feet</li>
+                            <li><strong><i class="fas fa-circle-half-stroke"></i> Contrast/Color:</strong> 2 feet</li>
+                        </ul>
+                        <p style="margin-top: 10px;"><strong><i class="fas fa-exclamation-triangle"></i> Use a tape measure for accuracy!</strong> Distance significantly affects results.</p>
+                    </div>
+
+                    <div class="manual-step">
+                        <strong>Step 1: Environment</strong>
+                        <p>Test in well-lit room. Avoid glare on screen. Adjust screen brightness to comfortable level. Eliminate distractions.</p>
+                    </div>
+
+                    <div class="manual-step">
+                        <strong>Step 2: Position</strong>
+                        <p>Sit upright with eyes level with screen center. Measure exact distance. Keep head still during test. Blink normally.</p>
+                    </div>
+
+                    <div class="manual-step">
+                        <strong>Step 3: One Eye at a Time</strong>
+                        <p>For accurate results, cover one eye with hand or card (don't press). Test right eye first, then left. Note any differences.</p>
+                    </div>
+                </div>
+
+                <div class="manual-section">
+                    <h3><i class="fas fa-hourglass-end"></i> Understanding Timed Blur Phases</h3>
+                    <p>Our system simulates how optometrists gradually refine lens prescriptions. This mimics the phoropter "Which is better: 1 or 2?" technique used in clinics.</p>
+                    
+                    <div class="manual-step">
+                        <strong><i class="fas fa-circle"></i> Phase 1 (0-5 seconds): Maximum Blur</strong>
+                        <p>Character appears heavily blurred, simulating incorrect lens prescription. Represents 20/200 or worse vision. Answering here shows good accommodation ability.</p>
+                    </div>
+
+                    <div class="manual-step">
+                        <strong><i class="fas fa-circle"></i> Phase 2 (5-10 seconds): Moderate Blur</strong>
+                        <p>Blur reduces moderately, simulating partial correction. Represents 20/40 to 20/60 vision range. Most people identify characters here.</p>
+                    </div>
+
+                    <div class="manual-step">
+                        <strong><i class="fas fa-circle"></i> Phase 3 (10-15 seconds): Optimal Clarity</strong>
+                        <p>Minimal blur, simulating correct prescription. Represents 20/20 to 20/30 vision. If you only see here, consultation recommended.</p>
+                    </div>
+
+                    <p style="margin-top: 15px;"><strong><i class="fas fa-lightbulb"></i> Strategy:</strong> Answer as soon as you're confident. Earlier correct answers = higher scores = better estimated acuity.</p>
+                </div>
+
+                <div class="manual-section">
+                    <h3><i class="fas fa-gamepad"></i> Test-Specific Instructions</h3>
+                    
+                    <div class="info-box">
+                        <h3><i class="fas fa-chart-simple"></i> Snellen Chart</h3>
+                        <ul>
+                            <li>Identify letter shown (A-Z, excluding I and O to avoid confusion)</li>
+                            <li>Click correct option from 4 choices below</li>
+                            <li>Distance simulation: number shows virtual "distance" to chart</li>
+                            <li>Characters shrink as level increases (harder = smaller)</li>
+                        </ul>
+                    </div>
+
+                    <div class="info-box">
+                        <h3><i class="fas fa-arrow-up"></i> Tumbling E Explained</h3>
+                        <ul>
+                            <li>Letter "E" rotates to point in 4 directions</li>
+                            <li>Identify which direction the opening points</li>
+                            <li>Click arrow button matching that direction</li>
+                            <li><i class="fas fa-arrow-up"></i> UP = E points upward | <i class="fas fa-arrow-down"></i> DOWN = E points down</li>
+                            <li><i class="fas fa-arrow-left"></i> LEFT = E points left | <i class="fas fa-arrow-right"></i> RIGHT = E points right</li>
+                            <li>Focus on the gap orientation, not letter reading</li>
+                        </ul>
+                    </div>
+
+                    <div class="info-box">
+                        <h3><i class="fas fa-circle"></i> Multi-Ball Tracking Tests</h3>
+                        <ul>
+                            <li><strong>3-4 colored balls move simultaneously across screen</strong></li>
+                            <li>Each ball contains a different letter or number</li>
+                            <li>Target character shown at top of screen</li>
+                            <li>Click directly on the ball with matching character</li>
+                            <li>Tests peripheral vision, multi-target tracking, and dynamic acuity</li>
+                            <li>Balls move faster and increase in quantity as levels progress</li>
+                            <li>Blur phases still apply - wait for clarity or answer early</li>
+                        </ul>
+                    </div>
+
+                    <div class="info-box">
+                        <h3><i class="fas fa-circle-half-stroke"></i> Contrast Sensitivity</h3>
+                        <ul>
+                            <li>Characters appear FAINT/LOW CONTRAST against background</li>
+                            <li>Tests ability to distinguish subtle differences</li>
+                            <li>Important for detecting cataracts, glaucoma, diabetic retinopathy</li>
+                            <li>Normal blur phases don't apply - contrast is challenge</li>
+                        </ul>
+                    </div>
+
+                    <div class="info-box">
+                        <h3><i class="fas fa-palette"></i> Ishihara Color Vision</h3>
+                        <ul>
+                            <li>Simulates Ishihara color plates (medical standard since 1917)</li>
+                            <li>Number appears within colored dot pattern</li>
+                            <li>Number is green-tinted, background is brown/orange dots</li>
+                            <li>Detects red-green color blindness (8% of males, 0.5% females)</li>
+                            <li>If you can't see number, select "Can't See" option</li>
+                            <li>No blur phases - color differentiation is the test</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="manual-section">
+                    <h3><i class="fas fa-trophy"></i> Scoring System</h3>
+                    <ul>
+                        <li><strong>Base Points:</strong> 100 points per correct answer</li>
+                        <li><strong>Time Bonus:</strong> Up to 52 points for fast responses</li>
+                        <li><strong>Phase Bonus:</strong> Phase 1 = +75pts, Phase 2 = +50pts, Phase 3 = +25pts</li>
+                        <li><strong>Maximum:</strong> 227 points per question × 15 questions = 3,405 total possible</li>
+                        <li><strong>Visual Acuity:</strong> Calculated from accuracy + average phase answered</li>
+                    </ul>
+                </div>
+
+                <div class="manual-section">
+                    <h3><i class="fas fa-pause"></i> During Test</h3>
+                    <ul>
+                        <li>Click <strong>PAUSE</strong> button (top right) anytime to pause/resume</li>
+                        <li>Timer freezes when paused - take breaks if needed</li>
+                        <li>15 seconds per question (realistic clinical timing)</li>
+                        <li>Progress: 3 levels × 5 questions each = 15 total questions</li>
+                        <li>Difficulty increases each level (smaller characters, faster movement, more balls)</li>
+                    </ul>
+                </div>
+
+                <div class="info-box" style="background: rgba(76, 175, 80, 0.1); border-color: rgba(76, 175, 80, 0.3);">
+                    <h3><i class="fas fa-check-circle"></i> Pro Tips for Accurate Results</h3>
+                    <ul>
+                        <li>Take test when eyes are rested (not after long screen time)</li>
+                        <li>Wear your usual glasses/contacts if you use them</li>
+                        <li>Test each eye separately for comprehensive assessment</li>
+                        <li>Don't squint - this artificially improves results</li>
+                        <li>Answer honestly - guessing defeats the purpose</li>
+                        <li>If unsure, wait for better clarity rather than random clicking</li>
+                        <li>Download PDF report after completion for records</li>
+                    </ul>
+                </div>
+
+                <div style="text-align: center; margin-top: 20px;">
+                    <button class="btn" onclick="showScreen('homeScreen')"><i class="fas fa-house"></i> Home</button>
+                    <button class="btn" onclick="showScreen('aboutScreen')"><i class="fas fa-book"></i> Medical Info</button>
+                    <button class="btn" onclick="showScreen('modeScreen')" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+                        <i class="fas fa-gamepad"></i> Start Testing
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mode Selection Screen -->
+        <div id="modeScreen" class="screen">
+            <div class="home-wrapper">
+                <h1><i class="fas fa-hospital"></i> Select Test</h1>
+                <p class="subtitle">Choose examination type</p>
+                
+                <div class="mode-grid">
+                    <div class="mode-card" onclick="startGame('myopia', 'snellen')">
+                        <span class="mode-icon"><i class="fas fa-font"></i></span>
+                        <div class="mode-title">Snellen Chart</div>
+                        <div class="mode-desc">Distance Vision</div>
+                        <div class="equipment-tag"><i class="fas fa-chart-simple"></i> Standard</div>
+                    </div>
+
+                    <div class="mode-card" onclick="startGame('hypermetropia', 'snellen')">
+                        <span class="mode-icon"><i class="fas fa-book"></i></span>
+                        <div class="mode-title">Near Vision</div>
+                        <div class="mode-desc">Reading Test</div>
+                        <div class="equipment-tag"><i class="fas fa-book"></i> Near Acuity</div>
+                    </div>
+
+                    <div class="mode-card" onclick="startGame('myopia', 'tumbling')">
+                        <span class="mode-icon"><i class="fas fa-arrow-up"></i></span>
+                        <div class="mode-title">Tumbling E</div>
+                        <div class="mode-desc">Directional Test</div>
+                        <div class="equipment-tag"><i class="fas fa-plane"></i> Aviation</div>
+                    </div>
+
+                    <div class="mode-card" onclick="startGame('myopia', 'numbers')">
+                        <span class="mode-icon"><i class="fas fa-hashtag"></i></span>
+                        <div class="mode-title">Numeric Vision</div>
+                        <div class="mode-desc">Number Acuity</div>
+                        <div class="equipment-tag"><i class="fas fa-hashtag"></i> Clinical</div>
+                    </div>
+
+                    <div class="mode-card" onclick="startGame('myopia', 'balls')">
+                        <span class="mode-icon"><i class="fas fa-circle"></i><i class="fas fa-circle"></i><i class="fas fa-circle"></i></span>
+                        <div class="mode-title">Multi-Ball Track</div>
+                        <div class="mode-desc">3-4 Moving Targets</div>
+                        <div class="equipment-tag"><i class="fas fa-object-group"></i> Advanced</div>
+                    </div>
+
+                    <div class="mode-card" onclick="startGame('myopia', 'contrast')">
+                        <span class="mode-icon"><i class="fas fa-circle-half-stroke"></i></span>
+                        <div class="mode-title">Contrast</div>
+                        <div class="mode-desc">Low Visibility</div>
+                        <div class="equipment-tag"><i class="fas fa-moon"></i> Sensitivity</div>
+                    </div>
+
+                    <div class="mode-card" onclick="startGame('myopia', 'color')">
+                        <span class="mode-icon"><i class="fas fa-palette"></i></span>
+                        <div class="mode-title">Color Vision</div>
+                        <div class="mode-desc">Ishihara Test</div>
+                        <div class="equipment-tag"><i class="fas fa-palette"></i> Colorblind</div>
+                    </div>
+                </div>
+
+                <div style="text-align: center; margin-top: 20px;">
+                    <button class="btn" onclick="showScreen('homeScreen')"><i class="fas fa-house"></i> Home</button>
+                    <button class="btn" onclick="showScreen('manualScreen')"><i class="fas fa-book-open"></i> Manual</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Game Screen -->
+        <div id="gameScreen" class="screen">
+            <div class="game-wrapper">
+                <div class="game-header">
+                    <div class="stat-box">
+                        <div class="stat-label">TEST</div>
+                        <div class="stat-value" id="modeDisplay" style="font-size: 1.1em;">-</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-label">LVL</div>
+                        <div class="stat-value" id="levelDisplay">1</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-label">SCORE</div>
+                        <div class="stat-value" id="scoreDisplay">0</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-label">Q</div>
+                        <div class="stat-value"><span id="questionDisplay">1</span>/15</div>
+                    </div>
+                    <div class="stat-box">
+                        <button class="btn" onclick="pauseGame()" style="padding: 8px 15px; margin: 0; font-size: 0.9em;">
+                            <i class="fas fa-pause"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="game-area">
+                    <div class="timer-bar" id="timerBar"></div>
+                    
+                    <div class="snellen-grid" id="snellenBg">
+                        <div class="snellen-line" style="font-size: 3em;">E F P</div>
+                        <div class="snellen-line" style="font-size: 2.2em;">T O Z</div>
+                        <div class="snellen-line" style="font-size: 1.8em;">L P E D</div>
+                    </div>
+
+                    <div class="distance-indicator" id="distanceDisplay">100m</div>
+                    <div class="phase-indicator" id="phaseDisplay">Phase 1</div>
+                    
+                    <div class="game-object-container" id="objectContainer">
+                        <div class="game-object" id="gameObject">A</div>
+                    </div>
+                    
+                    <div class="balls-container" id="ballsContainer"></div>
+                    <div id="specialTestArea"></div>
+                    <div class="options-container" id="optionsContainer"></div>
+                    
+                    <div class="instruction-popup" id="instructionPopup" style="display: none;">
+                        <h2 id="instructionTitle">Get Ready!</h2>
+                        <div id="instructionContent">
+                            <p id="instructionText"></p>
+                        </div>
+                        <button class="btn" onclick="hideInstruction()">
+                            <span class="btn-text"><i class="fas fa-check"></i> I'm Ready</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Result Screen -->
+        <div id="resultScreen" class="screen">
+            <div class="home-wrapper">
+                <div class="result-wrapper">
+                    <div class="result-header" id="resultEmoji"><i class="fas fa-face-smile"></i></div>
+                    <h1 id="resultTitle">Test Complete!</h1>
+                    
+                    <div class="score-display" id="finalScore">0</div>
+                    
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="accuracyBar">0%</div>
+                    </div>
+
+                    <div class="result-details" id="resultDetails"></div>
+
+                    <div class="report-section">
+                        <div class="report-header">
+                            <h3><i class="fas fa-file-medical"></i> Vision Assessment Report</h3>
+                            <span id="reportDate"></span>
+                        </div>
+                        <div class="visual-acuity-score" id="visualAcuityScore">20/20</div>
+                        <div id="reportContent"></div>
+                    </div>
+
+                    <div class="info-box" id="diagnosisBox">
+                        <h3><i class="fas fa-magnifying-glass"></i> Performance Analysis</h3>
+                        <p id="diagnosisText"></p>
+                    </div>
+
+                    <div class="info-box">
+                        <h3><i class="fas fa-lightbulb"></i> Recommendations</h3>
+                        <ul id="recommendationsList"></ul>
+                    </div>
+
+                    <div class="info-box" style="background: rgba(255, 215, 0, 0.1); border-color: rgba(255, 215, 0, 0.3);">
+                        <h3><i class="fas fa-stethoscope"></i> Medical Disclaimer</h3>
+                        <p><strong>IMPORTANT:</strong> This is an educational screening simulation only. Results are approximations and NOT professional medical diagnosis. Screen-based tests cannot replicate clinical equipment accuracy. DO NOT use this to self-diagnose or decide on treatment. Consult licensed optometrist or ophthalmologist for comprehensive eye examination. Regular professional eye exams are essential for eye health.</p>
+                    </div>
+
+                    <div style="margin-top: 20px; display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
+                        <button class="btn" onclick="showScreen('modeScreen')" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+                            <i class="fas fa-rotate-right"></i> New Test
+                        </button>
+                        <button class="btn" onclick="showScreen('homeScreen')">
+                            <i class="fas fa-house"></i> Home
+                        </button>
+                        <button class="btn" onclick="downloadReport()">
+                            <i class="fas fa-download"></i> Download PDF
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script>
+        // Audio Context for Sound Effects
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        
+        // Professional sound generation functions
+        function playClickSound() {
+            const oscillator = audioCtx.createOscillator();
+            const gainNode = audioCtx.createGain();
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+            
+            oscillator.frequency.value = 800;
+            oscillator.type = 'sine';
+            
+            gainNode.gain.setValueAtTime(0.3, audioCtx.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
+            
+            oscillator.start(audioCtx.currentTime);
+            oscillator.stop(audioCtx.currentTime + 0.1);
+        }
+
+        function playCorrectSound() {
+            const oscillator = audioCtx.createOscillator();
+            const gainNode = audioCtx.createGain();
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+            
+            oscillator.frequency.value = 523.25; // C5
+            oscillator.type = 'sine';
+            
+            gainNode.gain.setValueAtTime(0.2, audioCtx.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
+            
+            oscillator.start(audioCtx.currentTime);
+            oscillator.frequency.exponentialRampToValueAtTime(659.25, audioCtx.currentTime + 0.15); // E5
+            oscillator.stop(audioCtx.currentTime + 0.3);
+        }
+
+        function playWrongSound() {
+            const oscillator = audioCtx.createOscillator();
+            const gainNode = audioCtx.createGain();
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+            
+            oscillator.frequency.value = 200;
+            oscillator.type = 'sawtooth';
+            
+            gainNode.gain.setValueAtTime(0.2, audioCtx.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.4);
+            
+            oscillator.start(audioCtx.currentTime);
+            oscillator.stop(audioCtx.currentTime + 0.4);
+        }
+
+        function playLevelUpSound() {
+            const oscillator = audioCtx.createOscillator();
+            const gainNode = audioCtx.createGain();
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+            
+            oscillator.frequency.value = 440; // A4
+            oscillator.type = 'sine';
+            
+            gainNode.gain.setValueAtTime(0.25, audioCtx.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.5);
+            
+            oscillator.start(audioCtx.currentTime);
+            oscillator.frequency.exponentialRampToValueAtTime(880, audioCtx.currentTime + 0.3); // A5
+            oscillator.stop(audioCtx.currentTime + 0.5);
+        }
+
+        function playCompletionSound() {
+            const times = [0, 0.15, 0.3, 0.45];
+            const freqs = [523.25, 659.25, 783.99, 1046.50]; // C-E-G-C chord
+            
+            times.forEach((time, index) => {
+                const oscillator = audioCtx.createOscillator();
+                const gainNode = audioCtx.createGain();
+                
+                oscillator.connect(gainNode);
+                gainNode.connect(audioCtx.destination);
+                
+                oscillator.frequency.value = freqs[index];
+                oscillator.type = 'sine';
+                
+                gainNode.gain.setValueAtTime(0.15, audioCtx.currentTime + time);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + time + 0.4);
+                
+                oscillator.start(audioCtx.currentTime + time);
+                oscillator.stop(audioCtx.currentTime + time + 0.4);
+            });
+        }
+
+        function playStartSound() {
+            const oscillator = audioCtx.createOscillator();
+            const gainNode = audioCtx.createGain();
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+            
+            oscillator.frequency.value = 392; // G4
+            oscillator.type = 'triangle';
+            
+            gainNode.gain.setValueAtTime(0.2, audioCtx.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
+            
+            oscillator.start(audioCtx.currentTime);
+            oscillator.frequency.exponentialRampToValueAtTime(523.25, audioCtx.currentTime + 0.2); // C5
+            oscillator.stop(audioCtx.currentTime + 0.3);
+        }
+
+        let gameState = {
+            mode: 'myopia',
+            testType: 'snellen',
+            level: 1,
+            question: 1,
+            score: 0,
+            correctAnswers: 0,
+            totalQuestions: 15,
+            currentDistance: 100,
+            currentObject: null,
+            currentOptions: [],
+            timeLeft: 15,
+            currentPhase: 1,
+            timerInterval: null,
+            animationInterval: null,
+            phaseInterval: null,
+            ballInterval: null,
+            isPaused: false,
+            answerTimes: [],
+            distances: [],
+            phases: [],
+            balls: [],
+            testStartTime: null,
+            requiredDistance: '2-3 feet'
+        };
+
+        const testData = {
+            letters: ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'J', 'K', 'L', 'M', 'N', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'],
+            numbers: ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'],
+            directions: ['up', 'down', 'left', 'right'],
+            colorNumbers: ['2', '3', '5', '6', '8', '9']
+        };
+
+        function toggleTheme() {
+            const body = document.body;
+            const currentTheme = body.getAttribute('data-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            body.setAttribute('data-theme', newTheme);
+            
+            const icon = document.getElementById('themeIcon');
+            const text = document.getElementById('themeText');
+            
+            if (newTheme === 'dark') {
+                icon.innerHTML = '<i class="fas fa-moon"></i>';
+                text.textContent = 'Dark';
+            } else {
+                icon.innerHTML = '<i class="fas fa-sun"></i>';
+                text.textContent = 'Light';
+            }
+            
+            playClickSound();
+        }
+
+        function createStars() {
+            const container = document.getElementById('starsContainer');
+            for (let i = 0; i < 200; i++) {
+                const star = document.createElement('div');
+                star.className = 'star';
+                star.style.left = Math.random() * 100 + '%';
+                star.style.top = Math.random() * 100 + '%';
+                star.style.animationDelay = Math.random() * 3 + 's';
+                container.appendChild(star);
+            }
+        }
+
+        function showScreen(screenId) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById(screenId).classList.add('active');
+            playClickSound();
+        }
+
+        function startGame(mode, testType) {
+            playStartSound();
+            
+            let requiredDistance = '2-3 feet';
+            if (testType === 'tumbling') requiredDistance = '3 feet';
+            else if (testType === 'snellen' && mode === 'hypermetropia') requiredDistance = '1.5-2 feet';
+            else if (testType === 'balls') requiredDistance = '2.5 feet';
+            else if (testType === 'contrast' || testType === 'color') requiredDistance = '2 feet';
+
+            gameState = {
+                mode, testType, level: 1, question: 1, score: 0, correctAnswers: 0,
+                totalQuestions: 15, currentDistance: mode === 'myopia' ? 100 : 10,
+                currentObject: null, currentOptions: [], timeLeft: 15, currentPhase: 1,
+                timerInterval: null, animationInterval: null, phaseInterval: null,
+                ballInterval: null, isPaused: false, answerTimes: [], distances: [], phases: [],
+                balls: [], testStartTime: new Date(), requiredDistance
+            };
+
+            const modeNames = {
+                'snellen': '<i class="fas fa-chart-simple"></i> Chart',
+                'tumbling': '<i class="fas fa-arrow-up"></i> E-Test',
+                'numbers': '<i class="fas fa-hashtag"></i> Numbers',
+                'balls': '<i class="fas fa-circle"></i> Multi-Track',
+                'contrast': '<i class="fas fa-circle-half-stroke"></i> Contrast',
+                'color': '<i class="fas fa-palette"></i> Color'
+            };
+            document.getElementById('modeDisplay').innerHTML = modeNames[testType];
+            showScreen('gameScreen');
+            showInstruction();
+        }
+
+        function showInstruction() {
+            const popup = document.getElementById('instructionPopup');
+            const title = document.getElementById('instructionTitle');
+            const content = document.getElementById('instructionContent');
+            let instructionHTML = '';
+
+            if (gameState.testType === 'snellen') {
+                title.textContent = `Level ${gameState.level}: Snellen Chart`;
+                instructionHTML = `
+                    <div class="distance-setup">
+                        <h3><i class="fas fa-ruler"></i> Distance: ${gameState.requiredDistance}</h3>
+                        <p>Use measuring tape for accuracy!</p>
+                    </div>
+                    <p><strong>3-Phase Blur Sequence:</strong></p>
+                    <ul style="text-align: left; margin: 10px 0; line-height: 1.6; list-style: none;">
+                        <li style="margin-left: 0; padding-left: 0;"><strong><i class="fas fa-circle"></i> Phase 1 (0-5s):</strong> Maximum blur</li>
+                        <li style="margin-left: 0; padding-left: 0;"><strong><i class="fas fa-circle"></i> Phase 2 (5-10s):</strong> Moderate blur</li>
+                        <li style="margin-left: 0; padding-left: 0;"><strong><i class="fas fa-circle"></i> Phase 3 (10-15s):</strong> Clear view</li>
+                    </ul>
+                    <p><strong>Answer when you identify the letter!</strong></p>
+                    <p style="font-size: 0.9em; opacity: 0.8;">Earlier correct answers = higher scores</p>
+                `;
+            } else if (gameState.testType === 'tumbling') {
+                title.textContent = `Level ${gameState.level}: Tumbling E`;
+                instructionHTML = `
+                    <div class="distance-setup">
+                        <h3><i class="fas fa-ruler"></i> Distance: ${gameState.requiredDistance}</h3>
+                    </div>
+                    <p><strong>Identify E direction:</strong></p>
+                    <p style="margin: 15px 0; font-size: 1.3em;"><i class="fas fa-arrow-up"></i> <i class="fas fa-arrow-down"></i> <i class="fas fa-arrow-left"></i> <i class="fas fa-arrow-right"></i></p>
+                    <p><strong>Look at which way the gap opens!</strong></p>
+                    <p style="font-size: 0.9em; opacity: 0.8;">Focus on the opening, not letter reading</p>
+                `;
+            } else if (gameState.testType === 'balls') {
+                title.textContent = `Level ${gameState.level}: Multi-Ball Tracking`;
+                const numBalls = gameState.level + 2; // Level 1=3 balls, Level 2=4 balls, Level 3=5 balls
+                instructionHTML = `
+                    <div class="distance-setup">
+                        <h3><i class="fas fa-ruler"></i> Position: ${gameState.requiredDistance}</h3>
+                    </div>
+                    <p><strong>Track ${numBalls} moving balls simultaneously</strong></p>
+                    <p>Each ball contains different letter/number</p>
+                    <p>Target character shown at top</p>
+                    <p>Click on ball with matching character</p>
+                    <p style="font-size: 0.9em; opacity: 0.8;">Tests peripheral vision & multi-target tracking</p>
+                `;
+            } else if (gameState.testType === 'contrast') {
+                title.textContent = `Level ${gameState.level}: Contrast Sensitivity`;
+                instructionHTML = `
+                    <div class="distance-setup">
+                        <h3><i class="fas fa-ruler"></i> Distance: ${gameState.requiredDistance}</h3>
+                    </div>
+                    <p><strong>Characters appear FAINT</strong></p>
+                    <p>Low contrast against background</p>
+                    <p>Identify the low-contrast character</p>
+                    <p style="font-size: 0.9em; opacity: 0.8;">Important for detecting cataracts & glaucoma</p>
+                `;
+            } else if (gameState.testType === 'color') {
+                title.textContent = `Level ${gameState.level}: Ishihara Color Vision`;
+                instructionHTML = `
+                    <div class="distance-setup">
+                        <h3><i class="fas fa-ruler"></i> Distance: ${gameState.requiredDistance}</h3>
+                    </div>
+                    <p><strong>Ishihara color plates simulation</strong></p>
+                    <p>What number do you see in colored dots?</p>
+                    <p>If you can't see it, select "Can't See"</p>
+                    <p style="font-size: 0.9em; opacity: 0.8;">Detects red-green color blindness</p>
+                `;
+            } else {
+                title.textContent = `Level ${gameState.level}: Numeric Vision`;
+                instructionHTML = `
+                    <div class="distance-setup">
+                        <h3><i class="fas fa-ruler"></i> Distance: ${gameState.requiredDistance}</h3>
+                    </div>
+                    <p><strong>Identify numbers with timed blur</strong></p>
+                    <p>Same 3-phase system as Snellen</p>
+                    <p>Answer when clear enough!</p>
+                `;
+            }
+
+            content.innerHTML = instructionHTML;
+            popup.style.display = 'block';
+            document.getElementById('distanceWarning').style.display = 'block';
+            document.getElementById('distanceWarning').innerHTML = `<i class="fas fa-ruler"></i> ${gameState.requiredDistance}`;
+        }
+
+        function hideInstruction() {
+            document.getElementById('instructionPopup').style.display = 'none';
+            playClickSound();
+            loadQuestion();
+        }
+
+        function loadQuestion() {
+            clearIntervals();
+
+            document.getElementById('levelDisplay').textContent = gameState.level;
+            document.getElementById('scoreDisplay').textContent = gameState.score;
+            document.getElementById('questionDisplay').textContent = gameState.question;
+
+            gameState.timeLeft = 15;
+            gameState.currentPhase = 1;
+            document.getElementById('timerBar').style.width = '100%';
+            document.getElementById('phaseDisplay').textContent = 'Phase 1: Maximum Blur';
+
+            document.getElementById('ballsContainer').innerHTML = '';
+            document.getElementById('specialTestArea').innerHTML = '';
+            gameState.balls = [];
+
+            document.getElementById('snellenBg').style.display = 
+                (gameState.testType === 'snellen') ? 'flex' : 'none';
+
+            if (gameState.testType === 'balls') {
+                loadBallTest();
+            } else if (gameState.testType === 'tumbling') {
+                loadTumblingTest();
+            } else if (gameState.testType === 'color') {
+                loadColorTest();
+            } else if (gameState.testType === 'contrast') {
+                loadContrastTest();
+            } else {
+                loadStandardTest();
+            }
+
+            gameState.startTime = Date.now();
+            startTimer();
+            startPhaseProgression();
+        }
+
+        function loadStandardTest() {
+            const dataSet = gameState.testType === 'snellen' ? testData.letters : testData.numbers;
+            const correctAnswer = dataSet[Math.floor(Math.random() * dataSet.length)];
+            gameState.currentObject = correctAnswer;
+
+            const wrongOptions = dataSet.filter(item => item !== correctAnswer)
+                .sort(() => Math.random() - 0.5).slice(0, 3);
+            gameState.currentOptions = [correctAnswer, ...wrongOptions].sort(() => Math.random() - 0.5);
+
+            const objectElement = document.getElementById('gameObject');
+            objectElement.textContent = correctAnswer;
+            objectElement.className = 'game-object';
+            objectElement.style.display = 'block';
+            objectElement.style.color = '';
+
+            document.getElementById('objectContainer').style.display = 'block';
+
+            const optionsContainer = document.getElementById('optionsContainer');
+            optionsContainer.innerHTML = '';
+            optionsContainer.className = 'options-container';
+            
+            gameState.currentOptions.forEach(option => {
+                const btn = document.createElement('button');
+                btn.className = 'option-btn';
+                btn.textContent = option;
+                btn.onclick = () => checkAnswer(option);
+                optionsContainer.appendChild(btn);
+            });
+
+            gameState.currentDistance = gameState.mode === 'myopia' ? 100 : 10;
+            startObjectAnimation();
+        }
+
+        function loadTumblingTest() {
+            const directions = ['up', 'down', 'left', 'right'];
+            const correctDirection = directions[Math.floor(Math.random() * directions.length)];
+            gameState.currentObject = correctDirection;
+
+            const objectElement = document.getElementById('gameObject');
+            objectElement.className = 'game-object tumbling-e';
+            objectElement.style.display = 'block';
+            objectElement.textContent = 'E';
+            objectElement.style.color = '';
+            
+            const rotations = { 'right': 0, 'down': 90, 'left': 180, 'up': 270 };
+            objectElement.style.transform = `rotate(${rotations[correctDirection]}deg)`;
+
+            document.getElementById('objectContainer').style.display = 'block';
+
+            const optionsContainer = document.getElementById('optionsContainer');
+            optionsContainer.innerHTML = '';
+            optionsContainer.className = 'options-container direction-options';
+            
+            const directionSymbols = {
+                'up': { icon: 'fas fa-arrow-up', text: 'UP' },
+                'down': { icon: 'fas fa-arrow-down', text: 'DOWN' },
+                'left': { icon: 'fas fa-arrow-left', text: 'LEFT' },
+                'right': { icon: 'fas fa-arrow-right', text: 'RIGHT' }
+            };
+
+            directions.forEach(dir => {
+                const btn = document.createElement('button');
+                btn.className = 'direction-btn';
+                btn.innerHTML = `<span class="icon"><i class="${directionSymbols[dir].icon}"></i></span><span>${directionSymbols[dir].text}</span>`;
+                btn.onclick = () => checkAnswer(dir);
+                optionsContainer.appendChild(btn);
+            });
+
+            gameState.currentDistance = gameState.mode === 'myopia' ? 100 : 10;
+            startObjectAnimation();
+        }
+
+        function loadBallTest() {
+            document.getElementById('objectContainer').style.display = 'none';
+            document.getElementById('optionsContainer').innerHTML = '';
+
+            const dataSet = Math.random() > 0.5 ? testData.letters : testData.numbers;
+            
+            // Number of balls increases with level: Level 1=3, Level 2=4, Level 3=5
+            const numBalls = gameState.level + 2;
+            
+            // Select unique characters for each ball
+            const shuffled = dataSet.sort(() => Math.random() - 0.5);
+            const allBallContents = shuffled.slice(0, numBalls);
+            
+            // One random ball is correct
+            const correctIndex = Math.floor(Math.random() * numBalls);
+            const correctAnswer = allBallContents[correctIndex];
+            gameState.currentObject = correctAnswer;
+
+            const ballsContainer = document.getElementById('ballsContainer');
+            const colors = ['#ff6b6b', '#4ecdc4', '#45b7d1', '#f9ca24', '#6c5ce7', '#fd79a8', '#ff9ff3', '#54a0ff', '#48dbfb', '#ff9f43'];
+
+            allBallContents.forEach((content, index) => {
+                const ball = document.createElement('div');
+                ball.className = 'moving-ball';
+                ball.textContent = content;
+                
+                ball.style.background = colors[index % colors.length];
+                ball.style.width = '80px';
+                ball.style.height = '80px';
+                
+                // Spread balls more evenly
+                const angle = (index / numBalls) * Math.PI * 2;
+                const radius = 25;
+                ball.style.left = (50 + Math.cos(angle) * radius) + '%';
+                ball.style.top = (40 + Math.sin(angle) * radius) + '%';
+                
+                // Speed increases with level
+                const speedMultiplier = 1 + (gameState.level * 0.4);
+                ball.dataset.content = content;
+                ball.dataset.vx = (Math.random() - 0.5) * 3.5 * speedMultiplier;
+                ball.dataset.vy = (Math.random() - 0.5) * 3.5 * speedMultiplier;
+                
+                ball.onclick = () => checkAnswer(content);
+                
+                ballsContainer.appendChild(ball);
+                gameState.balls.push(ball);
+            });
+
+            const indicator = document.getElementById('distanceDisplay');
+            indicator.innerHTML = `<i class="fas fa-bullseye"></i> Find: ${correctAnswer}`;
+            indicator.style.fontSize = '1.8em';
+
+            document.getElementById('phaseDisplay').textContent = `Track ${numBalls} Balls!`;
+
+            startBallAnimation();
+        }
+
+        function loadColorTest() {
+            document.getElementById('objectContainer').style.display = 'none';
+            
+            const correctAnswer = testData.colorNumbers[Math.floor(Math.random() * testData.colorNumbers.length)];
+            gameState.currentObject = correctAnswer;
+
+            const specialArea = document.getElementById('specialTestArea');
+            const plate = document.createElement('div');
+            plate.className = 'ishihara-plate';
+            plate.style.background = '#e0e0e0';
+            plate.style.width = 'min(300px, 80vw)';
+            plate.style.height = 'min(300px, 80vw)';
+            plate.style.borderRadius = '50%';
+            plate.style.position = 'relative';
+            plate.style.margin = '40px auto';
+            plate.style.display = 'flex';
+            plate.style.alignItems = 'center';
+            plate.style.justifyContent = 'center';
+            plate.style.border = '3px solid var(--border-color)';
+            
+            const size = parseInt(plate.style.width);
+            for (let i = 0; i < 80; i++) {
+                const dot = document.createElement('div');
+                dot.className = 'dot';
+                const dotSize = 12 + Math.random() * 18;
+                dot.style.width = dotSize + 'px';
+                dot.style.height = dotSize + 'px';
+                dot.style.position = 'absolute';
+                dot.style.borderRadius = '50%';
+                
+                const angle = Math.random() * Math.PI * 2;
+                const radius = Math.random() * (size * 0.4);
+                dot.style.left = ((size/2) + Math.cos(angle) * radius - dotSize/2) + 'px';
+                dot.style.top = ((size/2) + Math.sin(angle) * radius - dotSize/2) + 'px';
+                
+                const colors = ['#8B4513', '#A0522D', '#CD853F', '#DEB887'];
+                const numberColors = ['#228B22', '#2E8B57', '#3CB371'];
+                
+                const isNumberDot = Math.random() < 0.35;
+                dot.style.background = isNumberDot ? 
+                    numberColors[Math.floor(Math.random() * numberColors.length)] :
+                    colors[Math.floor(Math.random() * colors.length)];
+                
+                plate.appendChild(dot);
+            }
+            
+            const numberDisplay = document.createElement('div');
+            numberDisplay.style.position = 'absolute';
+            numberDisplay.style.fontSize = 'clamp(60px, 20vw, 90px)';
+            numberDisplay.style.fontWeight = 'bold';
+            numberDisplay.style.color = '#2a9d2a';
+            numberDisplay.style.opacity = '0.45';
+            numberDisplay.style.zIndex = '5';
+            numberDisplay.textContent = correctAnswer;
+            plate.appendChild(numberDisplay);
+            
+            specialArea.innerHTML = '';
+            specialArea.appendChild(plate);
+
+            const wrongOptions = testData.colorNumbers.filter(n => n !== correctAnswer)
+                .sort(() => Math.random() - 0.5).slice(0, 3);
+            gameState.currentOptions = [correctAnswer, ...wrongOptions, "Can't See"].sort(() => Math.random() - 0.5);
+
+            const optionsContainer = document.getElementById('optionsContainer');
+            optionsContainer.innerHTML = '';
+            optionsContainer.className = 'options-container';
+            
+            gameState.currentOptions.forEach(option => {
+                const btn = document.createElement('button');
+                btn.className = 'option-btn';
+                btn.textContent = option;
+                btn.style.fontSize = '1.5em';
+                btn.onclick = () => checkAnswer(option);
+                optionsContainer.appendChild(btn);
+            });
+
+            document.getElementById('distanceDisplay').innerHTML = '<i class="fas fa-question"></i> What number?';
+        }
+
+        function loadContrastTest() {
+            const dataSet = Math.random() > 0.5 ? testData.letters : testData.numbers;
+            const correctAnswer = dataSet[Math.floor(Math.random() * dataSet.length)];
+            gameState.currentObject = correctAnswer;
+
+            const wrongOptions = dataSet.filter(item => item !== correctAnswer)
+                .sort(() => Math.random() - 0.5).slice(0, 3);
+            gameState.currentOptions = [correctAnswer, ...wrongOptions].sort(() => Math.random() - 0.5);
+
+            const objectElement = document.getElementById('gameObject');
+            objectElement.textContent = correctAnswer;
+            objectElement.className = 'game-object';
+            objectElement.style.display = 'block';
+            
+            const contrastLevel = 0.18 + (gameState.level * 0.12);
+            const theme = document.body.getAttribute('data-theme');
+            if (theme === 'dark') {
+                objectElement.style.color = `rgba(255, 255, 255, ${contrastLevel})`;
+            } else {
+                objectElement.style.color = `rgba(0, 0, 0, ${contrastLevel})`;
+            }
+
+            document.getElementById('objectContainer').style.display = 'block';
+
+            const optionsContainer = document.getElementById('optionsContainer');
+            optionsContainer.innerHTML = '';
+            optionsContainer.className = 'options-container';
+            
+            gameState.currentOptions.forEach(option => {
+                const btn = document.createElement('button');
+                btn.className = 'option-btn';
+                btn.textContent = option;
+                btn.onclick = () => checkAnswer(option);
+                optionsContainer.appendChild(btn);
+            });
+
+            document.getElementById('distanceDisplay').innerHTML = `<i class="fas fa-circle-half-stroke"></i> Level ${gameState.level}`;
+        }
+
+        function startObjectAnimation() {
+            const object = document.getElementById('gameObject');
+            const container = document.getElementById('objectContainer');
+            const distanceDisplay = document.getElementById('distanceDisplay');
+
+            gameState.animationInterval = setInterval(() => {
+                if (!gameState.isPaused) {
+                    const difficulty = 1 + (gameState.level - 1) * 0.25;
+                    
+                    if (gameState.mode === 'myopia') {
+                        gameState.currentDistance -= 0.6 * difficulty;
+                        if (gameState.currentDistance < 5) gameState.currentDistance = 5;
+                    } else {
+                        gameState.currentDistance += 0.6 * difficulty;
+                        if (gameState.currentDistance > 100) gameState.currentDistance = 100;
+                    }
+
+                    if (gameState.testType !== 'contrast' && gameState.testType !== 'color') {
+                        distanceDisplay.textContent = Math.round(gameState.currentDistance) + 'm';
+                    }
+
+                    let blurAmount, sizeMultiplier;
+                    
+                    if (gameState.currentPhase === 1) {
+                        blurAmount = 12 + (gameState.level * 2);
+                        sizeMultiplier = 0.55;
+                    } else if (gameState.currentPhase === 2) {
+                        blurAmount = 6 + (gameState.level * 1);
+                        sizeMultiplier = 0.75;
+                    } else {
+                        blurAmount = 1.5 + (gameState.level * 0.5);
+                        sizeMultiplier = 0.95;
+                    }
+
+                    object.style.filter = `blur(${blurAmount}px)`;
+                    const baseSize = gameState.testType === 'tumbling' ? 120 : 80;
+                    object.style.fontSize = (baseSize * sizeMultiplier) + 'px';
+                    container.style.transform = `translate(-50%, -50%) scale(${sizeMultiplier})`;
+                }
+            }, 50);
+        }
+
+        function startPhaseProgression() {
+            let elapsed = 0;
+            gameState.phaseInterval = setInterval(() => {
+                if (!gameState.isPaused) {
+                    elapsed += 0.1;
+                    
+                    if (elapsed >= 10 && gameState.currentPhase === 2) {
+                        gameState.currentPhase = 3;
+                        document.getElementById('phaseDisplay').textContent = 'Phase 3: Clear';
+                    } else if (elapsed >= 5 && gameState.currentPhase === 1) {
+                        gameState.currentPhase = 2;
+                        document.getElementById('phaseDisplay').textContent = 'Phase 2: Moderate';
+                    }
+                }
+            }, 100);
+        }
+
+        function startBallAnimation() {
+            gameState.ballInterval = setInterval(() => {
+                if (!gameState.isPaused) {
+                    gameState.balls.forEach(ball => {
+                        let x = parseFloat(ball.style.left);
+                        let y = parseFloat(ball.style.top);
+                        let vx = parseFloat(ball.dataset.vx);
+                        let vy = parseFloat(ball.dataset.vy);
+
+                        x += vx * 0.1;
+                        y += vy * 0.1;
+
+                        if (x <= 5 || x >= 85) {
+                            vx = -vx;
+                            ball.dataset.vx = vx;
+                        }
+                        if (y <= 10 || y >= 75) {
+                            vy = -vy;
+                            ball.dataset.vy = vy;
+                        }
+
+                        ball.style.left = x + '%';
+                        ball.style.top = y + '%';
+
+                        let blurAmount = 0;
+                        if (gameState.currentPhase === 1) {
+                            blurAmount = 10;
+                        } else if (gameState.currentPhase === 2) {
+                            blurAmount = 5;
+                        } else {
+                            blurAmount = 1.5;
+                        }
+                        ball.style.filter = `blur(${blurAmount}px)`;
+                    });
+                }
+            }, 20);
+        }
+
+        function startTimer() {
+            gameState.timerInterval = setInterval(() => {
+                if (!gameState.isPaused) {
+                    gameState.timeLeft -= 0.1;
+                    const percentage = (gameState.timeLeft / 15) * 100;
+                    document.getElementById('timerBar').style.width = percentage + '%';
+
+                    if (gameState.timeLeft <= 0) {
+                        checkAnswer(null);
+                    }
+                }
+            }, 100);
+        }
+
+        function checkAnswer(selected) {
+            clearIntervals();
+
+            const isCorrect = selected === gameState.currentObject;
+            const timeTaken = (Date.now() - gameState.startTime) / 1000;
+            
+            gameState.answerTimes.push(timeTaken);
+            gameState.distances.push(gameState.currentDistance);
+            gameState.phases.push(gameState.currentPhase);
+
+            let points = 0;
+            if (isCorrect) {
+                playCorrectSound();
+                gameState.correctAnswers++;
+                
+                points = 100;
+                const timeBonus = Math.max(0, Math.floor((15 - timeTaken) * 3.5));
+                points += timeBonus;
+                const phaseBonus = (4 - gameState.currentPhase) * 25;
+                points += phaseBonus;
+                
+                gameState.score += points;
+
+                if (gameState.testType === 'balls') {
+                    gameState.balls.forEach(ball => {
+                        if (ball.dataset.content === selected) {
+                            ball.style.background = '#4caf50';
+                            ball.style.transform = 'scale(1.5)';
+                            ball.style.boxShadow = '0 0 40px #4caf50';
+                        }
+                    });
+                } else {
+                    const buttons = document.querySelectorAll('.option-btn, .direction-btn');
+                    buttons.forEach(btn => {
+                        if (btn.textContent.includes(selected?.toUpperCase()) || btn.textContent === selected) {
+                            btn.classList.add('correct');
+                        }
+                    });
+                }
+            } else {
+                playWrongSound();
+
+                if (gameState.testType === 'balls') {
+                    gameState.balls.forEach(ball => {
+                        if (ball.dataset.content === selected) {
+                            ball.style.background = '#f44336';
+                            ball.style.boxShadow = '0 0 40px #f44336';
+                        } else if (ball.dataset.content === gameState.currentObject) {
+                            ball.style.background = '#4caf50';
+                            ball.style.transform = 'scale(1.5)';
+                            ball.style.boxShadow = '0 0 40px #4caf50';
+                        }
+                    });
+                } else {
+                    const buttons = document.querySelectorAll('.option-btn, .direction-btn');
+                    buttons.forEach(btn => {
+                        if (btn.textContent.includes(selected?.toUpperCase()) || btn.textContent === selected) {
+                            btn.classList.add('wrong');
+                        } else if (btn.textContent.includes(gameState.currentObject?.toUpperCase()) || btn.textContent === gameState.currentObject) {
+                            btn.classList.add('correct');
+                        }
+                    });
+                }
+            }
+
+            document.getElementById('scoreDisplay').textContent = gameState.score;
+
+            setTimeout(() => {
+                gameState.question++;
+                
+                if (gameState.question > 5) {
+                    gameState.question = 1;
+                    gameState.level++;
+                    
+                    if (gameState.level > 3) {
+                        showResults();
+                        return;
+                    } else {
+                        playLevelUpSound();
+                        showInstruction();
+                        return;
+                    }
+                }
+                
+                loadQuestion();
+            }, 1800);
+        }
+
+        function clearIntervals() {
+            if (gameState.timerInterval) clearInterval(gameState.timerInterval);
+            if (gameState.animationInterval) clearInterval(gameState.animationInterval);
+            if (gameState.phaseInterval) clearInterval(gameState.phaseInterval);
+            if (gameState.ballInterval) clearInterval(gameState.ballInterval);
+        }
+
+        function pauseGame() {
+            gameState.isPaused = !gameState.isPaused;
+            const btn = event.target.closest('button');
+            if (btn) {
+                btn.innerHTML = gameState.isPaused ? '<i class="fas fa-play"></i>' : '<i class="fas fa-pause"></i>';
+            }
+            playClickSound();
+        }
+
+        function showResults() {
+            playCompletionSound();
+            document.getElementById('distanceWarning').style.display = 'none';
+
+            const accuracy = (gameState.correctAnswers / gameState.totalQuestions) * 100;
+            const avgTime = gameState.answerTimes.reduce((a, b) => a + b, 0) / gameState.answerTimes.length;
+            const avgPhase = gameState.phases.reduce((a, b) => a + b, 0) / gameState.phases.length;
+
+            // Visual Acuity Calculation
+            let visualAcuity = '20/20';
+            let acuityValue = 20;
+            
+            if (accuracy >= 90 && avgPhase <= 1.5) {
+                visualAcuity = '20/15';
+                acuityValue = 15;
+            } else if (accuracy >= 85 && avgPhase <= 2) {
+                visualAcuity = '20/20';
+                acuityValue = 20;
+            } else if (accuracy >= 75 && avgPhase <= 2.5) {
+                visualAcuity = '20/25';
+                acuityValue = 25;
+            } else if (accuracy >= 65) {
+                visualAcuity = '20/30';
+                acuityValue = 30;
+            } else if (accuracy >= 50) {
+                visualAcuity = '20/40';
+                acuityValue = 40;
+            } else if (accuracy >= 35) {
+                visualAcuity = '20/60';
+                acuityValue = 60;
+            } else if (accuracy >= 20) {
+                visualAcuity = '20/80';
+                acuityValue = 80;
+            } else {
+                visualAcuity = '20/100';
+                acuityValue = 100;
+            }
+
+            document.getElementById('finalScore').textContent = gameState.score.toLocaleString();
+            document.getElementById('visualAcuityScore').textContent = visualAcuity;
+
+            // Emoji based on performance
+            let emoji = '<i class="fas fa-face-meh"></i>';
+            if (accuracy >= 90) emoji = '<i class="fas fa-face-grin-stars"></i>';
+            else if (accuracy >= 75) emoji = '<i class="fas fa-face-smile"></i>';
+            else if (accuracy >= 50) emoji = '<i class="fas fa-face-meh"></i>';
+            else emoji = '<i class="fas fa-face-frown"></i>';
+            
+            document.getElementById('resultEmoji').innerHTML = emoji;
+            document.getElementById('resultTitle').textContent = 
+                accuracy >= 90 ? 'Excellent Performance!' :
+                accuracy >= 75 ? 'Great Job!' :
+                accuracy >= 50 ? 'Good Effort!' : 'Keep Practicing!';
+
+            // Accuracy Bar
+            setTimeout(() => {
+                const bar = document.getElementById('accuracyBar');
+                bar.style.width = accuracy + '%';
+                bar.textContent = accuracy.toFixed(1) + '% Accuracy';
+            }, 300);
+
+            // Result Details
+            const detailsContainer = document.getElementById('resultDetails');
+            detailsContainer.innerHTML = `
+                <div class="detail-card">
+                    <h4><i class="fas fa-bullseye"></i> Accuracy</h4>
+                    <p style="font-size: 2em; font-weight: bold; color: var(--accent-gold);">${accuracy.toFixed(1)}%</p>
+                    <p>${gameState.correctAnswers}/${gameState.totalQuestions} correct</p>
+                </div>
+                <div class="detail-card">
+                    <h4><i class="fas fa-clock"></i> Avg Time</h4>
+                    <p style="font-size: 2em; font-weight: bold; color: var(--accent-gold);">${avgTime.toFixed(1)}s</p>
+                    <p>Per question</p>
+                </div>
+                <div class="detail-card">
+                    <h4><i class="fas fa-layer-group"></i> Avg Phase</h4>
+                    <p style="font-size: 2em; font-weight: bold; color: var(--accent-gold);">Phase ${avgPhase.toFixed(1)}</p>
+                    <p>${avgPhase <= 1.5 ? 'Excellent vision' : avgPhase <= 2.5 ? 'Good vision' : 'Needs attention'}</p>
+                </div>
+                <div class="detail-card">
+                    <h4><i class="fas fa-trophy"></i> Total Score</h4>
+                    <p style="font-size: 2em; font-weight: bold; color: var(--accent-gold);">${gameState.score}</p>
+                    <p>Out of 3,405 possible</p>
+                </div>
+            `;
+
+            // Report Content
+            const testNames = {
+                'snellen': 'Snellen Chart Test',
+                'tumbling': 'Tumbling E Test',
+                'numbers': 'Numeric Vision Test',
+                'balls': 'Multi-Ball Tracking Test',
+                'contrast': 'Contrast Sensitivity Test',
+                'color': 'Ishihara Color Vision Test'
+            };
+
+            const reportContent = document.getElementById('reportContent');
+            const now = new Date();
+            document.getElementById('reportDate').textContent = now.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+
+            reportContent.innerHTML = `
+                <div style="background: var(--bg-card); padding: 20px; border-radius: 10px; margin: 15px 0; border-left: 4px solid var(--accent-primary);">
+                    <p style="margin: 8px 0;"><strong>Test Type:</strong> ${testNames[gameState.testType]}</p>
+                    <p style="margin: 8px 0;"><strong>Mode:</strong> ${gameState.mode === 'myopia' ? 'Distance Vision (Myopia Detection)' : 'Near Vision (Hypermetropia Detection)'}</p>
+                    <p style="margin: 8px 0;"><strong>Estimated Visual Acuity:</strong> <span style="color: var(--accent-gold); font-size: 1.3em; font-weight: bold;">${visualAcuity}</span></p>
+                    <p style="margin: 8px 0;"><strong>Accuracy:</strong> ${accuracy.toFixed(1)}% (${gameState.correctAnswers}/${gameState.totalQuestions})</p>
+                    <p style="margin: 8px 0;"><strong>Average Response Time:</strong> ${avgTime.toFixed(2)} seconds</p>
+                    <p style="margin: 8px 0;"><strong>Average Clarity Phase:</strong> Phase ${avgPhase.toFixed(1)} ${avgPhase <= 1.5 ? '(Early detection)' : avgPhase <= 2.5 ? '(Normal timing)' : '(Delayed recognition)'}</p>
+                    <p style="margin: 8px 0;"><strong>Total Score:</strong> ${gameState.score.toLocaleString()} points</p>
+                    <p style="margin: 8px 0;"><strong>Test Duration:</strong> ${((Date.now() - gameState.testStartTime) / 1000 / 60).toFixed(1)} minutes</p>
+                </div>
+            `;
+
+            // Diagnosis
+            const diagnosisBox = document.getElementById('diagnosisText');
+            let diagnosis = '';
+            
+            if (acuityValue <= 20 && accuracy >= 85) {
+                diagnosis = `<strong>Excellent Results:</strong> Your estimated visual acuity of ${visualAcuity} indicates superior vision quality. You demonstrated strong ability to identify characters early in blur phases (avg Phase ${avgPhase.toFixed(1)}), suggesting good optical clarity and potentially no significant refractive errors.`;
+            } else if (acuityValue <= 25 && accuracy >= 75) {
+                diagnosis = `<strong>Good Results:</strong> Your estimated ${visualAcuity} acuity falls within normal functional vision range. With ${accuracy.toFixed(1)}% accuracy, your performance indicates adequate visual capability. Average Phase ${avgPhase.toFixed(1)} recognition suggests minor accommodative delay.`;
+            } else if (acuityValue <= 40) {
+                diagnosis = `<strong>Moderate Results:</strong> Estimated ${visualAcuity} acuity suggests mild visual limitations. Your ${accuracy.toFixed(1)}% accuracy and Phase ${avgPhase.toFixed(1)} average indicates you may benefit from professional eye examination. This level may affect distance viewing activities.`;
+            } else {
+                diagnosis = `<strong>Below Average Results:</strong> Estimated ${visualAcuity} acuity indicates potential visual impairment requiring attention. With ${accuracy.toFixed(1)}% accuracy and late-phase recognition (Phase ${avgPhase.toFixed(1)}), professional eye examination is strongly recommended. Possible refractive error (myopia, hypermetropia, or astigmatism) may be present.`;
+            }
+
+            if (gameState.testType === 'color' && accuracy < 70) {
+                diagnosis += `<br><br><strong>Color Vision Note:</strong> Lower accuracy on Ishihara test may indicate red-green color vision deficiency (deuteranopia or protanopia). Affects approximately 8% of males. Consultation with eye specialist recommended for confirmation.`;
+            }
+
+            if (gameState.testType === 'contrast' && accuracy < 65) {
+                diagnosis += `<br><br><strong>Contrast Sensitivity Note:</strong> Reduced contrast sensitivity can indicate early-stage cataracts, glaucoma, diabetic retinopathy, or other retinal conditions. Professional evaluation is important even if standard acuity seems normal.`;
+            }
+
+            if (gameState.testType === 'balls' && accuracy < 60) {
+                diagnosis += `<br><br><strong>Multi-Ball Tracking Note:</strong> Difficulty with multiple moving targets may indicate challenges with peripheral vision, dynamic visual acuity, or visual processing speed. Consider professional evaluation for comprehensive visual field testing.`;
+            }
+
+            diagnosisBox.innerHTML = diagnosis;
+
+            // Recommendations
+            const recommendationsList = document.getElementById('recommendationsList');
+            let recommendations = [];
+
+            if (acuityValue > 25) {
+                recommendations.push('Schedule comprehensive eye examination with licensed optometrist or ophthalmologist');
+                recommendations.push('Consider prescription eyewear evaluation (glasses or contact lenses)');
+            }
+
+            if (avgPhase > 2.5) {
+                recommendations.push('Discuss blur recognition delay with eye care professional - may indicate accommodation issues');
+            }
+
+            if (avgTime > 10) {
+                recommendations.push('Extended response time noted - consider evaluation for visual processing or attention factors');
+            }
+
+            if (gameState.testType === 'color' && accuracy < 70) {
+                recommendations.push('Request specific color vision testing (complete Ishihara battery or Farnsworth D-15 test)');
+                recommendations.push('Discuss career/activity implications of color vision deficiency if diagnosed');
+            }
+
+            if (gameState.testType === 'contrast' && accuracy < 65) {
+                recommendations.push('Request contrast sensitivity function (CSF) testing at clinic');
+                recommendations.push('Discuss screening for glaucoma, cataracts, and retinal conditions');
+            }
+
+            if (gameState.testType === 'balls' && accuracy < 60) {
+                recommendations.push('Visual tracking difficulties noted - consider evaluation for dynamic visual acuity and peripheral vision');
+                recommendations.push('Discuss potential benefits of vision therapy exercises for tracking improvement');
+            }
+
+            recommendations.push('Maintain regular eye exams (annually for ages 18-60, every 6 months for 60+)');
+            recommendations.push('Follow 20-20-20 rule: Every 20 minutes, look 20 feet away for 20 seconds (reduces digital eye strain)');
+            recommendations.push('Ensure adequate lighting when reading or using screens');
+            recommendations.push('Protect eyes from UV exposure with quality sunglasses outdoors');
+
+            if (acuityValue <= 20 && accuracy >= 85) {
+                recommendations.push('Maintain healthy vision habits - continue protective measures');
+                recommendations.push('Monitor for any changes in vision quality');
+            }
+
+            recommendationsList.innerHTML = recommendations.map(rec => `<li>${rec}</li>`).join('');
+
+            showScreen('resultScreen');
+        }
+
+        function downloadReport() {
+            playClickSound();
+            
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            
+            const pageWidth = doc.internal.pageSize.getWidth();
+            const pageHeight = doc.internal.pageSize.getHeight();
+            const margin = 20;
+            let yPos = margin;
+
+            // Header
+            doc.setFillColor(102, 126, 234);
+            doc.rect(0, 0, pageWidth, 35, 'F');
+            
+            doc.setTextColor(255, 255, 255);
+            doc.setFontSize(24);
+            doc.setFont(undefined, 'bold');
+            doc.text('LUMINA VISION', pageWidth / 2, 15, { align: 'center' });
+            
+            doc.setFontSize(12);
+            doc.setFont(undefined, 'normal');
+            doc.text('Clinical Eye Testing System - Assessment Report', pageWidth / 2, 25, { align: 'center' });
+
+            yPos = 45;
+
+            // Report Date
+            doc.setTextColor(0, 0, 0);
+            doc.setFontSize(10);
+            const now = new Date();
+            doc.text(`Report Generated: ${now.toLocaleString('en-US', { dateStyle: 'full', timeStyle: 'short' })}`, margin, yPos);
+            yPos += 10;
+
+            // Visual Acuity Score (Large)
+            const accuracy = (gameState.correctAnswers / gameState.totalQuestions) * 100;
+            const avgPhase = gameState.phases.reduce((a, b) => a + b, 0) / gameState.phases.length;
+            
+            let visualAcuity = '20/20';
+            if (accuracy >= 90 && avgPhase <= 1.5) visualAcuity = '20/15';
+            else if (accuracy >= 85 && avgPhase <= 2) visualAcuity = '20/20';
+            else if (accuracy >= 75 && avgPhase <= 2.5) visualAcuity = '20/25';
+            else if (accuracy >= 65) visualAcuity = '20/30';
+            else if (accuracy >= 50) visualAcuity = '20/40';
+            else if (accuracy >= 35) visualAcuity = '20/60';
+            else if (accuracy >= 20) visualAcuity = '20/80';
+            else visualAcuity = '20/100';
+
+            doc.setFontSize(36);
+            doc.setFont(undefined, 'bold');
+            doc.setTextColor(102, 126, 234);
+            doc.text(`Visual Acuity: ${visualAcuity}`, pageWidth / 2, yPos + 15, { align: 'center' });
+            yPos += 30;
+
+            // Test Information Box
+            doc.setDrawColor(102, 126, 234);
+            doc.setFillColor(240, 242, 250);
+            doc.roundedRect(margin, yPos, pageWidth - 2 * margin, 50, 3, 3, 'FD');
+            
+            doc.setFontSize(11);
+            doc.setFont(undefined, 'bold');
+            doc.setTextColor(0, 0, 0);
+            yPos += 8;
+
+            const testNames = {
+                'snellen': 'Snellen Chart Test',
+                'tumbling': 'Tumbling E Test',
+                'numbers': 'Numeric Vision Test',
+                'balls': 'Multi-Ball Tracking Test',
+                'contrast': 'Contrast Sensitivity Test',
+                'color': 'Ishihara Color Vision Test'
+            };
+
+            doc.text(`Test Type: `, margin + 5, yPos);
+            doc.setFont(undefined, 'normal');
+            doc.text(testNames[gameState.testType], margin + 30, yPos);
+            yPos += 7;
+
+            doc.setFont(undefined, 'bold');
+            doc.text(`Mode: `, margin + 5, yPos);
+            doc.setFont(undefined, 'normal');
+            doc.text(gameState.mode === 'myopia' ? 'Distance Vision (Myopia Detection)' : 'Near Vision (Hypermetropia Detection)', margin + 30, yPos);
+            yPos += 7;
+
+            doc.setFont(undefined, 'bold');
+            doc.text(`Required Distance: `, margin + 5, yPos);
+            doc.setFont(undefined, 'normal');
+            doc.text(gameState.requiredDistance, margin + 45, yPos);
+            yPos += 7;
+
+            doc.setFont(undefined, 'bold');
+            doc.text(`Accuracy: `, margin + 5, yPos);
+            doc.setFont(undefined, 'normal');
+            doc.text(`${accuracy.toFixed(1)}% (${gameState.correctAnswers}/${gameState.totalQuestions} correct)`, margin + 30, yPos);
+            yPos += 7;
+
+            doc.setFont(undefined, 'bold');
+            doc.text(`Score: `, margin + 5, yPos);
+            doc.setFont(undefined, 'normal');
+            doc.text(`${gameState.score} points out of 3,405 possible`, margin + 30, yPos);
+            yPos += 7;
+
+            const avgTime = gameState.answerTimes.reduce((a, b) => a + b, 0) / gameState.answerTimes.length;
+            doc.setFont(undefined, 'bold');
+            doc.text(`Avg Response Time: `, margin + 5, yPos);
+            doc.setFont(undefined, 'normal');
+            doc.text(`${avgTime.toFixed(2)} seconds`, margin + 45, yPos);
+            
+            yPos += 15;
+
+            // Performance Analysis
+            doc.setFontSize(14);
+            doc.setFont(undefined, 'bold');
+            doc.setTextColor(102, 126, 234);
+            doc.text('Performance Analysis', margin, yPos);
+            yPos += 8;
+
+            doc.setFontSize(10);
+            doc.setTextColor(0, 0, 0);
+            doc.setFont(undefined, 'normal');
+            
+            let diagnosis = '';
+            const acuityValue = parseInt(visualAcuity.split('/')[1]);
+            
+            if (acuityValue <= 20 && accuracy >= 85) {
+                diagnosis = `Excellent Results: Your estimated visual acuity of ${visualAcuity} indicates superior vision quality. You demonstrated strong ability to identify characters early in blur phases (avg Phase ${avgPhase.toFixed(1)}), suggesting good optical clarity.`;
+            } else if (acuityValue <= 25 && accuracy >= 75) {
+                diagnosis = `Good Results: Your estimated ${visualAcuity} acuity falls within normal functional vision range. With ${accuracy.toFixed(1)}% accuracy, your performance indicates adequate visual capability.`;
+            } else if (acuityValue <= 40) {
+                diagnosis = `Moderate Results: Estimated ${visualAcuity} acuity suggests mild visual limitations. Professional eye examination recommended.`;
+            } else {
+                diagnosis = `Below Average Results: Estimated ${visualAcuity} acuity indicates potential visual impairment. Professional eye examination strongly recommended.`;
+            }
+
+            const splitDiagnosis = doc.splitTextToSize(diagnosis, pageWidth - 2 * margin);
+            doc.text(splitDiagnosis, margin, yPos);
+            yPos += splitDiagnosis.length * 5 + 10;
+
+            // Recommendations
+            doc.setFontSize(14);
+            doc.setFont(undefined, 'bold');
+            doc.setTextColor(102, 126, 234);
+            doc.text('Recommendations', margin, yPos);
+            yPos += 8;
+
+            doc.setFontSize(10);
+            doc.setTextColor(0, 0, 0);
+            doc.setFont(undefined, 'normal');
+
+            let recommendations = [];
+            if (acuityValue > 25) {
+                recommendations.push('Schedule comprehensive eye examination with licensed optometrist');
+            }
+            if (gameState.testType === 'balls' && accuracy < 60) {
+                recommendations.push('Consider evaluation for peripheral vision and dynamic visual tracking');
+            }
+            recommendations.push('Maintain regular eye exams (annually for ages 18-60)');
+            recommendations.push('Follow 20-20-20 rule to reduce digital eye strain');
+            recommendations.push('Ensure adequate lighting when reading or using screens');
+            recommendations.push('Protect eyes from UV exposure with quality sunglasses');
+
+            recommendations.forEach((rec, index) => {
+                const recText = `${index + 1}. ${rec}`;
+                const splitRec = doc.splitTextToSize(recText, pageWidth - 2 * margin - 5);
+                doc.text(splitRec, margin + 5, yPos);
+                yPos += splitRec.length * 5 + 3;
+            });
+
+            yPos += 10;
+
+            // Medical Disclaimer
+            doc.setDrawColor(255, 152, 0);
+            doc.setFillColor(255, 250, 240);
+            doc.roundedRect(margin, yPos, pageWidth - 2 * margin, 35, 3, 3, 'FD');
+            
+            doc.setFontSize(11);
+            doc.setFont(undefined, 'bold');
+            doc.setTextColor(255, 152, 0);
+            doc.text('MEDICAL DISCLAIMER', margin + 5, yPos + 8);
+            
+            doc.setFontSize(9);
+            doc.setFont(undefined, 'normal');
+            doc.setTextColor(0, 0, 0);
+            const disclaimer = 'This is an educational simulation only. NOT a substitute for professional eye examination. Results are approximations. DO NOT use for self-diagnosis. Consult licensed optometrist or ophthalmologist for comprehensive eye examination.';
+            const splitDisclaimer = doc.splitTextToSize(disclaimer, pageWidth - 2 * margin - 10);
+            doc.text(splitDisclaimer, margin + 5, yPos + 16);
+
+            // Footer
+            doc.setFontSize(8);
+            doc.setTextColor(128, 128, 128);
+            doc.text('LUMINA Vision - Clinical Eye Testing System | Educational Use Only', pageWidth / 2, pageHeight - 10, { align: 'center' });
+
+            // Save PDF
+            doc.save(`LUMINA_Vision_Report_${now.toISOString().split('T')[0]}.pdf`);
+        }
+
+        // Initialize
+        createStars();
+
+        // Prevent zoom on mobile
+        document.addEventListener('touchstart', function(e) {
+            if (e.touches.length > 1) {
+                e.preventDefault();
+            }
+        }, { passive: false });
+
+        let lastTouchEnd = 0;
+        document.addEventListener('touchend', function(e) {
+            const now = Date.now();
+            if (now - lastTouchEnd <= 300) {
+                e.preventDefault();
+            }
+            lastTouchEnd = now;
+        }, false);
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', function(e) {
+            if (document.getElementById('gameScreen').classList.contains('active') && !gameState.isPaused) {
+                const options = document.querySelectorAll('.option-btn');
+                if (e.key >= '1' && e.key <= '4') {
+                    const index = parseInt(e.key) - 1;
+                    if (options[index]) options[index].click();
+                }
+
+                if (gameState.testType === 'tumbling') {
+                    const directionBtns = document.querySelectorAll('.direction-btn');
+                    if (e.key === 'ArrowUp' && directionBtns[0]) directionBtns[0].click();
+                    else if (e.key === 'ArrowDown' && directionBtns[1]) directionBtns[1].click();
+                    else if (e.key === 'ArrowLeft' && directionBtns[2]) directionBtns[2].click();
+                    else if (e.key === 'ArrowRight' && directionBtns[3]) directionBtns[3].click();
+                }
+            }
+
+            if (e.key === ' ' || e.key === 'Escape') {
+                e.preventDefault();
+                pauseGame();
+            }
+        });
+
+        // Visibility API - auto pause when tab hidden
+        document.addEventListener('visibilitychange', function() {
+            if (document.hidden && document.getElementById('gameScreen').classList.contains('active')) {
+                if (!gameState.isPaused) pauseGame();
+            }
+        });
+
+        // Responsive font size adjustment
+        function adjustFontSizes() {
+            const width = window.innerWidth;
+            if (width <= 480) {
+                document.documentElement.style.setProperty('--base-font-size', '14px');
+            } else if (width <= 768) {
+                document.documentElement.style.setProperty('--base-font-size', '15px');
+            } else {
+                document.documentElement.style.setProperty('--base-font-size', '16px');
+            }
+        }
+
+        window.addEventListener('resize', adjustFontSizes);
+        adjustFontSizes();
+
+        console.log('%c LUMINA Vision Pro v2.0 ', 'background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; font-size: 20px; font-weight: bold; padding: 10px;');
+        console.log('%c Clinical-Grade Vision Testing System ', 'background: #0a0e27; color: #ffd700; font-size: 14px; padding: 5px;');
+        console.log('%c Ready for testing! Multi-Ball Tracking Active! ', 'color: #4caf50; font-size: 12px;');
+    </script>
+</body>
+</html>
+
